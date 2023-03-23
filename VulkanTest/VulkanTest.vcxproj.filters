@@ -21,9 +21,6 @@
     <ClCompile Include="Vulkan\ValidationLayersInfo.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Playground.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Vulkan\CommandBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -77,12 +74,35 @@
     <ClInclude Include="Vulkan\VertexData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\triangle.vert" />
-    <None Include="shaders\triangle.frag" />
-    <None Include="shaders\compile.bat">
-      <Filter>Source Files</Filter>
-    </None>
+    <ClInclude Include="Math\Vector2.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Math\Vector3.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Playground.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\ObjReader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\tiny_gltf\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\tiny_gltf\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\tiny_gltf\tiny_gltf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\tiny_gltf\json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\GLTFReader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\RenderObject.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

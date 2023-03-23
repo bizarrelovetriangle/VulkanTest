@@ -19,7 +19,7 @@ class RenderPass;
 class VertexData;
 template <class T>
 class VulkanBuffer;
-class ObjVertexData;
+class RenderObjectVertexData;
 
 class CommandBuffer
 {
@@ -29,7 +29,7 @@ public:
 		std::shared_ptr<RenderPass> renderPass);
 	void Dispose();
 	void RecordCommandBuffer(int imageIndex,
-		const VulkanBuffer<ObjVertexData>& vertexBuffer);
+		const VulkanBuffer<RenderObjectVertexData>& vertexBuffer);
 	void Reset();
 
 private:

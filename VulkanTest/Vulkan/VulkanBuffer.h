@@ -5,7 +5,6 @@
 #define VULKAN_HPP_NO_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
 class DeviceController;
-class ObjVertexData;
 
 template <class T>
 class VulkanBuffer

@@ -158,7 +158,13 @@
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Playground.h" />
+    <ClInclude Include="Primitives\RenderObject.hpp" />
+    <ClInclude Include="Utils\GLTFReader.hpp" />
     <ClInclude Include="Utils\ObjReader.hpp" />
+    <ClInclude Include="Utils\tiny_gltf\json.hpp" />
+    <ClInclude Include="Utils\tiny_gltf\stb_image.h" />
+    <ClInclude Include="Utils\tiny_gltf\stb_image_write.h" />
+    <ClInclude Include="Utils\tiny_gltf\tiny_gltf.h" />
     <ClInclude Include="Vulkan\CommandBuffer.h" />
     <ClInclude Include="Vulkan\DeviceController.h" />
     <ClInclude Include="Vulkan\VertexData.h" />

@@ -32,7 +32,7 @@ void CommandBuffer::Dispose()
 }
 
 void CommandBuffer::RecordCommandBuffer(int imageIndex,
-	const VulkanBuffer<ObjVertexData>& vertexBuffer)
+	const VulkanBuffer<RenderObjectVertexData>& vertexBuffer)
 {
 	vk::CommandBufferBeginInfo beginInfo;
 	commandBuffer.begin(beginInfo);

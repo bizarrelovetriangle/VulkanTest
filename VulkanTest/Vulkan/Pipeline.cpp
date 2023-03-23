@@ -29,8 +29,8 @@ Pipeline::Pipeline(const vk::Device& device, const vk::RenderPass& renderPass, s
 	CreateShaderStages();
 	pipelineLayout = CreatePipelineLayout();
 
-	auto binding = ObjVertexData::BindingDescription();
-	auto attributes = ObjVertexData::AttributeDescriptions();
+	auto binding = RenderObjectVertexData::BindingDescription();
+	auto attributes = RenderObjectVertexData::AttributeDescriptions();
 	auto vertexInputInfo = CreateVertexInputInfo(binding, attributes);
 	auto inputAssemblyInfo = CreateInputAssemblyInfo();
 	auto viewportStateState = CreateViewportState();

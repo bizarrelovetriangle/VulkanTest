@@ -7,42 +7,9 @@
 #include <functional>
 #include "../Math/Vector3.hpp"
 #include "../Math/Vector2.hpp"
-#undef VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
-#include <vulkan/vulkan.hpp>
+#include "../Primitives/RenderObject.hpp"
 
 using namespace std::placeholders;
-
-class ObjVertexData
-{
-public:
-	Vector3 point;
-	Vector3 normal;
-	Vector2 texturePosition;
-
-	static vk::VertexInputBindingDescription BindingDescription()
-	{
-		return vk::VertexInputBindingDescription(0, sizeof(ObjVertexData), vk::VertexInputRate::eVertex);
-	}
-
-	static std::vector<vk::VertexInputAttributeDescription> AttributeDescriptions()
-	{
-		vk::VertexInputAttributeDescription position(
-			0, 0, vk::Format::eR32G32B32Sfloat, offsetof(ObjVertexData, point));
-		vk::VertexInputAttributeDescription normal(
-			1, 0, vk::Format::eR32G32B32Sfloat, offsetof(ObjVertexData, normal));
-		vk::VertexInputAttributeDescription texturePosition(
-			2, 0, vk::Format::eR32G32Sfloat, offsetof(ObjVertexData, texturePosition));
-
-		return { position, normal, texturePosition };
-	}
-};
-
-class Obj3DObject
-{
-public:
-	std::string name;
-	std::vector<ObjVertexData> verteces;
-};
 
 struct FaceData
 {
@@ -66,9 +33,9 @@ struct Obj3DObjectSerialized
 
 struct Obj3DObjectSerializedSet
 {
-	std::vector<Vector3> points;
-	std::vector<Vector3> normals;
-	std::vector<Vector2> texturePositions;
+	std::vector<Vector3f> points;
+	std::vector<Vector3f> normals;
+	std::vector<Vector2f> texturePositions;
 
 	std::vector<Obj3DObjectSerialized> obj3DObjectSerializeds;
 };
@@ -76,24 +43,24 @@ struct Obj3DObjectSerializedSet
 class ObjSerializer
 {
 public:
-	static Obj3DObject Deserialize(
+	static RenderObject Deserialize(
 		const Obj3DObjectSerializedSet obj3DObjectSerializedSet,
 		const Obj3DObjectSerialized& obj3DObjectSerialized)
 	{
-		Obj3DObject obj3DObject{ .name = obj3DObjectSerialized.name };
+		RenderObject obj3DObject{ .name = obj3DObjectSerialized.name };
 
 		for (auto& face : obj3DObjectSerialized.faces)
 		{
 			for (auto faceVertexData : {face.a, face.b, face.c})
 			{
-				ObjVertexData vertexData
+				RenderObjectVertexData vertexData
 				{
-					.point = obj3DObjectSerializedSet.points[faceVertexData.vertexId],
+					.position = obj3DObjectSerializedSet.points[faceVertexData.vertexId],
 					.normal = obj3DObjectSerializedSet.normals[faceVertexData.normalId],
-					.texturePosition = obj3DObjectSerializedSet.texturePositions[faceVertexData.textureId]
+					.textureCoord = obj3DObjectSerializedSet.texturePositions[faceVertexData.textureId]
 				};
 
-				obj3DObject.verteces.push_back(vertexData);
+				obj3DObject.vertexData.push_back(vertexData);
 			}
 		}
 
@@ -122,7 +89,7 @@ public:
 		}
 	}
 
-	std::map<std::string, Obj3DObject> obj3DObjects;
+	std::map<std::string, RenderObject> obj3DObjects;
 
 private:
 	Obj3DObjectSerializedSet obj3DObjectSerializedSet;
@@ -161,8 +128,8 @@ private:
 	void AddPoint(const std::string& str)
 	{
 		auto segments = Split<float>(str, " ");
-		Vector3 point(segments[0], segments[1], segments[2]);
-		obj3DObjectSerializedSet.points.push_back(point);
+		Vector3 position(segments[0], segments[1], segments[2]);
+		obj3DObjectSerializedSet.points.push_back(position);
 	}
 
 	void AddNormal(const std::string& str)

@@ -27,10 +27,13 @@
 #include "vulkan/VertexData.h"
 #include "vulkan/VulkanBuffer.h"
 #include "Utils/ObjReader.hpp"
+#include "Utils/GLTFReader.hpp"
 
-class Playground {
+class Playground
+{
 public:
-    Playground() {
+    Playground()
+    {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
@@ -59,10 +62,11 @@ public:
 
 
         ObjReader objReader("E:/Projects/VulkanTest/VulkanTest/Resources/Objects/SphereWithPlane/untitled.obj");
+        GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard.gltf");
 
         {
-            auto& vertices = objReader.obj3DObjects.begin()->second.verteces;
-            objVertexBuffer = std::make_shared<VulkanBuffer<ObjVertexData>>(
+            auto& vertices = glTFReader.renderObjects.begin()->second.vertexData;
+            objVertexBuffer = std::make_shared<VulkanBuffer<RenderObjectVertexData>>(
                 deviceController, vertices, vk::BufferUsageFlagBits::eVertexBuffer);
         }
 
@@ -183,7 +187,7 @@ private:
     std::shared_ptr<VulkanBuffer<uint16_t>> indexBuffer;
     std::shared_ptr<VulkanBuffer<VertexData>> vertexBuffer;
 
-    std::shared_ptr<VulkanBuffer<ObjVertexData>> objVertexBuffer;
+    std::shared_ptr<VulkanBuffer<RenderObjectVertexData>> objVertexBuffer;
 
     vk::Semaphore imageAvailableSemaphore;
     vk::Semaphore renderFinishedSemaphore;

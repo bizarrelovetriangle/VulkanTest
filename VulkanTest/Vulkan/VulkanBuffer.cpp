@@ -77,6 +77,6 @@ void VulkanBuffer<T>::Dispose()
 	deviceController->device.freeMemory(bufferMemory);
 }
 
-template VulkanBuffer<ObjVertexData>;
+template VulkanBuffer<RenderObjectVertexData>;
 template VulkanBuffer<VertexData>;
 template VulkanBuffer<uint16_t>;
