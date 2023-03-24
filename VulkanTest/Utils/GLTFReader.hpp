@@ -4,6 +4,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tiny_gltf/tiny_gltf.h"
+#include "../Math/Matrix4.hpp"
 
 namespace
 {
@@ -28,7 +29,10 @@ public:
 		{
 			auto& node = glTFModel.nodes[nodeId];
 			auto& mesh = glTFModel.meshes[node.mesh];
-			auto& renderObject = renderObjects.emplace(node.name, RenderObject{ .name = node.name }).first->second;
+
+			auto& renderObject = renderObjects.emplace(node.name, RenderObject()).first->second;
+			renderObject.name = node.name;
+			renderObject.modelMatrix = ComposeMatrix(node);
 
 			for (auto& primitive : mesh.primitives)
 			{
@@ -59,12 +63,26 @@ public:
 	std::map<std::string, RenderObject> renderObjects;
 
 private:
+	Matrix4 ComposeMatrix(const tinygltf::Node& node)
+	{
+		auto translation = GetVector<Vector3f>(node.translation);
+		auto scale = GetVector<Vector3f>(node.scale);
+		auto rotation = GetVector<Vector4f>(node.rotation);
+
+		Matrix4 matrix;
+		if (scale) matrix = Matrix4::Scale(*scale) * matrix;
+		//if (rotation) matrix = Matrix4::Scale(*rotation) * matrix;
+		if (translation) matrix = Matrix4::Translation(*translation) * matrix;
+		return matrix;
+	}
+
 	template <class T>
 	std::vector<T> ReadBuffer(int accessorId)
 	{
 		auto& accessor = glTFModel.accessors[accessorId];
 		auto& bufferView = glTFModel.bufferViews[accessor.bufferView];
-		int elementSize = tinygltf::GetComponentSizeInBytes(accessor.componentType) *
+		int elementSize =
+			tinygltf::GetComponentSizeInBytes(accessor.componentType) *
 			tinygltf::GetNumComponentsInType(accessor.type);
 		int offset = bufferView.byteOffset + accessor.byteOffset;
 
@@ -87,6 +105,16 @@ private:
 		}
 
 		return data;
+	}
+
+	template <class T>
+	std::optional<T> GetVector(const std::vector<double> list)
+	{
+		if (list.empty()) return std::nullopt;
+
+		if constexpr (std::is_same_v<T, Vector4f>) return T(list[0], list[1], list[2], list[3]);
+		else if constexpr (std::is_same_v<T, Vector3f>) return T(list[0], list[1], list[2]);
+		else throw std::exception();
 	}
 
 	tinygltf::Model glTFModel;

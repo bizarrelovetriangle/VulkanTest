@@ -155,8 +155,10 @@
     <ClCompile Include="Vulkan\VulkanAuxiliary.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Math\Matrix4.hpp" />
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
+    <ClInclude Include="Math\Vector4.hpp" />
     <ClInclude Include="Playground.h" />
     <ClInclude Include="Primitives\RenderObject.hpp" />
     <ClInclude Include="Utils\GLTFReader.hpp" />

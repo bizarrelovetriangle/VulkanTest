@@ -1,5 +1,6 @@
 #include "../Math/Vector3.hpp"
 #include "../Math/Vector2.hpp"
+#include "../Math/Matrix4.hpp"
 
 #undef VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
@@ -33,5 +34,6 @@ class RenderObject
 {
 public:
 	std::string name;
+	Matrix4 modelMatrix;
 	std::vector<RenderObjectVertexData> vertexData;
 };
