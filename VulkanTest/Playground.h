@@ -64,10 +64,11 @@ public:
         ObjReader objReader("E:/Projects/VulkanTest/VulkanTest/Resources/Objects/SphereWithPlane/untitled.obj");
         GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard.gltf");
 
+        for (auto& [name, renderObject] : glTFReader.renderObjects)
         {
-            auto& vertices = glTFReader.renderObjects.begin()->second.vertexData;
-            objVertexBuffer = std::make_shared<VulkanBuffer<RenderObjectVertexData>>(
-                deviceController, vertices, vk::BufferUsageFlagBits::eVertexBuffer);
+            renderObject.vertexBuffer = std::make_shared<VulkanBuffer<RenderObjectVertexData>>(
+                deviceController, renderObject.vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
+            renderObjects.push_back(std::make_unique<RenderObject>(std::move(renderObject)));
         }
 
         {
@@ -117,7 +118,8 @@ public:
         uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
         commandBuffer->Reset();
-        commandBuffer->RecordCommandBuffer(imageIndex, *objVertexBuffer);
+        auto two = decltype(renderObjects)(renderObjects.begin() + 1, renderObjects.end());
+        commandBuffer->RecordCommandBuffer(imageIndex, renderObjects);
 
         vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore };
         vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
@@ -158,7 +160,7 @@ public:
         renderPass->Dispose();
         indexBuffer->Dispose();
         vertexBuffer->Dispose();
-        objVertexBuffer->Dispose();
+        for (auto& renderObject : renderObjects) renderObject->vertexBuffer->Dispose();
 
         vkDestroySemaphore(deviceController->device, imageAvailableSemaphore, nullptr);
         vkDestroySemaphore(deviceController->device, renderFinishedSemaphore, nullptr);
@@ -187,9 +189,10 @@ private:
     std::shared_ptr<VulkanBuffer<uint16_t>> indexBuffer;
     std::shared_ptr<VulkanBuffer<VertexData>> vertexBuffer;
 
-    std::shared_ptr<VulkanBuffer<RenderObjectVertexData>> objVertexBuffer;
 
     vk::Semaphore imageAvailableSemaphore;
     vk::Semaphore renderFinishedSemaphore;
     vk::Fence inFlightFence;
+
+    std::vector<std::shared_ptr<RenderObject>> renderObjects;
 };

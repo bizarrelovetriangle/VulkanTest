@@ -1,9 +1,18 @@
+#pragma once;
 #include "../Math/Vector3.hpp"
 #include "../Math/Vector2.hpp"
 #include "../Math/Matrix4.hpp"
+#include "../Vulkan/VulkanBuffer.h"
 
 #undef VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
+
+class RenderObjectPushConstantRange
+{
+public:
+	Matrix4 model;
+	Matrix4 world;
+};
 
 class RenderObjectVertexData
 {
@@ -34,6 +43,7 @@ class RenderObject
 {
 public:
 	std::string name;
-	Matrix4 modelMatrix;
+	Matrix4 model;
 	std::vector<RenderObjectVertexData> vertexData;
+	std::shared_ptr<VulkanBuffer<RenderObjectVertexData>> vertexBuffer;
 };

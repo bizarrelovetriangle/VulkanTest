@@ -23,8 +23,6 @@ public:
 
 private:
 	void CreateShaderStages();
-	vk::PipelineShaderStageCreateInfo createPipelineShaderStage(
-		vk::ShaderStageFlagBits stageFlag, vk::ShaderModule& shaderModule);
 	vk::PipelineLayout CreatePipelineLayout();
 	vk::PipelineVertexInputStateCreateInfo CreateVertexInputInfo(
 		vk::VertexInputBindingDescription binding, std::vector<vk::VertexInputAttributeDescription>& attributes);
@@ -40,9 +38,9 @@ private:
 
 public:
 	vk::Pipeline graphicsPipeline;
+	vk::PipelineLayout pipelineLayout;
 
 private:
-	vk::PipelineLayout pipelineLayout;
 	vk::ShaderModule vertShaderModule;
 	vk::ShaderModule fragShaderModule;
 	std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;

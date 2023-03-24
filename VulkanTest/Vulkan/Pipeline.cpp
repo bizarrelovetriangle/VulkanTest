@@ -122,13 +122,21 @@ void Pipeline::CreateShaderStages() {
 	shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 }
 
-vk::PipelineLayout Pipeline::CreatePipelineLayout() {
+vk::PipelineLayout Pipeline::CreatePipelineLayout()
+{
+	vk::PushConstantRange pushConstant
+	{
+		.stageFlags = vk::ShaderStageFlagBits::eVertex,
+		.offset = 0,
+		.size = sizeof(RenderObjectPushConstantRange)
+	};
+
 	vk::PipelineLayoutCreateInfo pipelineLayoutInfo
 	{
 		.setLayoutCount = 0, // Optional
 		.pSetLayouts = nullptr, // Optional
-		.pushConstantRangeCount = 0, // Optional
-		.pPushConstantRanges = nullptr // Optional
+		.pushConstantRangeCount = 1, // Optional
+		.pPushConstantRanges = &pushConstant // Optional
 	};
 
 	return device.createPipelineLayout(pipelineLayoutInfo);

@@ -15,6 +15,7 @@
 #include "RenderPass.h"
 #include "VulkanBuffer.h"
 #include "VertexData.h"
+#include "../Primitives/RenderObject.hpp"
 #include "../Utils/ObjReader.hpp"
 
 CommandBuffer::CommandBuffer(const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
@@ -32,7 +33,7 @@ void CommandBuffer::Dispose()
 }
 
 void CommandBuffer::RecordCommandBuffer(int imageIndex,
-	const VulkanBuffer<RenderObjectVertexData>& vertexBuffer)
+	const std::vector<std::shared_ptr<RenderObject>>& renderObjects)
 {
 	vk::CommandBufferBeginInfo beginInfo;
 	commandBuffer.begin(beginInfo);
@@ -65,11 +66,21 @@ void CommandBuffer::RecordCommandBuffer(int imageIndex,
 			commandBuffer.setViewport(0, 1, &viewport);
 			commandBuffer.setScissor(0, 1, &scissors);
 
-			vk::Buffer vertexBuffers[] = { vertexBuffer.buffer };
-			vk::DeviceSize vertexOffsets[] = { 0 };
-			commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
+			for (auto& renderObject : renderObjects)
+			{
+				vk::Buffer vertexBuffers[] = { renderObject->vertexBuffer->buffer };
+				vk::DeviceSize vertexOffsets[] = { 0 };
+				commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
 
-			commandBuffer.draw(vertexBuffer.count, 1, 0, 0);
+
+				Matrix4 world = Matrix4::Translation({ 0., 0., 0.5 }) * Matrix4::Scale({ 0.3, 0.3, 0.3 });
+
+				RenderObjectPushConstantRange pushConstantRange{ renderObject->model.Transpose(), world.Transpose() };
+				commandBuffer.pushConstants(pipeline->pipelineLayout, vk::ShaderStageFlagBits::eVertex,
+					0, sizeof(RenderObjectPushConstantRange), &pushConstantRange);
+
+				commandBuffer.draw(renderObject->vertexBuffer->count, 1, 0, 0);
+			}
 		}
 
 		commandBuffer.endRenderPass();

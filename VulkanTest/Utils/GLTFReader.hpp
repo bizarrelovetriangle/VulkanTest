@@ -32,7 +32,7 @@ public:
 
 			auto& renderObject = renderObjects.emplace(node.name, RenderObject()).first->second;
 			renderObject.name = node.name;
-			renderObject.modelMatrix = ComposeMatrix(node);
+			renderObject.model = ComposeMatrix(node);
 
 			for (auto& primitive : mesh.primitives)
 			{
@@ -50,7 +50,7 @@ public:
 					RenderObjectVertexData vertexData
 					{
 						.position = positions[index],
-						.normal = positions[index],
+						.normal = normals[index],
 						.textureCoord = textureCoords[index]
 					};
 
@@ -71,7 +71,7 @@ private:
 
 		Matrix4 matrix;
 		if (scale) matrix = Matrix4::Scale(*scale) * matrix;
-		//if (rotation) matrix = Matrix4::Scale(*rotation) * matrix;
+		//if (rotation) matrix = Matrix4::Rotate(*rotation) * matrix;
 		if (translation) matrix = Matrix4::Translation(*translation) * matrix;
 		return matrix;
 	}
@@ -111,7 +111,6 @@ private:
 	std::optional<T> GetVector(const std::vector<double> list)
 	{
 		if (list.empty()) return std::nullopt;
-
 		if constexpr (std::is_same_v<T, Vector4f>) return T(list[0], list[1], list[2], list[3]);
 		else if constexpr (std::is_same_v<T, Vector3f>) return T(list[0], list[1], list[2]);
 		else throw std::exception();

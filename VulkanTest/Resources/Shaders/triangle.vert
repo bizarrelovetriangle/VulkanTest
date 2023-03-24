@@ -6,12 +6,18 @@ layout(location = 2) in vec2 texturePos;
 
 layout(location = 0) out vec3 fragColor;
 
+layout (push_constant) uniform constans
+{
+    mat4x4 model;
+    mat4x4 world;
+} Matrixes;
+
 void main() {
-    gl_Position = vec4(pos, 1.0);
+    gl_Position = Matrixes.world * Matrixes.model * vec4(pos, 1.0);
 
     vec3 color = (gl_VertexIndex / 3) % 2 == 0 ? vec3(0.8, 0.8, 0.) : vec3(0., 0.8, 0.8);
     color = vec3(0.5);
 
     vec3 view = vec3(0., 0., 1.);
-    fragColor = color * dot(view, normal);
+    fragColor = color * (dot(view, normal) + 0.1);
 }
