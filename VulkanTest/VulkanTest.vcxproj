@@ -177,6 +177,11 @@
     <ClInclude Include="Vulkan\SwapChain.h" />
     <ClInclude Include="Vulkan\VulkanAuxiliary.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Shaders\compile.bat" />
+    <None Include="Resources\Shaders\triangle.frag" />
+    <None Include="Resources\Shaders\triangle.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
