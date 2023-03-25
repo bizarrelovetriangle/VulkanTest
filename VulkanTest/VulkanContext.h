@@ -29,15 +29,11 @@
 #include "Utils/ObjReader.hpp"
 #include "Utils/GLTFReader.hpp"
 
-class Playground
+class VulkanContext
 {
 public:
-    Playground()
+    void Init(GLFWwindow* window)
     {
-        glfwInit();
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
-        
         ValidationLayersInfo validationLayersInfo;
         vulkanAuxiliary = std::make_shared<VulkanAuxiliary>(validationLayersInfo);
         deviceController = std::make_shared<DeviceController>(vulkanAuxiliary->instance, validationLayersInfo);
@@ -45,14 +41,14 @@ public:
         auto res = glfwCreateWindowSurface(vulkanAuxiliary->instance, window, nullptr, &surfacePtr);
         surface = vk::SurfaceKHR(surfacePtr);
         queueFamilies = std::make_shared<QueueFamilies>(deviceController->physicalDevice, surface);
-        
+
         auto graphicQueueFamily = std::find_if(std::begin(queueFamilies->queueFamilies), std::end(queueFamilies->queueFamilies),
             [](auto& family) { return family.flags.contains(vk::QueueFlagBits::eGraphics) && family.presentSupport; });
         deviceController->createDevice(*queueFamilies, { graphicQueueFamily->index });
-        
+
         queueFamilies->graphicsQueue = deviceController->device.getQueue(graphicQueueFamily->index, 0);
         queueFamilies->presentQueue = deviceController->device.getQueue(graphicQueueFamily->index, 0);
-        
+
         swapChain = std::make_shared<SwapChain>(deviceController, surface, window);
         renderPass = std::make_shared<RenderPass>(deviceController->device, swapChain->swapChainImageFormat);
         swapChain->CreateFramebuffers(renderPass->renderPass);
@@ -62,14 +58,7 @@ public:
 
 
         ObjReader objReader("E:/Projects/VulkanTest/VulkanTest/Resources/Objects/SphereWithPlane/untitled.obj");
-        GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard.gltf");
 
-        for (auto& [name, renderObject] : glTFReader.renderObjects)
-        {
-            renderObject.vertexBuffer = std::make_shared<VulkanBuffer<RenderObjectVertexData>>(
-                deviceController, renderObject.vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
-            renderObjects.push_back(std::make_unique<RenderObject>(std::move(renderObject)));
-        }
 
         {
             const std::vector<VertexData> vertexData = {
@@ -77,7 +66,7 @@ public:
                 {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
                 {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
             };
-        
+
             vertexBuffer = std::make_shared<VulkanBuffer<VertexData>>(
                 deviceController, vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
         }
@@ -99,18 +88,7 @@ public:
         inFlightFence = deviceController->device.createFence(fenceInfo);
     }
 
-    void Run() {
-        while (!glfwWindowShouldClose(window)) {
-            glfwPollEvents();
-            DrawFrame();
-        }
-        
-        vkDeviceWaitIdle(deviceController->device);
-        glfwDestroyWindow(window);
-        glfwTerminate();
-    }
-
-    void DrawFrame()
+    void DrawFrame(std::vector<std::unique_ptr<RenderObject>>& renderObjects)
     {
         deviceController->device.waitForFences({ inFlightFence }, VK_TRUE, UINT64_MAX);
         deviceController->device.resetFences({ inFlightFence });
@@ -118,7 +96,6 @@ public:
         uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
         commandBuffer->Reset();
-        auto two = decltype(renderObjects)(renderObjects.begin() + 1, renderObjects.end());
         commandBuffer->RecordCommandBuffer(imageIndex, renderObjects);
 
         vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore };
@@ -152,7 +129,12 @@ public:
         queueFamilies->presentQueue.presentKHR(presentInfo);
     }
 
-    ~Playground()
+    void Await()
+    {
+        vkDeviceWaitIdle(deviceController->device);
+    }
+
+    void Dispose()
     {
         swapChain->Dispose();
         commandBuffer->Dispose();
@@ -160,7 +142,6 @@ public:
         renderPass->Dispose();
         indexBuffer->Dispose();
         vertexBuffer->Dispose();
-        for (auto& renderObject : renderObjects) renderObject->vertexBuffer->Dispose();
 
         vkDestroySemaphore(deviceController->device, imageAvailableSemaphore, nullptr);
         vkDestroySemaphore(deviceController->device, renderFinishedSemaphore, nullptr);
@@ -172,19 +153,16 @@ public:
         vulkanAuxiliary->Dispose();
     }
 
-private:
-    const uint32_t width = 1200;
-    const uint32_t height = 1200;
-
-    vk::SurfaceKHR surface;
-    GLFWwindow* window;
-    std::shared_ptr<VulkanAuxiliary> vulkanAuxiliary;
+    std::shared_ptr<CommandBuffer> commandBuffer;
     std::shared_ptr<DeviceController> deviceController;
+
+private:
+    vk::SurfaceKHR surface;
+    std::shared_ptr<VulkanAuxiliary> vulkanAuxiliary;
     std::shared_ptr<QueueFamilies> queueFamilies;
     std::shared_ptr<SwapChain> swapChain;
     std::shared_ptr<RenderPass> renderPass;
     std::shared_ptr<Pipeline> pipeline;
-    std::shared_ptr<CommandBuffer> commandBuffer;
 
     std::shared_ptr<VulkanBuffer<uint16_t>> indexBuffer;
     std::shared_ptr<VulkanBuffer<VertexData>> vertexBuffer;
@@ -193,6 +171,4 @@ private:
     vk::Semaphore imageAvailableSemaphore;
     vk::Semaphore renderFinishedSemaphore;
     vk::Fence inFlightFence;
-
-    std::vector<std::shared_ptr<RenderObject>> renderObjects;
 };

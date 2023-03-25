@@ -1,7 +1,7 @@
 
-#include "Playground.h"
+#include "Scene.h"
 
 int main() {
-	Playground playground;
-	playground.Run();
+	Scene scene;
+	scene.Run();
 }

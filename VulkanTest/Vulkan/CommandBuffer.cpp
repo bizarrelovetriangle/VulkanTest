@@ -15,8 +15,9 @@
 #include "RenderPass.h"
 #include "VulkanBuffer.h"
 #include "VertexData.h"
-#include "../Primitives/RenderObject.hpp"
+#include "../Primitives/RenderObject.h"
 #include "../Utils/ObjReader.hpp"
+#include "../RenderVisitor.h";
 
 CommandBuffer::CommandBuffer(const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
 	std::shared_ptr<Pipeline> pipeline, std::shared_ptr<SwapChain> swapChain,
@@ -33,7 +34,7 @@ void CommandBuffer::Dispose()
 }
 
 void CommandBuffer::RecordCommandBuffer(int imageIndex,
-	const std::vector<std::shared_ptr<RenderObject>>& renderObjects)
+	const std::vector<std::unique_ptr<RenderObject>>& renderObjects)
 {
 	vk::CommandBufferBeginInfo beginInfo;
 	commandBuffer.begin(beginInfo);
@@ -60,26 +61,11 @@ void CommandBuffer::RecordCommandBuffer(int imageIndex,
 		commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
 		{
-			commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->graphicsPipeline);
-			auto viewport = pipeline->CreateViewport();
-			auto scissors = pipeline->CreateScissors();
-			commandBuffer.setViewport(0, 1, &viewport);
-			commandBuffer.setScissor(0, 1, &scissors);
+			RenderVisitor renderVisitor(*this, *pipeline);
 
 			for (auto& renderObject : renderObjects)
 			{
-				vk::Buffer vertexBuffers[] = { renderObject->vertexBuffer->buffer };
-				vk::DeviceSize vertexOffsets[] = { 0 };
-				commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
-
-
-				Matrix4 world = Matrix4::Translation({ 0., 0., 0.5 }) * Matrix4::Scale({ 0.3, 0.3, 0.3 });
-
-				RenderObjectPushConstantRange pushConstantRange{ renderObject->model.Transpose(), world.Transpose() };
-				commandBuffer.pushConstants(pipeline->pipelineLayout, vk::ShaderStageFlagBits::eVertex,
-					0, sizeof(RenderObjectPushConstantRange), &pushConstantRange);
-
-				commandBuffer.draw(renderObject->vertexBuffer->count, 1, 0, 0);
+				renderObject->Accept(renderVisitor);
 			}
 		}
 

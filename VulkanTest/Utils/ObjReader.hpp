@@ -7,7 +7,7 @@
 #include <functional>
 #include "../Math/Vector3.hpp"
 #include "../Math/Vector2.hpp"
-#include "../Primitives/RenderObject.hpp"
+#include "../Primitives/RenderObject.h"
 
 using namespace std::placeholders;
 
@@ -47,7 +47,8 @@ public:
 		const Obj3DObjectSerializedSet obj3DObjectSerializedSet,
 		const Obj3DObjectSerialized& obj3DObjectSerialized)
 	{
-		RenderObject obj3DObject{ .name = obj3DObjectSerialized.name };
+		RenderObject obj3DObject;
+		obj3DObject.name = obj3DObjectSerialized.name;
 
 		for (auto& face : obj3DObjectSerialized.faces)
 		{

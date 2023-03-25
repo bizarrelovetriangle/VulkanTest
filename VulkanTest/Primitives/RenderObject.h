@@ -7,6 +7,8 @@
 #undef VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
 
+class RenderVisitor;
+
 class RenderObjectPushConstantRange
 {
 public:
@@ -45,5 +47,6 @@ public:
 	std::string name;
 	Matrix4 model;
 	std::vector<RenderObjectVertexData> vertexData;
-	std::shared_ptr<VulkanBuffer<RenderObjectVertexData>> vertexBuffer;
+	std::unique_ptr<VulkanBuffer<RenderObjectVertexData>> vertexBuffer;
+	virtual void Accept(RenderVisitor& renderVisitor) const;
 };

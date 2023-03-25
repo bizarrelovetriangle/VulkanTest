@@ -36,6 +36,12 @@ public:
 		return matrix;
 	}
 
+	static Matrix4 Rotate(const Vector4f& quarternion)
+	{
+		Matrix4 matrix;
+		return matrix;
+	}
+
 	static Matrix4 Scale(const Vector3f& vec)
 	{
 		Matrix4 matrix;

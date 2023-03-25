@@ -30,7 +30,7 @@ public:
 		std::shared_ptr<RenderPass> renderPass);
 	void Dispose();
 	void RecordCommandBuffer(int imageIndex,
-		const std::vector<std::shared_ptr<RenderObject>>& renderObjects);
+		const std::vector<std::unique_ptr<RenderObject>>& renderObjects);
 	void Reset();
 
 private:

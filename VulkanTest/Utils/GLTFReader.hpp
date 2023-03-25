@@ -30,7 +30,7 @@ public:
 			auto& node = glTFModel.nodes[nodeId];
 			auto& mesh = glTFModel.meshes[node.mesh];
 
-			auto& renderObject = renderObjects.emplace(node.name, RenderObject()).first->second;
+			auto& renderObject = *renderObjects.emplace_back(std::make_unique<RenderObject>());
 			renderObject.name = node.name;
 			renderObject.model = ComposeMatrix(node);
 
@@ -60,7 +60,7 @@ public:
 		}
 	}
 
-	std::map<std::string, RenderObject> renderObjects;
+	std::vector<std::unique_ptr<RenderObject>> renderObjects;
 
 private:
 	Matrix4 ComposeMatrix(const tinygltf::Node& node)
@@ -71,7 +71,7 @@ private:
 
 		Matrix4 matrix;
 		if (scale) matrix = Matrix4::Scale(*scale) * matrix;
-		//if (rotation) matrix = Matrix4::Rotate(*rotation) * matrix;
+		if (rotation) matrix = Matrix4::Rotate(*rotation) * matrix;
 		if (translation) matrix = Matrix4::Translation(*translation) * matrix;
 		return matrix;
 	}

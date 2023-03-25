@@ -1,4 +1,6 @@
 #pragma once;
+#include <memory>
+
 template <class T>
 class Vector4;
 using Vector4f = Vector4<float>;

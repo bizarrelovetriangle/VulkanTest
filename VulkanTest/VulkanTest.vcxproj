@@ -143,6 +143,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Primitives\RenderObject.cpp" />
+    <ClCompile Include="RenderVisitor.cpp" />
     <ClCompile Include="Vulkan\CommandBuffer.cpp" />
     <ClCompile Include="Vulkan\DeviceController.cpp" />
     <ClCompile Include="Vulkan\VulkanBuffer.cpp" />
@@ -159,8 +161,10 @@
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Math\Vector4.hpp" />
-    <ClInclude Include="Playground.h" />
-    <ClInclude Include="Primitives\RenderObject.hpp" />
+    <ClInclude Include="RenderVisitor.h" />
+    <ClInclude Include="VulkanContext.h" />
+    <ClInclude Include="Primitives\RenderObject.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Utils\GLTFReader.hpp" />
     <ClInclude Include="Utils\ObjReader.hpp" />
     <ClInclude Include="Utils\tiny_gltf\json.hpp" />
