@@ -3,8 +3,6 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #define NTDDI_VERSION NTDDI_WIN10_RS1 // work around linker failure MapViewOfFileNuma2@36
 
-#define VK_HEADER_VERSION 239
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32

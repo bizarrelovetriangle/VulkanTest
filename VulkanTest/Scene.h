@@ -10,7 +10,7 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
-		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard.gltf");
+		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\monkey2.gltf");
 
 		renderObjects = std::move(glTFReader.renderObjects);
 

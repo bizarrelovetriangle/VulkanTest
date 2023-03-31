@@ -71,7 +71,10 @@ private:
 
 		Matrix4 matrix;
 		if (scale) matrix = Matrix4::Scale(*scale) * matrix;
-		if (rotation) matrix = Matrix4::Rotate(*rotation) * matrix;
+		if (rotation) {
+			auto rotation_ = Vector4f(rotation->x, rotation->y, rotation->w, rotation->z); // x z y
+			matrix = Matrix4::Rotate(rotation_) * matrix;
+		}
 		if (translation) matrix = Matrix4::Translation(*translation) * matrix;
 		return matrix;
 	}

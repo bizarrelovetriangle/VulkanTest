@@ -11,13 +11,37 @@ RenderVisitor::RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline)
 
 void RenderVisitor::Visit(const RenderObject& renderObject)
 {
+	//if (renderObject.name != "Torus") return;
+
 	BindPipeline(pipeline);
 
 	vk::Buffer vertexBuffers[] = { renderObject.vertexBuffer->buffer };
 	vk::DeviceSize vertexOffsets[] = { 0 };
 	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
 
-	Matrix4 world = Matrix4::Translation({ 0., 0., 0.5 }) * Matrix4::Scale({ 0.3, 0.3, 0.3 });
+	static auto before = std::chrono::high_resolution_clock::now();
+	auto now = std::chrono::high_resolution_clock::now();
+	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - before);
+	float seconds = float(diff.count()) / 1000;
+	
+	float degen = float(0. + seconds / 2);
+
+	Matrix4 world;
+
+	//world = Matrix4::Rotate(Vector4f(degen, 0, 0, 0)) * world;
+	//world = Matrix4::RotateY(degen) * world;
+	world = Matrix4::Translation(Vector3f(0, 0, 0.9)) * world;
+
+	world = Matrix4::Translation({ 0., 0., 0 }) * Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
+	//Matrix4 world = Matrix4::Translation(Vector3f( 0., 0., 0 )) * Matrix4::Scale({ 0.3, 0.3, 0.3 });
+
+	world.i.y = -world.i.y;
+	world.j.y = -world.j.y;
+	world.k.y = -world.k.y;
+	world.l.y = -world.l.y;
+
+	//world.k.z /= 10;
+
 
 	RenderObjectPushConstantRange pushConstantRange{ renderObject.model.Transpose(), world.Transpose() };
 	commandBuffer.pushConstants(

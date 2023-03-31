@@ -1,4 +1,6 @@
 #pragma once;
+#include <cmath>
+#include <memory>
 
 template <class T>
 class Vector3;
@@ -20,5 +22,45 @@ public:
 	Vector3(T x, T y, T z)
 		: x(x), y(y), z(z)
 	{
+	}
+
+	template <std::enable_if_t<std::is_same_v<T, float>, bool> = true>
+	T Dot(const Vector3<T>& vec) const
+	{
+		return x * vec.x + y * vec.y + z * vec.z;
+	}
+
+	template <std::enable_if_t<std::is_same_v<T, float>, bool> = true>
+	Vector3<T> Cross(const Vector3<T>& vec) const
+	{
+		return Vector3<T>(
+			z * vec.y - y * vec.z,
+			x * vec.z - z * vec.x,
+			y * vec.x - x * vec.y);
+	}
+
+	Vector3<T> operator*(T s)
+	{
+		return Vector3<T>(x * s, y * s, z * s);
+	}
+
+	Vector3<T> operator/(T s)
+	{
+		return Vector3<T>(x / s, y / s, z / s);
+	}
+
+	Vector3<T> Normalized()
+	{
+		return *this / Length();
+	}
+
+	T Length()
+	{
+		return std::sqrt(Length2());
+	}
+
+	T Length2()
+	{
+		return std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2);
 	}
 };

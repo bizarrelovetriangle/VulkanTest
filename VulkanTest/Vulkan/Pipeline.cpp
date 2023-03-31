@@ -189,7 +189,7 @@ vk::PipelineRasterizationStateCreateInfo Pipeline::CreateRasterizer() {
 		.polygonMode = vk::PolygonMode::eFill,
 
 		.cullMode = vk::CullModeFlagBits::eBack,
-		.frontFace = vk::FrontFace::eClockwise,
+		.frontFace = vk::FrontFace::eCounterClockwise,
 
 		.depthBiasEnable = VK_FALSE,
 		.depthBiasConstantFactor = 0.0f, // Optional

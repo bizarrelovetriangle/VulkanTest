@@ -1,4 +1,5 @@
 #pragma once;
+#include <cmath>
 #include "Vector4.hpp"
 
 class Matrix4
@@ -36,9 +37,24 @@ public:
 		return matrix;
 	}
 
-	static Matrix4 Rotate(const Vector4f& quarternion)
+	static Matrix4 Rotate(const Vector4f& quaternion)
 	{
-		Matrix4 matrix;
+		auto angle = std::acos(quaternion.x);
+
+		auto jA = Vector3f(quaternion.y, quaternion.z, quaternion.w) / std::sin(angle);
+		auto iA = jA.Cross({ 0., 1., 0. }).Normalized();
+		auto kA = jA.Cross(iA);
+
+		Matrix4 asixRotate
+		{
+			{iA.x, jA.x, kA.x, 0.},
+			{iA.y, jA.y, kA.y, 0.},
+			{iA.z, jA.z, kA.z, 0.},
+			{  0.,   0.,   0., 1.}
+		};
+
+		auto yRotate = RotateY(angle);
+		auto matrix = asixRotate * yRotate * asixRotate.Transpose();
 		return matrix;
 	}
 
@@ -53,10 +69,46 @@ public:
 
 	Matrix4 Transpose() const
 	{
-		return Matrix4(
-			Vector4f(i.x, j.x, k.x, l.x),
-			Vector4f(i.y, j.y, k.y, l.y),
-			Vector4f(i.z, j.z, k.z, l.z),
-			Vector4f(i.w, j.w, k.w, l.w));
+		return Matrix4 {
+			{i.x, j.x, k.x, l.x},
+			{i.y, j.y, k.y, l.y},
+			{i.z, j.z, k.z, l.z},
+			{i.w, j.w, k.w, l.w}};
+	}
+
+	static Matrix4 RotateX(float radians)
+	{
+		float cos = std::cos(radians);
+		float sin = std::sin(radians);
+
+		return Matrix4 {
+			{  1.,  0.,  0.,  0.},
+			{  0., cos, sin,  0.},
+			{  0.,-sin, cos,  0.},
+			{  0.,  0.,  0.,  1.}};
+	}
+
+	static Matrix4 RotateY(float radians)
+	{
+		float cos = std::cos(radians);
+		float sin = std::sin(radians);
+
+		return Matrix4{
+			{ cos,  0.,-sin,  0.},
+			{  0.,  1.,  0.,  0.},
+			{ sin,  0., cos,  0.},
+			{  0.,  0.,  0.,  1.}};
+	}
+	
+	static Matrix4 RotateZ(float radians)
+	{
+		float cos = std::cos(radians);
+		float sin = std::sin(radians);
+
+		return Matrix4{
+			{ cos,-sin,  0.,  0.},
+			{ sin, cos,  0.,  0.},
+			{  0.,  0.,  1.,  0.},
+			{  0.,  0.,  0.,  1.}};
 	}
 };
