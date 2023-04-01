@@ -39,21 +39,19 @@ public:
 
 	static Matrix4 Rotate(const Vector4f& quaternion)
 	{
-		auto angle = std::acos(quaternion.x);
+		auto angle = std::acos(quaternion.w);
 
-		auto jA = Vector3f(quaternion.y, quaternion.z, quaternion.w) / std::sin(angle);
+		auto jA = Vector3f(quaternion.x, quaternion.y, quaternion.z) / std::sin(angle);
 		auto iA = jA.Cross({ 0., 1., 0. }).Normalized();
 		auto kA = jA.Cross(iA);
 
-		Matrix4 asixRotate
-		{
+		Matrix4 asixRotate{
 			{iA.x, jA.x, kA.x, 0.},
 			{iA.y, jA.y, kA.y, 0.},
 			{iA.z, jA.z, kA.z, 0.},
-			{  0.,   0.,   0., 1.}
-		};
+			{  0.,   0.,   0., 1.}};
 
-		auto yRotate = RotateY(angle);
+		auto yRotate = RotateY(-angle);
 		auto matrix = asixRotate * yRotate * asixRotate.Transpose();
 		return matrix;
 	}

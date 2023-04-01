@@ -51,6 +51,8 @@ public:
 
 	Vector3<T> Normalized()
 	{
+		float length = Length();
+		if (length == 0) return Vector3<T>(1., 0., 0.);
 		return *this / Length();
 	}
 
