@@ -25,9 +25,9 @@ public:
 
 		auto& scene = glTFModel.scenes.front();
 
-		for (auto nodeId : scene.nodes)
+		for (auto& node : glTFModel.nodes)
 		{
-			auto& node = glTFModel.nodes[nodeId];
+			if (node.mesh < 0) continue;
 			auto& mesh = glTFModel.meshes[node.mesh];
 
 			auto& renderObject = *renderObjects.emplace_back(std::make_unique<RenderObject>());
@@ -38,12 +38,16 @@ public:
 			{
 				auto positionsId = primitive.attributes.at(Position);
 				auto nomalsId = primitive.attributes.at(Normal);
-				auto textureCoordsId = primitive.attributes.at(TextureCoord);
+				//auto textureCoordsId = primitive.attributes.at(TextureCoord);
 
-				auto indexes = ReadBuffer<uint16_t>(primitive.indices);
+				int indexSize = tinygltf::GetComponentSizeInBytes(
+					glTFModel.accessors[primitive.indices].componentType);
+				auto indexes = indexSize == sizeof(uint32_t)
+					? ReadBuffer<uint32_t>(primitive.indices)
+					: ReadBuffer<uint16_t, uint32_t>(primitive.indices);
 				auto positions = ReadBuffer<Vector3f>(positionsId);
 				auto normals = ReadBuffer<Vector3f>(nomalsId);
-				auto textureCoords = ReadBuffer<Vector2f>(textureCoordsId);
+				//auto textureCoords = ReadBuffer<Vector2f>(textureCoordsId);
 
 				for (auto index : indexes)
 				{
@@ -51,7 +55,7 @@ public:
 					{
 						.position = positions[index],
 						.normal = normals[index],
-						.textureCoord = textureCoords[index]
+						//.textureCoord = textureCoords[index]
 					};
 
 					renderObject.vertexData.push_back(vertexData);
@@ -76,8 +80,8 @@ private:
 		return matrix;
 	}
 
-	template <class T>
-	std::vector<T> ReadBuffer(int accessorId)
+	template <class T, class R = T>
+	std::vector<R> ReadBuffer(int accessorId)
 	{
 		auto& accessor = glTFModel.accessors[accessorId];
 		auto& bufferView = glTFModel.bufferViews[accessor.bufferView];
@@ -90,21 +94,16 @@ private:
 		auto& buffer = glTFModel.buffers[bufferView.buffer];
 		std::vector<T> data(accessor.count);
 
-		if (bufferView.byteStride == 0)
+		if (bufferView.byteStride == 0) bufferView.byteStride = elementSize;
+
+		for (int i = 0; i < accessor.count; ++i)
 		{
-			std::memcpy(data.data(), buffer.data.data() + offset, elementSize * accessor.count);
-		}
-		else
-		{
-			for (int i = 0; i < accessor.count; ++i)
-			{
-				int dataOffset = elementSize * i;
-				int bufferOffset = offset + bufferView.byteStride * i;
-				std::memcpy(data.data() + dataOffset, buffer.data.data() + bufferOffset, elementSize);
-			}
+			int dataOffset = i;
+			int bufferOffset = offset + bufferView.byteStride * i;
+			std::memcpy(data.data() + dataOffset, buffer.data.data() + bufferOffset, elementSize);
 		}
 
-		return data;
+		return std::vector<R>(std::begin(data), std::end(data));
 	}
 
 	template <class T>

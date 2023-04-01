@@ -10,6 +10,7 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
+		//GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
 		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
 
 		renderObjects = std::move(glTFReader.renderObjects);
