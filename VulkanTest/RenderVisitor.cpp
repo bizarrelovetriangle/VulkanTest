@@ -29,19 +29,13 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 	Matrix4 world;
 
 	//world = Matrix4::Rotate(Vector4f(degen, 0, 0, 0)) * world;
-	//world = Matrix4::RotateY(degen) * world;
+	world = Matrix4::RotateY(degen) * world;
 	world = Matrix4::Translation(Vector3f(0, 0, 0.9)) * world;
 
 	world = Matrix4::Translation({ 0., 0., 0 }) * Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
 	//Matrix4 world = Matrix4::Translation(Vector3f( 0., 0., 0 )) * Matrix4::Scale({ 0.3, 0.3, 0.3 });
 
-	world.i.y = -world.i.y;
-	world.j.y = -world.j.y;
-	world.k.y = -world.k.y;
-	world.l.y = -world.l.y;
-
-	//world.k.z /= 10;
-
+	world.j *= -1;
 
 	RenderObjectPushConstantRange pushConstantRange{ renderObject.model.Transpose(), world.Transpose() };
 	commandBuffer.pushConstants(

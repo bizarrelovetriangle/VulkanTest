@@ -28,4 +28,12 @@ public:
 	{
 		return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
 	}
+
+	void operator*=(T s)
+	{
+		x *= s;
+		y *= s;
+		z *= s;
+		w *= s;
+	}
 };
