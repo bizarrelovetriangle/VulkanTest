@@ -60,13 +60,11 @@ void CommandBuffer::RecordCommandBuffer(int imageIndex,
 
 		commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
-		{
-			RenderVisitor renderVisitor(*this, *pipeline);
+		RenderVisitor renderVisitor(*this, *pipeline);
 
-			for (auto& renderObject : renderObjects)
-			{
-				renderObject->Accept(renderVisitor);
-			}
+		for (auto& renderObject : renderObjects)
+		{
+			renderObject->Accept(renderVisitor);
 		}
 
 		commandBuffer.endRenderPass();

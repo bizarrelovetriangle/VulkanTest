@@ -16,6 +16,12 @@ public:
 	{
 	}
 
+	template <class O>
+	Vector2(const Vector2<O>& vec)
+		: x(vec.x), y(vec.y)
+	{
+	}
+
 	Vector2(T x, T y)
 		: x(x), y(y)
 	{

@@ -36,15 +36,13 @@ public:
 
 			for (auto& primitive : mesh.primitives)
 			{
+				Vector3<uint16_t> vec;
+
 				auto positionsId = primitive.attributes.at(Position);
 				auto nomalsId = primitive.attributes.at(Normal);
 				//auto textureCoordsId = primitive.attributes.at(TextureCoord);
 
-				int indexSize = tinygltf::GetComponentSizeInBytes(
-					glTFModel.accessors[primitive.indices].componentType);
-				auto indexes = indexSize == sizeof(uint32_t)
-					? ReadBuffer<uint32_t>(primitive.indices)
-					: ReadBuffer<uint16_t, uint32_t>(primitive.indices);
+				auto indexes = ReadBuffer<uint32_t>(primitive.indices);
 				auto positions = ReadBuffer<Vector3f>(positionsId);
 				auto normals = ReadBuffer<Vector3f>(nomalsId);
 				//auto textureCoords = ReadBuffer<Vector2f>(textureCoordsId);
@@ -80,31 +78,73 @@ private:
 		return matrix;
 	}
 
-	template <class T, class R = T>
-	std::vector<R> ReadBuffer(int accessorId)
+	template <class T>
+	std::vector<T> ReadBuffer(int accessorId)
 	{
 		auto& accessor = glTFModel.accessors[accessorId];
 		auto& bufferView = glTFModel.bufferViews[accessor.bufferView];
-		int elementSize =
-			tinygltf::GetComponentSizeInBytes(accessor.componentType) *
-			tinygltf::GetNumComponentsInType(accessor.type);
-		int offset = bufferView.byteOffset + accessor.byteOffset;
+		size_t componentSize = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+		size_t componentCount = tinygltf::GetNumComponentsInType(accessor.type);
+		size_t elementSize = componentSize * componentCount;
+		size_t offset = bufferView.byteOffset + accessor.byteOffset;
 
-		if (elementSize != sizeof(T)) throw std::exception();
 		auto& buffer = glTFModel.buffers[bufferView.buffer];
-		std::vector<T> data(accessor.count);
+		std::vector<std::byte> data(accessor.count * elementSize);
 
 		if (bufferView.byteStride == 0) bufferView.byteStride = elementSize;
 
-		for (int i = 0; i < accessor.count; ++i)
+		for (size_t i = 0; i < accessor.count; ++i)
 		{
-			int dataOffset = i;
-			int bufferOffset = offset + bufferView.byteStride * i;
+			size_t dataOffset = elementSize * i;
+			size_t bufferOffset = offset + bufferView.byteStride * i;
 			std::memcpy(data.data() + dataOffset, buffer.data.data() + bufferOffset, elementSize);
 		}
 
-		return std::vector<R>(std::begin(data), std::end(data));
+		return TypeMarshal<T>(accessor.componentType, accessor.type, data);
 	}
+
+	template <class O>
+	std::vector<O> TypeMarshal(size_t componentType, size_t componentCount, const std::vector<std::byte>& buffer)
+	{
+		if (componentCount == TINYGLTF_TYPE_VEC2)
+			return InnerTypeMarshal<Vector2, O>(componentType, buffer);
+		if (componentCount == TINYGLTF_TYPE_VEC3)
+			return InnerTypeMarshal<Vector3, O>(componentType, buffer);
+		if(componentCount == TINYGLTF_TYPE_SCALAR)
+			return InnerTypeMarshal<Scalar, O>(componentType, buffer);
+		throw std::exception("gosh");
+	}
+
+	template <template<class> class I, class O>
+	std::vector<O> InnerTypeMarshal(size_t componentType, const std::vector<std::byte>& buffer)
+	{
+		if (componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
+			return Helper<I<uint16_t>, O>(buffer);
+		if (componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
+			return Helper<I<uint32_t>, O>(buffer);
+		if (componentType == TINYGLTF_COMPONENT_TYPE_FLOAT)
+			return Helper<I<float>, O>(buffer);
+		if (componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE)
+			return Helper<I<double>, O>(buffer);
+		throw std::exception("gosh");
+	}
+
+	template <class I, class O>
+	std::vector<O> Helper(const std::vector<std::byte>& buffer)
+	{
+		std::vector<I> bufferData(buffer.size() / sizeof(I));
+		std::memcpy(bufferData.data(), buffer.data(), buffer.size());
+		if constexpr (std::is_convertible_v<I, O>)
+			return std::vector<O>(std::begin(bufferData), std::end(bufferData));
+		else throw std::exception("gosh");
+	}
+
+	template<class T>
+	struct Scalar
+	{
+		T value;
+		operator T() const { return value; }
+	};
 
 	template <class T>
 	std::optional<T> GetVector(const std::vector<double> list)

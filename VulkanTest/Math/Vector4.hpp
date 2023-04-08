@@ -18,12 +18,18 @@ public:
 	{
 	}
 
+	template <class O>
+	Vector4(const Vector4<O>& vec)
+		: x(vec.x), y(vec.y), z(vec.z), w(vec.w)
+	{
+	}
+
 	Vector4(T x, T y, T z, T w)
 		: x(x), y(y), z(z), w(w)
 	{
 	}
 
-	template <std::enable_if_t<std::is_same_v<T, float>, int> = 0>
+	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
 	T Dot(const Vector4<T> vec) const
 	{
 		return x * vec.x + y * vec.y + z * vec.z + w * vec.w;

@@ -24,13 +24,19 @@ public:
 	{
 	}
 
-	template <std::enable_if_t<std::is_same_v<T, float>, bool> = true>
+	template <class O>
+	Vector3(const Vector3<O>& vec)
+		: x(vec.x), y(vec.y), z(vec.z)
+	{
+	}
+
+	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
 	T Dot(const Vector3<T>& vec) const
 	{
 		return x * vec.x + y * vec.y + z * vec.z;
 	}
 
-	template <std::enable_if_t<std::is_same_v<T, float>, bool> = true>
+	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
 	Vector3<T> Cross(const Vector3<T>& vec) const
 	{
 		return Vector3<T>(
