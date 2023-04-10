@@ -12,58 +12,26 @@
 RenderPass::RenderPass(const vk::Device& device, vk::Format swapChainImageFormat)
 	: device(device), swapChainImageFormat(swapChainImageFormat)
 {
-	vk::AttachmentReference colorAttachmentRef
-	{
-		.attachment = 0,
-		.layout = vk::ImageLayout::eColorAttachmentOptimal
-	};
+	vk::AttachmentDescription colorAttachment(
+		{}, swapChainImageFormat, vk::SampleCountFlagBits::e1,
+		vk::AttachmentLoadOp::eClear, vk::AttachmentStoreOp::eStore,
+		vk::AttachmentLoadOp::eDontCare, vk::AttachmentStoreOp::eDontCare,
+		vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR);
 
-	vk::SubpassDescription subpass
-	{
-		.pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
-		.colorAttachmentCount = 1,
-		.pColorAttachments = &colorAttachmentRef
-	};
+	vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
 
-	auto colorAttachment = CreateColorAttachment();
+	vk::SubpassDescription subpass({}, vk::PipelineBindPoint::eGraphics, {}, colorAttachmentRef);
 
-	vk::SubpassDependency dependency
-	{
-		.srcSubpass = VK_SUBPASS_EXTERNAL,
-		.dstSubpass = 0,
-		.srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-		.dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-		.srcAccessMask = vk::AccessFlagBits::eNone,
-		.dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
-	};
+	vk::SubpassDependency dependency(
+		VK_SUBPASS_EXTERNAL, 0,
+		vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eColorAttachmentOutput,
+		vk::AccessFlagBits::eNone, vk::AccessFlagBits::eColorAttachmentWrite);
 
-	vk::RenderPassCreateInfo renderPassInfo{};
-	renderPassInfo.attachmentCount = 1;
-	renderPassInfo.pAttachments = &colorAttachment;
-	renderPassInfo.subpassCount = 1;
-	renderPassInfo.pSubpasses = &subpass;
-	renderPassInfo.dependencyCount = 1;
-	renderPassInfo.pDependencies = &dependency;
-
+	vk::RenderPassCreateInfo renderPassInfo({}, colorAttachment, subpass, dependency);
 	renderPass = device.createRenderPass(renderPassInfo);
 }
 
 void RenderPass::Dispose()
 {
 	device.destroyRenderPass(renderPass);
-}
-
-vk::AttachmentDescription RenderPass::CreateColorAttachment() {
-	vk::AttachmentDescription colorAttachment
-	{
-		.format = swapChainImageFormat,
-		.samples = vk::SampleCountFlagBits::e1,
-		.loadOp = vk::AttachmentLoadOp::eClear,
-		.storeOp = vk::AttachmentStoreOp::eStore,
-		.stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
-		.stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-		.initialLayout = vk::ImageLayout::eUndefined,
-		.finalLayout = vk::ImageLayout::ePresentSrcKHR
-	};
-	return colorAttachment;
 }

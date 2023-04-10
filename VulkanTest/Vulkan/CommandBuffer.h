@@ -8,8 +8,6 @@
 
 #include <memory>
 
-#define VK_HEADER_VERSION 239
-#define VULKAN_HPP_NO_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
 
 class QueueFamilies;

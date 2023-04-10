@@ -23,26 +23,17 @@ void DeviceController::createDevice(QueueFamilies& queueFamilies, std::initializ
 {
     std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
     for (auto index : queueFamilyIndexes) {
-        float queuePriority = 1.0f;
+        float queuePriority[] = { 1.0f };
 
-        vk::DeviceQueueCreateInfo queueCreateInfo
-        {
-            .queueFamilyIndex = (uint32_t) index,
-            .queueCount = 1,
-            .pQueuePriorities = &queuePriority
-        };
+        vk::DeviceQueueCreateInfo queueCreateInfo({}, (uint32_t)index, queuePriority);
 
         queueCreateInfos.push_back(queueCreateInfo);
     }
 
-    vk::PhysicalDeviceFeatures deviceFeatures{ .fillModeNonSolid = true };
-    vk::DeviceCreateInfo createInfo
-    {
-        .queueCreateInfoCount = (uint32_t) queueCreateInfos.size(),
-        .pQueueCreateInfos = queueCreateInfos.data(),
-        .enabledExtensionCount = 0,
-        .pEnabledFeatures = &deviceFeatures,
-    };
+    vk::PhysicalDeviceFeatures deviceFeatures;
+    deviceFeatures.fillModeNonSolid = true;
+
+    vk::DeviceCreateInfo createInfo({}, queueCreateInfos, {}, {}, &deviceFeatures);
 
     if (validationLayersInfo.enableValidationLayers) {
         createInfo.enabledLayerCount = validationLayersInfo.validationLayers.size();

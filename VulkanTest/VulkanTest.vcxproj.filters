@@ -51,6 +51,12 @@
     <ClCompile Include="Primitives\RenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vulkan\ImageHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">
@@ -104,7 +110,7 @@
     <ClInclude Include="Utils\tiny_gltf\json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\GLTFReader.hpp">
+    <ClInclude Include="Utils\GLTFReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Primitives\RenderObject.h">
@@ -120,6 +126,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderVisitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\ImageHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -44,36 +44,23 @@ void VulkanAuxiliary::Dispose() {
 
 void VulkanAuxiliary::createInstance()
 {
-    vk::DebugUtilsMessengerCreateInfoEXT debugMessagerCreateInfo
-    {
-        .messageSeverity =
-            vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
-            vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-            vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-        .messageType =
-            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-            vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-            vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-        .pfnUserCallback = (PFN_vkDebugUtilsMessengerCallbackEXT)debugCallback,
-    };
+    vk::DebugUtilsMessengerCreateInfoEXT debugMessagerCreateInfo({},
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
+        (PFN_vkDebugUtilsMessengerCallbackEXT)debugCallback);
 
-    vk::ApplicationInfo appInfo
-    {
-        .pApplicationName = "Hello Triangle",
-        .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-        .pEngineName = "No Engine",
-        .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-        .apiVersion = VK_API_VERSION_1_0
-    };
+    vk::ApplicationInfo appInfo(
+        "Hello Triangle", VK_MAKE_VERSION(1, 0, 0),
+        "No Engine", VK_MAKE_VERSION(1, 0, 0),
+        VK_API_VERSION_1_0);
 
     auto extensions = getRequiredExtensions();
 
-    vk::InstanceCreateInfo createInfo
-    {
-        .pApplicationInfo = &appInfo,
-        .enabledExtensionCount = (uint32_t)extensions.size(),
-        .ppEnabledExtensionNames = extensions.data()
-    };
+    vk::InstanceCreateInfo createInfo({}, &appInfo, {}, extensions);
 
     if (validationLayersInfo.enableValidationLayers) {
         createInfo.enabledLayerCount = validationLayersInfo.validationLayers.size();

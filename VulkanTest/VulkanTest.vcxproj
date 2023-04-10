@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Vulkan\ImageHelper.cpp" />
     <ClCompile Include="Primitives\RenderObject.cpp" />
     <ClCompile Include="RenderVisitor.cpp" />
     <ClCompile Include="Vulkan\CommandBuffer.cpp" />
@@ -155,8 +156,10 @@
     <ClCompile Include="Vulkan\ValidationLayersInfo.h" />
     <ClCompile Include="VulkanTest.cpp" />
     <ClCompile Include="Vulkan\VulkanAuxiliary.cpp" />
+    <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vulkan\ImageHelper.h" />
     <ClInclude Include="Math\Matrix4.hpp" />
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
@@ -165,7 +168,7 @@
     <ClInclude Include="VulkanContext.h" />
     <ClInclude Include="Primitives\RenderObject.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="Utils\GLTFReader.hpp" />
+    <ClInclude Include="Utils\GLTFReader.h" />
     <ClInclude Include="Utils\ObjReader.hpp" />
     <ClInclude Include="Utils\tiny_gltf\json.hpp" />
     <ClInclude Include="Utils\tiny_gltf\stb_image.h" />

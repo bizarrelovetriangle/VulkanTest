@@ -1,4 +1,7 @@
+#include <memory>
 #include "VulkanContext.h"
+#include "Utils/GLTFReader.h"
+#include "Primitives/RenderObject.h"
 
 class Scene
 {

@@ -11,7 +11,7 @@ public:
 	struct QueueFamily {
 		std::set<vk::QueueFlagBits> flags;
 		size_t count;
-		size_t index;
+		uint32_t index;
 		bool presentSupport;
 	};
 

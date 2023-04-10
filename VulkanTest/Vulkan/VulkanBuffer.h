@@ -1,8 +1,6 @@
 #pragma once;
 #include <memory>
 
-#define VK_HEADER_VERSION 239
-#define VULKAN_HPP_NO_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
 class DeviceController;
 
@@ -19,9 +17,7 @@ public:
 	void Dispose();
 
 private:
-	vk::Buffer CreateBuffer(size_t size, vk::BufferUsageFlagBits usage);
 	uint32_t FindMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-	vk::DeviceMemory CreateBufferMemory(const vk::MemoryRequirements& memRequirements);
 
 public:
 	vk::Buffer buffer;

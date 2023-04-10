@@ -1,10 +1,12 @@
 #undef max
 #define STBI_MSC_SECURE_CRT
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tiny_gltf/tiny_gltf.h"
+#include "../Primitives/RenderObject.h"
+#include "../Math/Vector2.hpp"
+#include "../Math/Vector3.hpp"
 #include "../Math/Matrix4.hpp"
+#include <string>
+#include <optional>
 
 namespace
 {
@@ -136,7 +138,7 @@ private:
 		std::memcpy(bufferData.data(), buffer.data(), buffer.size());
 		if constexpr (std::is_convertible_v<I, O>)
 			return std::vector<O>(std::begin(bufferData), std::end(bufferData));
-		else throw std::exception("gosh");
+		throw std::exception("gosh");
 	}
 
 	template<class T>

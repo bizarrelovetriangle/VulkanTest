@@ -1,5 +1,6 @@
 #pragma once;
 #include <cmath>
+#include "Vector3.hpp"
 #include "Vector4.hpp"
 
 class Matrix4

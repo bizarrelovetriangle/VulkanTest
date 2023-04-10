@@ -40,23 +40,14 @@ void CommandBuffer::RecordCommandBuffer(int imageIndex,
 	commandBuffer.begin(beginInfo);
 
 	{
-		vk::Rect2D renderArea
-		{
-			.offset = { 0, 0 },
-			.extent = swapChain->swapChainExtent,
-		};
+		vk::Rect2D renderArea({ 0, 0 }, swapChain->swapChainExtent);
 
 		vk::ClearColorValue clearColorValue(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f});
-		vk::ClearValue clearColor{ .color = clearColorValue };
+		vk::ClearValue clearColor(clearColorValue);
 
-		vk::RenderPassBeginInfo renderPassInfo
-		{
-			.renderPass = renderPass->renderPass,
-			.framebuffer = swapChain->swapChainFramebuffers[imageIndex],
-			.renderArea = renderArea,
-			.clearValueCount = 1,
-			.pClearValues = &clearColor
-		};
+		vk::RenderPassBeginInfo renderPassInfo(
+			renderPass->renderPass, swapChain->swapChainFramebuffers[imageIndex],
+			renderArea, clearColor);
 
 		commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
@@ -82,23 +73,14 @@ void CommandBuffer::CreateCommandPool()
 	auto graphicQueueFamily = std::find_if(std::begin(queueFamilies->queueFamilies), std::end(queueFamilies->queueFamilies),
 		[](auto& family) { return family.flags.contains(vk::QueueFlagBits::eGraphics) && family.presentSupport; });
 
-	vk::CommandPoolCreateInfo poolInfo
-	{
-		.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-		.queueFamilyIndex = (uint32_t) graphicQueueFamily->index
-	};
+	vk::CommandPoolCreateInfo poolInfo(
+		vk::CommandPoolCreateFlagBits::eResetCommandBuffer, graphicQueueFamily->index);
 
 	commandPool = device.createCommandPool(poolInfo);
 }
 
 void CommandBuffer::CreateCommandBuffer()
 {
-	vk::CommandBufferAllocateInfo allocInfo
-	{
-		.commandPool = commandPool,
-		.level = vk::CommandBufferLevel::ePrimary,
-		.commandBufferCount = 1
-	};
-
+	vk::CommandBufferAllocateInfo allocInfo(commandPool, vk::CommandBufferLevel::ePrimary, 1);
 	commandBuffer = device.allocateCommandBuffers(allocInfo).front();
 }

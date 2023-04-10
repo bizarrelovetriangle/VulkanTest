@@ -1,17 +1,19 @@
 #pragma once
+#include "SwapChain.h"
 
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include "..\VulkanContext.h"
 
-#include "SwapChain.h"
 #include "DeviceController.h"
+#include "ImageHelper.h"
 #include <algorithm>
 
-SwapChain::SwapChain(std::shared_ptr<DeviceController> deviceController, vk::SurfaceKHR& surface, GLFWwindow* window)
-    : deviceController(deviceController), surface(surface), window(window)
+SwapChain::SwapChain(VulkanContext& vulkanContext)
+    : vulkanContext(vulkanContext)
 {
     createSwapChain();
     createImageViews();
@@ -20,14 +22,14 @@ SwapChain::SwapChain(std::shared_ptr<DeviceController> deviceController, vk::Sur
 void SwapChain::Dispose()
 {
     for (auto& imageView : swapChainImageViews) {
-        deviceController->device.destroyImageView(imageView);
+        vulkanContext.deviceController->device.destroyImageView(imageView);
     }
 
     for (auto& swapChainFramebuffer : swapChainFramebuffers) {
-        deviceController->device.destroyFramebuffer(swapChainFramebuffer);
+        vulkanContext.deviceController->device.destroyFramebuffer(swapChainFramebuffer);
     }
 
-    deviceController->device.destroySwapchainKHR(swapChain);
+    vulkanContext.deviceController->device.destroySwapchainKHR(swapChain);
 }
 
 void SwapChain::CreateFramebuffers(vk::RenderPass& renderPass) {
@@ -38,22 +40,16 @@ void SwapChain::CreateFramebuffers(vk::RenderPass& renderPass) {
             swapChainImageViews[i]
         };
 
-        vk::FramebufferCreateInfo framebufferInfo
-        {
-            .renderPass = renderPass,
-            .attachmentCount = 1,
-            .pAttachments = attachments,
-            .width = swapChainExtent.width,
-            .height = swapChainExtent.height,
-            .layers = 1
-        };
+        vk::FramebufferCreateInfo framebufferInfo(
+            {}, renderPass, attachments,
+            swapChainExtent.width, swapChainExtent.height, 1);
 
-        swapChainFramebuffers[i] = deviceController->device.createFramebuffer(framebufferInfo);
+        swapChainFramebuffers[i] = vulkanContext.deviceController->device.createFramebuffer(framebufferInfo);
     }
 }
 
 void SwapChain::createSwapChain() {
-    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(deviceController->physicalDevice);
+    SwapChainSupportDetails swapChainSupport = querySwapChainSupport(vulkanContext.deviceController->physicalDevice);
 
     vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -65,64 +61,43 @@ void SwapChain::createSwapChain() {
         imageCount = swapChainSupport.capabilities.maxImageCount;
     }
 
-    vk::SwapchainCreateInfoKHR createInfo
-    {
-        .surface = surface,
-        .minImageCount = imageCount,
-        .imageFormat = surfaceFormat.format,
-        .imageColorSpace = surfaceFormat.colorSpace,
-        .imageExtent = extent,
-        .imageArrayLayers = 1,
-        .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+    vk::SwapchainCreateInfoKHR createInfo(
+        {}, vulkanContext.surface, imageCount, surfaceFormat.format, surfaceFormat.colorSpace,
+        extent, 1, vk::ImageUsageFlagBits::eColorAttachment,
+        vk::SharingMode::eExclusive, {},
+        swapChainSupport.capabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, presentMode,
+        VK_TRUE, VK_NULL_HANDLE);
 
-        .imageSharingMode = vk::SharingMode::eExclusive,
-        .queueFamilyIndexCount = 0, // Optional
-        .pQueueFamilyIndices = nullptr, // Optional
-        .preTransform = swapChainSupport.capabilities.currentTransform,
-        .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-        .presentMode = presentMode,
-        .clipped = VK_TRUE,
-        .oldSwapchain = VK_NULL_HANDLE
-    };
-
-    swapChain = deviceController->device.createSwapchainKHR(createInfo);
-    swapChainImages = deviceController->device.getSwapchainImagesKHR(swapChain);
+    swapChain = vulkanContext.deviceController->device.createSwapchainKHR(createInfo);
+    swapChainImages = vulkanContext.deviceController->device.getSwapchainImagesKHR(swapChain);
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
+
+    {
+        vk::Extent3D extent3D(extent.width, extent.height, 1);
+        vulkanContext.imageHelper->CreateImage(
+            extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal,
+            depthImage, depthMemory);
+    }
 }
 
 void SwapChain::createImageViews() {
     swapChainImageViews.resize(swapChainImages.size());
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {
-        vk::ComponentMapping components
-        {
-            .r = vk::ComponentSwizzle::eIdentity,
-            .g = vk::ComponentSwizzle::eIdentity,
-            .b = vk::ComponentSwizzle::eIdentity,
-            .a = vk::ComponentSwizzle::eIdentity,
-        };
+        vk::ComponentMapping components(
+            vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity,
+            vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity);
 
-        vk::ImageSubresourceRange subresourceRange
-        {
-            .aspectMask = vk::ImageAspectFlagBits::eColor,
-            .baseMipLevel = 0,
-            .levelCount = 1,
-            .baseArrayLayer = 0,
-            .layerCount = 1
-        };
+        vk::ImageSubresourceRange subresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
 
-        vk::ImageViewCreateInfo createInfo
-        {
-            .image = swapChainImages[i],
-            .viewType = vk::ImageViewType::e2D,
-            .format = swapChainImageFormat,
-            .components = components,
-            .subresourceRange = subresourceRange
-        };
+        vk::ImageViewCreateInfo createInfo(
+            {},
+            swapChainImages[i], vk::ImageViewType::e2D, swapChainImageFormat,
+            components, subresourceRange);
 
-        swapChainImageViews[i] = deviceController->device.createImageView(createInfo);
+        swapChainImageViews[i] = vulkanContext.deviceController->device.createImageView(createInfo);
     }
 }
 
@@ -130,9 +105,9 @@ SwapChain::SwapChainSupportDetails SwapChain::querySwapChainSupport(const vk::Ph
 {
     SwapChainSupportDetails details
     {
-        .capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface),
-        .formats = physicalDevice.getSurfaceFormatsKHR(surface),
-        .presentModes = physicalDevice.getSurfacePresentModesKHR(surface)
+        .capabilities = physicalDevice.getSurfaceCapabilitiesKHR(vulkanContext.surface),
+        .formats = physicalDevice.getSurfaceFormatsKHR(vulkanContext.surface),
+        .presentModes = physicalDevice.getSurfacePresentModesKHR(vulkanContext.surface)
     };
     return details;
 }
@@ -157,7 +132,7 @@ vk::Extent2D SwapChain::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capab
     }
 
     int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(vulkanContext.window, &width, &height);
 
     vk::Extent2D actualExtent = {
         static_cast<uint32_t>(width),

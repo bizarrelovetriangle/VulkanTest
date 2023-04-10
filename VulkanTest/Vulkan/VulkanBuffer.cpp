@@ -10,9 +10,20 @@ VulkanBuffer<T>::VulkanBuffer(
 	: deviceController(deviceController)
 {
 	size_t size = sizeof(T) * data.size();
-	buffer = CreateBuffer(size, usage);
+
+	vk::BufferCreateInfo bufferInfo({}, size, usage, vk::SharingMode::eExclusive);
+	buffer = deviceController->device.createBuffer(bufferInfo);
+
 	auto memRequirements = deviceController->device.getBufferMemoryRequirements(buffer);
-	bufferMemory = CreateBufferMemory(memRequirements);
+	
+	vk::MemoryAllocateInfo allocInfo(
+		memRequirements.size,
+		FindMemoryType(memRequirements.memoryTypeBits,
+			vk::MemoryPropertyFlagBits::eDeviceLocal |
+			vk::MemoryPropertyFlagBits::eHostVisible |
+			vk::MemoryPropertyFlagBits::eHostCoherent));
+	bufferMemory = deviceController->device.allocateMemory(allocInfo);;
+
 	deviceController->device.bindBufferMemory(buffer, bufferMemory, 0);
 
 	count = data.size();
@@ -26,34 +37,6 @@ void VulkanBuffer<T>::FlushData(const std::vector<T>& data)
 	auto dataPointer = deviceController->device.mapMemory(bufferMemory, 0, size);
 	memcpy(dataPointer, data.data(), size);
 	deviceController->device.unmapMemory(bufferMemory);
-}
-
-template <class T>
-vk::Buffer VulkanBuffer<T>::CreateBuffer(size_t size, vk::BufferUsageFlagBits usage)
-{
-	vk::BufferCreateInfo bufferInfo
-	{
-		.size = size,
-		.usage = usage,
-		.sharingMode = vk::SharingMode::eExclusive
-	};
-
-	return deviceController->device.createBuffer(bufferInfo);
-}
-
-template <class T>
-vk::DeviceMemory VulkanBuffer<T>::CreateBufferMemory(const vk::MemoryRequirements& memRequirements)
-{
-	vk::MemoryAllocateInfo allocInfo
-	{
-		.allocationSize = memRequirements.size,
-		.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits,
-			vk::MemoryPropertyFlagBits::eDeviceLocal |
-			vk::MemoryPropertyFlagBits::eHostVisible |
-			vk::MemoryPropertyFlagBits::eHostCoherent)
-	};
-	
-	return deviceController->device.allocateMemory(allocInfo);;
 }
 
 template <class T>

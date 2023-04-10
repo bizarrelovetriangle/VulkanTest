@@ -6,17 +6,15 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-#define VK_HEADER_VERSION 239
-#define VULKAN_HPP_NO_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
 #include <vector>
 #include <memory>
 
-class DeviceController;
+class VulkanContext;
 
 class SwapChain {
 public:
-    SwapChain(std::shared_ptr<DeviceController> deviceController, vk::SurfaceKHR& surface, GLFWwindow* window);
+    SwapChain(VulkanContext& vulkanContext);
     void Dispose();
     void CreateFramebuffers(vk::RenderPass& renderPass);
 
@@ -43,8 +41,10 @@ public:
     std::vector<vk::ImageView> swapChainImageViews;
     std::vector<vk::Framebuffer> swapChainFramebuffers;
 
+    vk::Image depthImage;
+    vk::ImageView depthView;
+    vk::DeviceMemory depthMemory;
+
 private:
-    std::shared_ptr<DeviceController> deviceController;
-    vk::SurfaceKHR& surface;
-    GLFWwindow* window;
+    VulkanContext& vulkanContext;
 };
