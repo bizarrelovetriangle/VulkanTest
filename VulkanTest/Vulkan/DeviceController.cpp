@@ -56,8 +56,8 @@ void DeviceController::pickPhysicalDevice() {
     for (const auto& device : physicalDevices) {
         auto deviceProperties = device.getProperties();
 
-        //auto deviceType = vk::PhysicalDeviceType::eIntegratedGpu;
-        auto deviceType = vk::PhysicalDeviceType::eDiscreteGpu;
+        auto deviceType = vk::PhysicalDeviceType::eIntegratedGpu;
+        //auto deviceType = vk::PhysicalDeviceType::eDiscreteGpu;
 
         if (deviceProperties.deviceType == deviceType) {
             physicalDevice = device;

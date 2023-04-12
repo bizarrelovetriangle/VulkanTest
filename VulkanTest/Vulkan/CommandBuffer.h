@@ -15,8 +15,6 @@ class Pipeline;
 class SwapChain;
 class RenderPass;
 class VertexData;
-template <class T>
-class VulkanBuffer;
 class RenderObjectVertexData;
 class RenderObject;
 

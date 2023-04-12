@@ -13,7 +13,6 @@
 #include "Pipeline.h"
 #include "SwapChain.h"
 #include "RenderPass.h"
-#include "VulkanBuffer.h"
 #include "VertexData.h"
 #include "../Primitives/RenderObject.h"
 #include "../Utils/ObjReader.hpp"

@@ -16,9 +16,8 @@ class Pipeline;
 class VertexData;
 class RenderObject;
 class GLFWwindow;
-class ImageHelper;
 template <class T>
-class VulkanBuffer;
+class BufferMemory;
 
 class VulkanContext
 {
@@ -38,11 +37,10 @@ public:
     std::shared_ptr<SwapChain> swapChain;
     std::shared_ptr<RenderPass> renderPass;
     std::shared_ptr<Pipeline> pipeline;
-    std::shared_ptr<ImageHelper> imageHelper;
 
 private:
-    std::shared_ptr<VulkanBuffer<uint16_t>> indexBuffer;
-    std::shared_ptr<VulkanBuffer<VertexData>> vertexBuffer;
+    std::shared_ptr<BufferMemory<uint16_t>> indexBuffer;
+    std::shared_ptr<BufferMemory<VertexData>> vertexBuffer;
 
     vk::Semaphore imageAvailableSemaphore;
     vk::Semaphore renderFinishedSemaphore;

@@ -20,18 +20,18 @@
 #include <limits>
 #include <optional>
 #include "VulkanContext.h"
-#include "vulkan/VulkanAuxiliary.h"
-#include "vulkan/DeviceController.h"
-#include "vulkan/QueueFamilies.h"
-#include "vulkan/Pipeline.h"
-#include "vulkan/SwapChain.h"
-#include "vulkan/RenderPass.h"
-#include "vulkan/CommandBuffer.h"
-#include "vulkan/VertexData.h"
-#include "vulkan/VulkanBuffer.h"
+#include "Vulkan/VulkanAuxiliary.h"
+#include "Vulkan/DeviceController.h"
+#include "Vulkan/QueueFamilies.h"
+#include "Vulkan/Pipeline.h"
+#include "Vulkan/SwapChain.h"
+#include "Vulkan/RenderPass.h"
+#include "Vulkan/CommandBuffer.h"
+#include "Vulkan/VertexData.h"
+#include "Vulkan/Memory/BufferMemory.h"
 #include "Utils/ObjReader.hpp"
 #include "Utils/GLTFReader.h"
-#include "Vulkan/ImageHelper.h"
+#include "Vulkan/Memory/ImageMemory.h"
 
 void VulkanContext::Init(GLFWwindow* window)
 {
@@ -56,7 +56,6 @@ void VulkanContext::Init(GLFWwindow* window)
     pipeline = std::make_shared<Pipeline>(deviceController->device, renderPass->renderPass, swapChain);
     commandBuffer = std::make_shared<CommandBuffer>(deviceController->device,
         queueFamilies, pipeline, swapChain, renderPass);
-    imageHelper = std::make_shared<ImageHelper>(*this);
 
     ObjReader objReader("E:/Projects/VulkanTest/VulkanTest/Resources/Objects/SphereWithPlane/untitled.obj");
 
@@ -68,8 +67,8 @@ void VulkanContext::Init(GLFWwindow* window)
             {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
         };
 
-        vertexBuffer = std::make_shared<VulkanBuffer<VertexData>>(
-            deviceController, vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
+        vertexBuffer = std::make_shared<BufferMemory<VertexData>>(
+            *this, vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
     }
 
     {
@@ -77,8 +76,8 @@ void VulkanContext::Init(GLFWwindow* window)
             0, 1, 2
         };
 
-        indexBuffer = std::make_shared<VulkanBuffer<uint16_t>>(
-            deviceController, indices, vk::BufferUsageFlagBits::eIndexBuffer);
+        indexBuffer = std::make_shared<BufferMemory<uint16_t>>(
+            *this, indices, vk::BufferUsageFlagBits::eIndexBuffer);
     }
 
 

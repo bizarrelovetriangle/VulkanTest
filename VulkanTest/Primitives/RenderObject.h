@@ -2,7 +2,7 @@
 #include "../Math/Vector3.hpp"
 #include "../Math/Vector2.hpp"
 #include "../Math/Matrix4.hpp"
-#include "../Vulkan/VulkanBuffer.h"
+#include "../Vulkan/Memory/BufferMemory.h"
 
 #undef VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 #include <vulkan/vulkan.hpp>
@@ -47,6 +47,6 @@ public:
 	std::string name;
 	Matrix4 model;
 	std::vector<RenderObjectVertexData> vertexData;
-	std::unique_ptr<VulkanBuffer<RenderObjectVertexData>> vertexBuffer;
+	std::unique_ptr<BufferMemory<RenderObjectVertexData>> vertexBuffer;
 	virtual void Accept(RenderVisitor& renderVisitor) const;
 };

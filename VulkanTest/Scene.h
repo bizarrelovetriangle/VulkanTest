@@ -20,8 +20,8 @@ public:
 
 		for (auto& renderObject : renderObjects)
 		{
-			renderObject->vertexBuffer = std::make_unique<VulkanBuffer<RenderObjectVertexData>>(
-				vulkanContext.deviceController, renderObject->vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
+			renderObject->vertexBuffer = std::make_unique<BufferMemory<RenderObjectVertexData>>(
+				vulkanContext, renderObject->vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
 		}
 	}
 

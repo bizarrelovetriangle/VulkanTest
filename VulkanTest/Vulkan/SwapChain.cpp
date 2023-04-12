@@ -9,7 +9,7 @@
 #include "..\VulkanContext.h"
 
 #include "DeviceController.h"
-#include "ImageHelper.h"
+#include "Memory/ImageMemory.h"
 #include <algorithm>
 
 SwapChain::SwapChain(VulkanContext& vulkanContext)
@@ -76,9 +76,8 @@ void SwapChain::createSwapChain() {
 
     {
         vk::Extent3D extent3D(extent.width, extent.height, 1);
-        vulkanContext.imageHelper->CreateImage(
-            extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::MemoryPropertyFlagBits::eDeviceLocal,
-            depthImage, depthMemory);
+        ImageMemory image(vulkanContext,
+            extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment);
     }
 }
 

@@ -143,12 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Vulkan\ImageHelper.cpp" />
+    <ClCompile Include="Vulkan\Memory\DeviceMemory.cpp" />
+    <ClCompile Include="Vulkan\Memory\ImageMemory.cpp" />
     <ClCompile Include="Primitives\RenderObject.cpp" />
     <ClCompile Include="RenderVisitor.cpp" />
     <ClCompile Include="Vulkan\CommandBuffer.cpp" />
     <ClCompile Include="Vulkan\DeviceController.cpp" />
-    <ClCompile Include="Vulkan\VulkanBuffer.cpp" />
+    <ClCompile Include="Vulkan\Memory\BufferMemory.cpp" />
     <ClCompile Include="Vulkan\Pipeline.cpp" />
     <ClCompile Include="Vulkan\QueueFamilies.cpp" />
     <ClCompile Include="Vulkan\RenderPass.cpp" />
@@ -159,7 +160,8 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vulkan\ImageHelper.h" />
+    <ClInclude Include="Vulkan\Memory\DeviceMemory.h" />
+    <ClInclude Include="Vulkan\Memory\ImageMemory.h" />
     <ClInclude Include="Math\Matrix4.hpp" />
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
@@ -177,7 +179,7 @@
     <ClInclude Include="Vulkan\CommandBuffer.h" />
     <ClInclude Include="Vulkan\DeviceController.h" />
     <ClInclude Include="Vulkan\VertexData.h" />
-    <ClInclude Include="Vulkan\VulkanBuffer.h" />
+    <ClInclude Include="Vulkan\Memory\BufferMemory.h" />
     <ClInclude Include="Vulkan\Pipeline.h" />
     <ClInclude Include="Vulkan\QueueFamilies.h" />
     <ClInclude Include="Vulkan\RenderPass.h" />

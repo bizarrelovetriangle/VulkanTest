@@ -42,7 +42,7 @@
     <ClCompile Include="Vulkan\VulkanAuxiliary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\VulkanBuffer.cpp">
+    <ClCompile Include="Vulkan\Memory\BufferMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderVisitor.cpp">
@@ -51,10 +51,13 @@
     <ClCompile Include="Primitives\RenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\ImageHelper.cpp">
+    <ClCompile Include="Vulkan\Memory\ImageMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VulkanContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vulkan\Memory\DeviceMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,7 +83,7 @@
     <ClInclude Include="Vulkan\CommandBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\VulkanBuffer.h">
+    <ClInclude Include="Vulkan\Memory\BufferMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\VertexData.h">
@@ -128,7 +131,10 @@
     <ClInclude Include="RenderVisitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\ImageHelper.h">
+    <ClInclude Include="Vulkan\Memory\ImageMemory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\Memory\DeviceMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
