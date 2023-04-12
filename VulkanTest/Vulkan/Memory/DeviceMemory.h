@@ -4,17 +4,20 @@
 
 class VulkanContext;
 
+enum class MemoryType { Universal, DeviceLocal, HostLocal };
+
 class DeviceMemory
 {
 public:
-	DeviceMemory(VulkanContext& vulkanContext);
+	DeviceMemory(VulkanContext& vulkanContext, MemoryType memoryType);
 	void AllocateMemory(const vk::MemoryRequirements& memoryRequirements);
-	template <class T>
-	void FlushData(const std::vector<T>& data);
+	void FlushData(std::span<std::byte> data);
+	virtual void StagingFlush(std::span<std::byte> data) = 0;
 	void Dispose();
 
 protected:
-	uint32_t FindMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+	uint32_t FindMemoryTypeIndex(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+	MemoryType memoryType;
 
 protected:
 	VulkanContext& vulkanContext;

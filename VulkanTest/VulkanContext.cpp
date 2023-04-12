@@ -43,12 +43,13 @@ void VulkanContext::Init(GLFWwindow* window)
     surface = vk::SurfaceKHR(surfacePtr);
     queueFamilies = std::make_shared<QueueFamilies>(deviceController->physicalDevice, surface);
 
-    auto graphicQueueFamily = std::find_if(std::begin(queueFamilies->queueFamilies), std::end(queueFamilies->queueFamilies),
-        [](auto& family) { return family.flags.contains(vk::QueueFlagBits::eGraphics) && family.presentSupport; });
-    deviceController->createDevice(*queueFamilies, { graphicQueueFamily->index });
+    std::vector<uint32_t> queueFamilyIndexes =
+        { queueFamilies->graphicQueueFamilyIndex, queueFamilies->presentQueueFamilyIndex, queueFamilies->transferQueueFamilyIndex };
+    deviceController->createDevice(*queueFamilies, queueFamilyIndexes);
 
-    queueFamilies->graphicsQueue = deviceController->device.getQueue(graphicQueueFamily->index, 0);
-    queueFamilies->presentQueue = deviceController->device.getQueue(graphicQueueFamily->index, 0);
+    queueFamilies->graphicsQueue = deviceController->device.getQueue(queueFamilies->graphicQueueFamilyIndex, 0);
+    queueFamilies->presentQueue = deviceController->device.getQueue(queueFamilies->presentQueueFamilyIndex, 0);
+    queueFamilies->transferQueue = deviceController->device.getQueue(queueFamilies->transferQueueFamilyIndex, 0);
 
     swapChain = std::make_shared<SwapChain>(*this);
     renderPass = std::make_shared<RenderPass>(deviceController->device, swapChain->swapChainImageFormat);
@@ -56,30 +57,6 @@ void VulkanContext::Init(GLFWwindow* window)
     pipeline = std::make_shared<Pipeline>(deviceController->device, renderPass->renderPass, swapChain);
     commandBuffer = std::make_shared<CommandBuffer>(deviceController->device,
         queueFamilies, pipeline, swapChain, renderPass);
-
-    ObjReader objReader("E:/Projects/VulkanTest/VulkanTest/Resources/Objects/SphereWithPlane/untitled.obj");
-
-
-    {
-        const std::vector<VertexData> vertexData = {
-            {{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-        };
-
-        vertexBuffer = std::make_shared<BufferMemory<VertexData>>(
-            *this, vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
-    }
-
-    {
-        const std::vector<uint16_t> indices = {
-            0, 1, 2
-        };
-
-        indexBuffer = std::make_shared<BufferMemory<uint16_t>>(
-            *this, indices, vk::BufferUsageFlagBits::eIndexBuffer);
-    }
-
 
     vk::SemaphoreCreateInfo semaphoreInfo{};
     imageAvailableSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
@@ -122,8 +99,6 @@ void VulkanContext::Dispose()
     commandBuffer->Dispose();
     pipeline->Dispose();
     renderPass->Dispose();
-    indexBuffer->Dispose();
-    vertexBuffer->Dispose();
 
     vkDestroySemaphore(deviceController->device, imageAvailableSemaphore, nullptr);
     vkDestroySemaphore(deviceController->device, renderFinishedSemaphore, nullptr);

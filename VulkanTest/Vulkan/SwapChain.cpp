@@ -78,6 +78,7 @@ void SwapChain::createSwapChain() {
         vk::Extent3D extent3D(extent.width, extent.height, 1);
         ImageMemory image(vulkanContext,
             extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment);
+        image.Dispose();
     }
 }
 

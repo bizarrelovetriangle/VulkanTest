@@ -25,7 +25,7 @@ public:
     vk::SurfaceKHR surface;
 
 private:
-    ValidationLayersInfo& validationLayersInfo;
+    ValidationLayersInfo validationLayersInfo;
 
     struct DebugDispatch {
         int getVkHeaderVersion() const { return 239; };

@@ -19,14 +19,14 @@ DeviceController::DeviceController(vk::Instance& instance, ValidationLayersInfo&
     pickPhysicalDevice();
 }
 
-void DeviceController::createDevice(QueueFamilies& queueFamilies, std::initializer_list<size_t> queueFamilyIndexes)
+void DeviceController::createDevice(QueueFamilies& queueFamilies, std::vector<uint32_t> queueFamilyIndexes)
 {
     std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+    queueFamilyIndexes.erase(std::unique(std::begin(queueFamilyIndexes), std::end(queueFamilyIndexes)), std::end(queueFamilyIndexes));
+
     for (auto index : queueFamilyIndexes) {
         float queuePriority[] = { 1.0f };
-
-        vk::DeviceQueueCreateInfo queueCreateInfo({}, (uint32_t)index, queuePriority);
-
+        vk::DeviceQueueCreateInfo queueCreateInfo({}, index, queuePriority);
         queueCreateInfos.push_back(queueCreateInfo);
     }
 

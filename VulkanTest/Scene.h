@@ -21,7 +21,7 @@ public:
 		for (auto& renderObject : renderObjects)
 		{
 			renderObject->vertexBuffer = std::make_unique<BufferMemory<RenderObjectVertexData>>(
-				vulkanContext, renderObject->vertexData, vk::BufferUsageFlagBits::eVertexBuffer);
+				vulkanContext, renderObject->vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 		}
 	}
 

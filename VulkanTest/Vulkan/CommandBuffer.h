@@ -35,9 +35,9 @@ private:
 
 public:
 	vk::CommandBuffer commandBuffer;
+	vk::CommandPool commandPool;
 
 private:
-	vk::CommandPool commandPool;
 	const vk::Device& device;
 	std::shared_ptr<QueueFamilies> queueFamilies;
 	std::shared_ptr<Pipeline> pipeline;

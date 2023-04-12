@@ -1,35 +1,43 @@
 #include "DeviceMemory.h"
+#include "BufferMemory.h"
 #include "../DeviceController.h"
 #include "../VertexData.h"
 #include "../../Primitives/RenderObject.h"
 #include "../../VulkanContext.h"
 
-DeviceMemory::DeviceMemory(VulkanContext& vulkanContext)
-	: vulkanContext(vulkanContext)
+DeviceMemory::DeviceMemory(VulkanContext& vulkanContext, MemoryType memoryType)
+	: vulkanContext(vulkanContext), memoryType(memoryType)
 {
 }
 
 void DeviceMemory::AllocateMemory(const vk::MemoryRequirements& memoryRequirements)
 {
-	auto memoryType = FindMemoryType(memoryRequirements.memoryTypeBits,
-		vk::MemoryPropertyFlagBits::eDeviceLocal |
-		vk::MemoryPropertyFlagBits::eHostVisible |
-		vk::MemoryPropertyFlagBits::eHostCoherent);
+	vk::MemoryPropertyFlags memoryProperties{};
+	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
+		memoryProperties |= vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent;
+	if (memoryType == MemoryType::Universal || memoryType == MemoryType::DeviceLocal)
+		memoryProperties |= vk::MemoryPropertyFlagBits::eDeviceLocal;
 
-	vk::MemoryAllocateInfo allocInfo(memoryRequirements.size, memoryType);
+	auto memoryTypeIndex = FindMemoryTypeIndex(memoryRequirements.memoryTypeBits, memoryProperties);
+	vk::MemoryAllocateInfo allocInfo(memoryRequirements.size, memoryTypeIndex);
 	memory = vulkanContext.deviceController->device.allocateMemory(allocInfo);;
 }
 
-template <class T>
-void DeviceMemory::FlushData(const std::vector<T>& data)
+void DeviceMemory::FlushData(std::span<std::byte> data)
 {
-	size_t size = sizeof(T) * data.size();
-	auto dataPointer = vulkanContext.deviceController->device.mapMemory(memory, 0, size);
-	memcpy(dataPointer, data.data(), size);
-	vulkanContext.deviceController->device.unmapMemory(memory);
+	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
+	{
+		auto dataPointer = vulkanContext.deviceController->device.mapMemory(memory, 0, data.size());
+		memcpy(dataPointer, data.data(), data.size());
+		vulkanContext.deviceController->device.unmapMemory(memory);
+	}
+	else
+	{
+		StagingFlush(data);
+	}
 }
 
-uint32_t DeviceMemory::FindMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
+uint32_t DeviceMemory::FindMemoryTypeIndex(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {
 	auto memProperties = vulkanContext.deviceController->physicalDevice.getMemoryProperties();
 
@@ -46,8 +54,3 @@ void DeviceMemory::Dispose()
 {
 	vulkanContext.deviceController->device.freeMemory(memory);
 }
-
-template void DeviceMemory::FlushData(const std::vector<RenderObjectVertexData>& data);
-template void DeviceMemory::FlushData(const std::vector<VertexData>& data);
-template void DeviceMemory::FlushData(const std::vector<uint16_t>& data);
-

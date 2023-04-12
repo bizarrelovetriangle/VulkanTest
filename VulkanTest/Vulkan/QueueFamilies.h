@@ -16,8 +16,13 @@ public:
 	};
 
 public:
+    uint32_t graphicQueueFamilyIndex;
+    uint32_t presentQueueFamilyIndex;
+    uint32_t transferQueueFamilyIndex;
+
 	vk::Queue graphicsQueue;
-	vk::Queue presentQueue;
+    vk::Queue presentQueue;
+    vk::Queue transferQueue;
     std::vector<QueueFamily> queueFamilies;
 
 private:

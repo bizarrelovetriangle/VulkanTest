@@ -39,9 +39,6 @@ public:
     std::shared_ptr<Pipeline> pipeline;
 
 private:
-    std::shared_ptr<BufferMemory<uint16_t>> indexBuffer;
-    std::shared_ptr<BufferMemory<VertexData>> vertexBuffer;
-
     vk::Semaphore imageAvailableSemaphore;
     vk::Semaphore renderFinishedSemaphore;
     vk::Fence inFlightFence;

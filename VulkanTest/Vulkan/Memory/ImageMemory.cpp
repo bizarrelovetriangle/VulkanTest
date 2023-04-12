@@ -5,7 +5,7 @@
 
 ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 	vk::Extent3D extend, vk::Format format, vk::ImageUsageFlags usage)
-	: DeviceMemory(vulkanContext)
+	: DeviceMemory(vulkanContext, MemoryType::DeviceLocal)
 {
 	auto& device = vulkanContext.deviceController->device;
 
@@ -18,6 +18,10 @@ ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 	auto memoryRequirements = device.getImageMemoryRequirements(image);
 	AllocateMemory(memoryRequirements);
 	device.bindImageMemory(image, memory, 0);
+}
+
+void ImageMemory::StagingFlush(std::span<std::byte>)
+{
 }
 
 void ImageMemory::Dispose()
