@@ -3,11 +3,14 @@
 #include "VulkanContext.h"
 #include "Utils/GLTFReader.h"
 #include "Primitives/RenderObject.h"
+#include "Vulkan/Memory/ImageMemory.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#undef LoadImage;
+
 
 class Scene
 {
@@ -18,6 +21,18 @@ public:
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
+
+		{
+			auto imageInfo = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
+
+			ImageMemory image(vulkanContext,
+				imageInfo.first, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled,
+				MemoryType::HostLocal);
+
+			image.FlushData(imageInfo.second);
+
+			image.Dispose();
+		}
 
 		//GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
 		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");

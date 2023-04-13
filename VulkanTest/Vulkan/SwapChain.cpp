@@ -9,6 +9,8 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
+#undef LoadImage;
+
 SwapChain::SwapChain(VulkanContext& vulkanContext)
     : vulkanContext(vulkanContext)
 {
@@ -76,14 +78,6 @@ void SwapChain::createSwapChain() {
         //ImageMemory image(vulkanContext,
         //    extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment,
         //    MemoryType::DeviceLocal);
-
-        vk::Extent3D extent3D(extent.width, extent.height, 1);
-        ImageMemory image(vulkanContext,
-            extent3D, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled,
-            MemoryType::HostLocal);
-
-
-        image.Dispose();
     }
 }
 
@@ -91,15 +85,10 @@ void SwapChain::createImageViews() {
     swapChainImageViews.resize(swapChainImages.size());
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {
-        vk::ComponentMapping components(
-            vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity,
-            vk::ComponentSwizzle::eIdentity, vk::ComponentSwizzle::eIdentity);
-
+        vk::ComponentMapping components{};
         vk::ImageSubresourceRange subresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
-
         vk::ImageViewCreateInfo createInfo(
-            {},
-            swapChainImages[i], vk::ImageViewType::e2D, swapChainImageFormat,
+            {}, swapChainImages[i], vk::ImageViewType::e2D, swapChainImageFormat,
             components, subresourceRange);
 
         swapChainImageViews[i] = vulkanContext.deviceController->device.createImageView(createInfo);
