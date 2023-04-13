@@ -1,8 +1,5 @@
 #include "DeviceMemory.h"
-#include "BufferMemory.h"
 #include "../DeviceController.h"
-#include "../VertexData.h"
-#include "../../Primitives/RenderObject.h"
 #include "../../VulkanContext.h"
 
 DeviceMemory::DeviceMemory(VulkanContext& vulkanContext, MemoryType memoryType)

@@ -1,6 +1,6 @@
 #undef max
 #define STBI_MSC_SECURE_CRT
-#include "tiny_gltf/tiny_gltf.h"
+#include "../Dependencies/tiny_gltf/tiny_gltf.h"
 #include "../Primitives/RenderObject.h"
 #include "../Math/Vector2.hpp"
 #include "../Math/Vector3.hpp"

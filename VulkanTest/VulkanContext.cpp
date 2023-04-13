@@ -3,11 +3,6 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #define NTDDI_VERSION NTDDI_WIN10_RS1 // work around linker failure MapViewOfFileNuma2@36
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -27,11 +22,15 @@
 #include "Vulkan/SwapChain.h"
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/CommandBuffer.h"
-#include "Vulkan/VertexData.h"
 #include "Vulkan/Memory/BufferMemory.h"
 #include "Utils/ObjReader.hpp"
 #include "Utils/GLTFReader.h"
 #include "Vulkan/Memory/ImageMemory.h"
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 void VulkanContext::Init(GLFWwindow* window)
 {

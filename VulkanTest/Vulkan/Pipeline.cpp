@@ -1,16 +1,9 @@
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
 #include "Pipeline.h"
 #include <vector>
 #include <string>
 #include <fstream>
 #include "SwapChain.h"
-#include "VertexData.h"
-#include "../Utils/ObjReader.hpp"
+#include "../Primitives/RenderObject.h"
 
 Pipeline::Pipeline(const vk::Device& device, const vk::RenderPass& renderPass, std::shared_ptr<SwapChain> swapChain)
 	: device(device), renderPass(renderPass), swapChain(swapChain)

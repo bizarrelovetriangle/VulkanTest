@@ -160,6 +160,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Dependencies\stb_image.h" />
     <ClInclude Include="Vulkan\Memory\DeviceMemory.h" />
     <ClInclude Include="Vulkan\Memory\ImageMemory.h" />
     <ClInclude Include="Math\Matrix4.hpp" />
@@ -172,13 +173,12 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Utils\GLTFReader.h" />
     <ClInclude Include="Utils\ObjReader.hpp" />
-    <ClInclude Include="Utils\tiny_gltf\json.hpp" />
-    <ClInclude Include="Utils\tiny_gltf\stb_image.h" />
-    <ClInclude Include="Utils\tiny_gltf\stb_image_write.h" />
-    <ClInclude Include="Utils\tiny_gltf\tiny_gltf.h" />
+    <ClInclude Include="Dependencies\tiny_gltf\json.hpp" />
+    <ClInclude Include="Dependencies\tiny_gltf\stb_image.h" />
+    <ClInclude Include="Dependencies\tiny_gltf\stb_image_write.h" />
+    <ClInclude Include="Dependencies\tiny_gltf\tiny_gltf.h" />
     <ClInclude Include="Vulkan\CommandBuffer.h" />
     <ClInclude Include="Vulkan\DeviceController.h" />
-    <ClInclude Include="Vulkan\VertexData.h" />
     <ClInclude Include="Vulkan\Memory\BufferMemory.h" />
     <ClInclude Include="Vulkan\Pipeline.h" />
     <ClInclude Include="Vulkan\QueueFamilies.h" />

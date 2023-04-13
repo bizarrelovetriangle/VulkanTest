@@ -1,5 +1,3 @@
-#pragma once
-
 #include "QueueFamilies.h"
 #include "DeviceController.h"
 #include <set>

@@ -33,9 +33,8 @@ void BufferMemory<T>::StagingFlush(std::span<std::byte> data)
 {
 	BufferMemory<std::byte> stagingBuffer(vulkanContext, data, MemoryType::HostLocal, vk::BufferUsageFlagBits::eTransferSrc);
 
-	vk::CommandBufferAllocateInfo commandBufferAllocInfo(vulkanContext.commandBuffer->commandPool,
-		vk::CommandBufferLevel::ePrimary, 1);
-
+	vk::CommandBufferAllocateInfo commandBufferAllocInfo(
+		vulkanContext.commandBuffer->commandPool, vk::CommandBufferLevel::ePrimary, 1);
 	auto commandBuffer = vulkanContext.deviceController->device.allocateCommandBuffers(commandBufferAllocInfo).front();
 
 	vk::CommandBufferBeginInfo beginInfo;

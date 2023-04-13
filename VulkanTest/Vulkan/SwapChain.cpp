@@ -1,16 +1,13 @@
-#pragma once
 #include "SwapChain.h"
+#include "..\VulkanContext.h"
+#include "DeviceController.h"
+#include "Memory/ImageMemory.h"
+#include <algorithm>
 
-#define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#include "..\VulkanContext.h"
-
-#include "DeviceController.h"
-#include "Memory/ImageMemory.h"
-#include <algorithm>
 
 SwapChain::SwapChain(VulkanContext& vulkanContext)
     : vulkanContext(vulkanContext)
@@ -75,9 +72,17 @@ void SwapChain::createSwapChain() {
     swapChainExtent = extent;
 
     {
+        //vk::Extent3D extent3D(extent.width, extent.height, 1);
+        //ImageMemory image(vulkanContext,
+        //    extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment,
+        //    MemoryType::DeviceLocal);
+
         vk::Extent3D extent3D(extent.width, extent.height, 1);
         ImageMemory image(vulkanContext,
-            extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment);
+            extent3D, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled,
+            MemoryType::HostLocal);
+
+
         image.Dispose();
     }
 }

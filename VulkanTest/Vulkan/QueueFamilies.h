@@ -1,7 +1,6 @@
 #pragma once
-
-#include "DeviceController.h"
 #include <set>
+#include <vulkan/vulkan.hpp>
 
 class QueueFamilies {
 public:

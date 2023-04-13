@@ -1,11 +1,4 @@
 #pragma once
-
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
 #include "CommandBuffer.h"
 #include "DeviceController.h"
 #include "QueueFamilies.h"
@@ -13,9 +6,7 @@
 #include "Pipeline.h"
 #include "SwapChain.h"
 #include "RenderPass.h"
-#include "VertexData.h"
 #include "../Primitives/RenderObject.h"
-#include "../Utils/ObjReader.hpp"
 #include "../RenderVisitor.h";
 
 CommandBuffer::CommandBuffer(const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
