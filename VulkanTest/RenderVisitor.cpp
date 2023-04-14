@@ -4,8 +4,8 @@
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Pipeline.h"
 
-RenderVisitor::RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline)
-	: commandBuffer(commandBuffer.commandBuffer), pipeline(pipeline)
+RenderVisitor::RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline, size_t imageIndex)
+	: commandBuffer(commandBuffer.commandBuffer), pipeline(pipeline), imageIndex(imageIndex)
 {
 }
 
@@ -48,6 +48,8 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 void RenderVisitor::BindPipeline(Pipeline& pipeline)
 {
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphicsPipeline);
+	commandBuffer.bindDescriptorSets(
+		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0, pipeline.descriptorSets[imageIndex], {});
 	auto viewport = pipeline.CreateViewport();
 	auto scissors = pipeline.CreateScissors();
 	commandBuffer.setViewport(0, 1, &viewport);

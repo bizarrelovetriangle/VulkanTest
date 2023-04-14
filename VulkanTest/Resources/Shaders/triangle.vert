@@ -5,6 +5,7 @@ layout(location = 1) in vec3 normal;
 layout(location = 2) in vec2 texturePos;
 
 layout(location = 0) out vec3 fragColor;
+layout(location = 1) out vec2 fragTexturePos;
 
 layout (push_constant) uniform constans
 {
@@ -12,7 +13,10 @@ layout (push_constant) uniform constans
     mat4x4 world;
 } Matrixes;
 
-void main() {
+void main()
+{
+    fragTexturePos = texturePos;
+
     mat4 matrix = Matrixes.world * Matrixes.model;
 
     vec3 rotated_normal = vec3(matrix * vec4(normal, 0.));

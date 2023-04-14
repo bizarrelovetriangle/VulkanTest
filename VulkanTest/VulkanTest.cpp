@@ -1,6 +1,7 @@
 #include "Scene.h"
 
-int main() {
+int main()
+{
 	Scene scene;
 	scene.Run();
 }

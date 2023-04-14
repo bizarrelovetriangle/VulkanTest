@@ -4,9 +4,12 @@
 #include <fstream>
 #include "SwapChain.h"
 #include "../Primitives/RenderObject.h"
+#include "Memory/ImageMemory.h"
+#include "../VulkanContext.h"
 
-Pipeline::Pipeline(const vk::Device& device, const vk::RenderPass& renderPass, std::shared_ptr<SwapChain> swapChain)
-	: device(device), renderPass(renderPass), swapChain(swapChain)
+Pipeline::Pipeline(VulkanContext& vulkanContext,
+	const vk::Device& device, const vk::RenderPass& renderPass, std::shared_ptr<SwapChain> swapChain)
+	: vulkanContext(vulkanContext), device(device), renderPass(renderPass), swapChain(swapChain)
 {
 	vertShaderModule = CreateShaderModule("E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/spir-v/triangle.vert.spv");
 	fragShaderModule = CreateShaderModule("E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/spir-v/triangle.frag.spv");
@@ -18,8 +21,20 @@ Pipeline::Pipeline(const vk::Device& device, const vk::RenderPass& renderPass, s
 
 	shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
+
+	{
+		auto imageInfo = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
+
+		image = std::make_unique<ImageMemory>(vulkanContext,
+			imageInfo.first, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled,
+			MemoryType::HostLocal);
+
+		image->FlushData(imageInfo.second);
+	}
+
+	CreateDescriptorSetLayout();
 	vk::PushConstantRange pushConstant(vk::ShaderStageFlagBits::eVertex, 0, sizeof(RenderObjectPushConstantRange));
-	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, {}, pushConstant);
+	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, descriptorSetLayout, pushConstant);
 	pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
 	auto binding = RenderObjectVertexData::BindingDescription();
@@ -68,11 +83,41 @@ Pipeline::Pipeline(const vk::Device& device, const vk::RenderPass& renderPass, s
 
 void Pipeline::Dispose()
 {
+	image->Dispose();
+
+	device.destroyDescriptorSetLayout(descriptorSetLayout);
+	device.destroyDescriptorPool(descriptorPool);
+
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipelineLayout(pipelineLayout);
 
 	device.destroyShaderModule(fragShaderModule);
 	device.destroyShaderModule(vertShaderModule);
+}
+
+void Pipeline::CreateDescriptorSetLayout()
+{
+	vk::DescriptorSetLayoutBinding binding(
+		0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment);
+	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, binding);
+	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
+
+	vk::DescriptorPoolSize descriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, swapChain->frameCount);
+	vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo({}, swapChain->frameCount, descriptorPoolSize);
+	descriptorPool = device.createDescriptorPool(descriptorPoolCreateInfo);
+
+	std::vector<vk::DescriptorSetLayout> layouts(swapChain->frameCount, descriptorSetLayout);
+	vk::DescriptorSetAllocateInfo descriptorSetAllocateInfo(descriptorPool, layouts);
+	descriptorSets = device.allocateDescriptorSets(descriptorSetAllocateInfo);
+
+	for (size_t i = 0; i < swapChain->frameCount; ++i)
+	{
+		vk::DescriptorImageInfo descriptorImageInfo(
+			image->sampler, image->imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
+		vk::WriteDescriptorSet writeDescriptorSet(
+			descriptorSets[i], 0, 0, vk::DescriptorType::eCombinedImageSampler, descriptorImageInfo, {}, {});
+		device.updateDescriptorSets(writeDescriptorSet, {});
+	}
 }
 
 vk::Viewport Pipeline::CreateViewport()

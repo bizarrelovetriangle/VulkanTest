@@ -23,7 +23,7 @@ void CommandBuffer::Dispose()
 	device.destroyCommandPool(commandPool);
 }
 
-void CommandBuffer::RecordCommandBuffer(int imageIndex,
+void CommandBuffer::RecordCommandBuffer(size_t imageIndex,
 	const std::vector<std::unique_ptr<RenderObject>>& renderObjects)
 {
 	vk::CommandBufferBeginInfo beginInfo;
@@ -41,7 +41,7 @@ void CommandBuffer::RecordCommandBuffer(int imageIndex,
 
 		commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
-		RenderVisitor renderVisitor(*this, *pipeline);
+		RenderVisitor renderVisitor(*this, *pipeline, imageIndex);
 
 		for (auto& renderObject : renderObjects)
 		{

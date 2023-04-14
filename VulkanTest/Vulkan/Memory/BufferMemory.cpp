@@ -1,6 +1,5 @@
 #include "BufferMemory.h"
 #include "../DeviceController.h"
-#include "../VertexData.h"
 #include "../../Primitives/RenderObject.h"
 #include "../../VulkanContext.h"
 #include "../QueueFamilies.h"
@@ -63,6 +62,5 @@ void BufferMemory<T>::Dispose()
 }
 
 template BufferMemory<RenderObjectVertexData>;
-template BufferMemory<VertexData>;
 template BufferMemory<uint16_t>;
 template BufferMemory<std::byte>;

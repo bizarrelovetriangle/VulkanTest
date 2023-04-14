@@ -42,12 +42,12 @@ public:
 
 				auto positionsId = primitive.attributes.at(Position);
 				auto nomalsId = primitive.attributes.at(Normal);
-				//auto textureCoordsId = primitive.attributes.at(TextureCoord);
+				auto textureCoordsId = primitive.attributes.at(TextureCoord);
 
 				auto indexes = ReadBuffer<uint32_t>(primitive.indices);
 				auto positions = ReadBuffer<Vector3f>(positionsId);
 				auto normals = ReadBuffer<Vector3f>(nomalsId);
-				//auto textureCoords = ReadBuffer<Vector2f>(textureCoordsId);
+				auto textureCoords = ReadBuffer<Vector2f>(textureCoordsId);
 
 				for (auto index : indexes)
 				{
@@ -55,7 +55,7 @@ public:
 					{
 						.position = positions[index],
 						.normal = normals[index],
-						//.textureCoord = textureCoords[index]
+						.textureCoord = textureCoords[index]
 					};
 
 					renderObject.vertexData.push_back(vertexData);

@@ -6,7 +6,6 @@ class QueueFamilies;
 class Pipeline;
 class SwapChain;
 class RenderPass;
-class VertexData;
 class RenderObjectVertexData;
 class RenderObject;
 
@@ -17,7 +16,7 @@ public:
 		std::shared_ptr<Pipeline> pipeline, std::shared_ptr<SwapChain> swapChain,
 		std::shared_ptr<RenderPass> renderPass);
 	void Dispose();
-	void RecordCommandBuffer(int imageIndex,
+	void RecordCommandBuffer(size_t imageIndex,
 		const std::vector<std::unique_ptr<RenderObject>>& renderObjects);
 	void Reset();
 

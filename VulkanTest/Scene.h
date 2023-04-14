@@ -22,18 +22,6 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
-		{
-			auto imageInfo = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
-
-			ImageMemory image(vulkanContext,
-				imageInfo.first, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled,
-				MemoryType::HostLocal);
-
-			image.FlushData(imageInfo.second);
-
-			image.Dispose();
-		}
-
 		//GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
 		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
 

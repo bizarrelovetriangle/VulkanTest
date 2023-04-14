@@ -53,7 +53,7 @@ void VulkanContext::Init(GLFWwindow* window)
     swapChain = std::make_shared<SwapChain>(*this);
     renderPass = std::make_shared<RenderPass>(deviceController->device, swapChain->swapChainImageFormat);
     swapChain->CreateFramebuffers(renderPass->renderPass);
-    pipeline = std::make_shared<Pipeline>(deviceController->device, renderPass->renderPass, swapChain);
+    pipeline = std::make_shared<Pipeline>(*this, deviceController->device, renderPass->renderPass, swapChain);
     commandBuffer = std::make_shared<CommandBuffer>(deviceController->device,
         queueFamilies, pipeline, swapChain, renderPass);
 

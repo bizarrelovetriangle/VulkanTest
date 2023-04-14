@@ -18,8 +18,8 @@ private:
         std::vector<vk::PresentModeKHR> presentModes;
     };
 
-    void createSwapChain();
-    void createImageViews();
+    void CreateSwapChain();
+    void CreateImageViews();
 
     SwapChainSupportDetails querySwapChainSupport(const vk::PhysicalDevice& physicalDevice);
     vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
@@ -34,10 +34,7 @@ public:
     std::vector<vk::ImageView> swapChainImageViews;
     std::vector<vk::Framebuffer> swapChainFramebuffers;
 
-    vk::Image depthImage;
-    vk::ImageView depthView;
-    vk::DeviceMemory depthMemory;
-
+    size_t frameCount = 0;
 private:
     VulkanContext& vulkanContext;
 };

@@ -12,6 +12,7 @@ public:
 		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage,
 		MemoryType memoryType);
 	void StagingFlush(std::span<std::byte> data) override;
+	void TransitionLayout();
 	void CreateImageViewAndSampler();
 	void Dispose();
 

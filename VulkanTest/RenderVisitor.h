@@ -5,7 +5,7 @@ class Pipeline;
 class RenderVisitor
 {
 public:
-	RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline);
+	RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline, size_t imageIndex);
 
 	void Visit(const RenderObject& renderObject);
 
@@ -14,4 +14,5 @@ private:
 
 	vk::CommandBuffer& commandBuffer;
 	Pipeline& pipeline;
+	size_t imageIndex;
 };

@@ -14,8 +14,8 @@
 SwapChain::SwapChain(VulkanContext& vulkanContext)
     : vulkanContext(vulkanContext)
 {
-    createSwapChain();
-    createImageViews();
+    CreateSwapChain();
+    CreateImageViews();
 }
 
 void SwapChain::Dispose()
@@ -47,21 +47,22 @@ void SwapChain::CreateFramebuffers(vk::RenderPass& renderPass) {
     }
 }
 
-void SwapChain::createSwapChain() {
+void SwapChain::CreateSwapChain()
+{
     SwapChainSupportDetails swapChainSupport = querySwapChainSupport(vulkanContext.deviceController->physicalDevice);
 
     vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
     vk::Extent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
-    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+    frameCount = swapChainSupport.capabilities.minImageCount + 1;
 
-    if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
-        imageCount = swapChainSupport.capabilities.maxImageCount;
+    if (swapChainSupport.capabilities.maxImageCount > 0 && frameCount > swapChainSupport.capabilities.maxImageCount) {
+        frameCount = swapChainSupport.capabilities.maxImageCount;
     }
 
     vk::SwapchainCreateInfoKHR createInfo(
-        {}, vulkanContext.surface, imageCount, surfaceFormat.format, surfaceFormat.colorSpace,
+        {}, vulkanContext.surface, frameCount, surfaceFormat.format, surfaceFormat.colorSpace,
         extent, 1, vk::ImageUsageFlagBits::eColorAttachment,
         vk::SharingMode::eExclusive, {},
         swapChainSupport.capabilities.currentTransform, vk::CompositeAlphaFlagBitsKHR::eOpaque, presentMode,
@@ -81,7 +82,8 @@ void SwapChain::createSwapChain() {
     }
 }
 
-void SwapChain::createImageViews() {
+void SwapChain::CreateImageViews()
+{
     swapChainImageViews.resize(swapChainImages.size());
 
     for (size_t i = 0; i < swapChainImages.size(); i++) {

@@ -36,6 +36,11 @@ void ImageMemory::StagingFlush(std::span<std::byte> data)
 
 }
 
+void ImageMemory::TransitionLayout()
+{
+
+}
+
 void ImageMemory::CreateImageViewAndSampler()
 {
 	vk::ComponentMapping components{};
