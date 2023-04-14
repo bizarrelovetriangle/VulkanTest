@@ -4,6 +4,7 @@
 #include "../../VulkanContext.h"
 #include "../QueueFamilies.h"
 #include "../CommandBuffer.h"
+#include "../CommandBufferDispatcher.h"
 
 template <class T>
 BufferMemory<T>::BufferMemory(VulkanContext& vulkanContext,
@@ -32,24 +33,13 @@ void BufferMemory<T>::StagingFlush(std::span<std::byte> data)
 {
 	BufferMemory<std::byte> stagingBuffer(vulkanContext, data, MemoryType::HostLocal, vk::BufferUsageFlagBits::eTransferSrc);
 
-	vk::CommandBufferAllocateInfo commandBufferAllocInfo(
-		vulkanContext.commandBuffer->commandPool, vk::CommandBufferLevel::ePrimary, 1);
-	auto commandBuffer = vulkanContext.deviceController->device.allocateCommandBuffers(commandBufferAllocInfo).front();
-
-	vk::CommandBufferBeginInfo beginInfo;
-	commandBuffer.begin(beginInfo);
-
-	vk::BufferCopy copyRegion(0, 0, stagingBuffer.count);
-	commandBuffer.copyBuffer(stagingBuffer.buffer, buffer, copyRegion);
-
-	commandBuffer.end();
-
-	vk::SubmitInfo submitInfo({}, {}, commandBuffer);
-
-	vulkanContext.queueFamilies->transferQueue.submit(submitInfo);
-	vulkanContext.queueFamilies->transferQueue.waitIdle();
-
-	vulkanContext.deviceController->device.freeCommandBuffers(vulkanContext.commandBuffer->commandPool, commandBuffer);
+	uint32_t transferQueueFamily = vulkanContext.queueFamilies->transferQueueFamily;
+	vulkanContext.commandBufferDispatcher->Invoke(transferQueueFamily,
+		[this, &stagingBuffer](auto& cb)
+		{
+			vk::BufferCopy copyRegion(0, 0, stagingBuffer.count);
+			cb.copyBuffer(stagingBuffer.buffer, buffer, copyRegion);
+		});
 
 	stagingBuffer.Dispose();
 }

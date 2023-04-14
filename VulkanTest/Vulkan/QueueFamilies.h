@@ -1,5 +1,6 @@
 #pragma once
-#include <set>
+#include <unordered_set>
+#include <unordered_map>
 #include <vulkan/vulkan.hpp>
 
 class QueueFamilies {
@@ -8,20 +9,18 @@ public:
     void findQueueFamilies();
 
 	struct QueueFamily {
-		std::set<vk::QueueFlagBits> flags;
+		std::unordered_set<vk::QueueFlagBits> flags;
 		size_t count;
 		uint32_t index;
 		bool presentSupport;
 	};
 
 public:
-    uint32_t graphicQueueFamilyIndex;
-    uint32_t presentQueueFamilyIndex;
-    uint32_t transferQueueFamilyIndex;
+    uint32_t graphicQueueFamily;
+    uint32_t presentQueueFamily;
+    uint32_t transferQueueFamily;
 
-	vk::Queue graphicsQueue;
-    vk::Queue presentQueue;
-    vk::Queue transferQueue;
+    std::unordered_map<uint32_t, vk::Queue> queueMap;
     std::vector<QueueFamily> queueFamilies;
 
 private:

@@ -60,6 +60,9 @@
     <ClCompile Include="Vulkan\Memory\DeviceMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">
@@ -135,6 +138,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dependencies\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\CommandBufferDispatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

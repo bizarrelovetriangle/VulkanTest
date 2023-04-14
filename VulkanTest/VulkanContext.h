@@ -13,6 +13,7 @@ class RenderObject;
 class GLFWwindow;
 template <class T>
 class BufferMemory;
+class CommandBufferDispatcher;
 
 class VulkanContext
 {
@@ -32,6 +33,7 @@ public:
     std::shared_ptr<SwapChain> swapChain;
     std::shared_ptr<RenderPass> renderPass;
     std::shared_ptr<Pipeline> pipeline;
+    std::shared_ptr<CommandBufferDispatcher> commandBufferDispatcher;
 
 private:
     vk::Semaphore imageAvailableSemaphore;

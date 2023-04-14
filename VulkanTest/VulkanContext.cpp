@@ -26,6 +26,7 @@
 #include "Utils/ObjReader.hpp"
 #include "Utils/GLTFReader.h"
 #include "Vulkan/Memory/ImageMemory.h"
+#include "Vulkan/CommandBufferDispatcher.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -43,19 +44,20 @@ void VulkanContext::Init(GLFWwindow* window)
     queueFamilies = std::make_shared<QueueFamilies>(deviceController->physicalDevice, surface);
 
     std::vector<uint32_t> queueFamilyIndexes =
-        { queueFamilies->graphicQueueFamilyIndex, queueFamilies->presentQueueFamilyIndex, queueFamilies->transferQueueFamilyIndex };
+        { queueFamilies->graphicQueueFamily, queueFamilies->presentQueueFamily, queueFamilies->transferQueueFamily };
     deviceController->createDevice(*queueFamilies, queueFamilyIndexes);
 
-    queueFamilies->graphicsQueue = deviceController->device.getQueue(queueFamilies->graphicQueueFamilyIndex, 0);
-    queueFamilies->presentQueue = deviceController->device.getQueue(queueFamilies->presentQueueFamilyIndex, 0);
-    queueFamilies->transferQueue = deviceController->device.getQueue(queueFamilies->transferQueueFamilyIndex, 0);
+    queueFamilies->queueMap[queueFamilies->graphicQueueFamily] = deviceController->device.getQueue(queueFamilies->graphicQueueFamily, 0);
+    queueFamilies->queueMap[queueFamilies->presentQueueFamily] = deviceController->device.getQueue(queueFamilies->presentQueueFamily, 0);
+    queueFamilies->queueMap[queueFamilies->transferQueueFamily] = deviceController->device.getQueue(queueFamilies->transferQueueFamily, 0);
 
     swapChain = std::make_shared<SwapChain>(*this);
     renderPass = std::make_shared<RenderPass>(deviceController->device, swapChain->swapChainImageFormat);
     swapChain->CreateFramebuffers(renderPass->renderPass);
     pipeline = std::make_shared<Pipeline>(*this, deviceController->device, renderPass->renderPass, swapChain);
-    commandBuffer = std::make_shared<CommandBuffer>(deviceController->device,
+    commandBuffer = std::make_shared<CommandBuffer>(*this, deviceController->device,
         queueFamilies, pipeline, swapChain, renderPass);
+    commandBufferDispatcher = std::make_shared<CommandBufferDispatcher>(*this);
 
     vk::SemaphoreCreateInfo semaphoreInfo{};
     imageAvailableSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
@@ -80,10 +82,10 @@ void VulkanContext::DrawFrame(std::vector<std::unique_ptr<RenderObject>>& render
 
     auto commandBuffers = { commandBuffer->commandBuffer };
     vk::SubmitInfo submitInfo(imageAvailableSemaphore, waitStages, commandBuffer->commandBuffer, signalSemaphores);
-    queueFamilies->graphicsQueue.submit(submitInfo, inFlightFence);
+    queueFamilies->queueMap.at(queueFamilies->graphicQueueFamily).submit(submitInfo, inFlightFence);
 
     vk::PresentInfoKHR presentInfo(signalSemaphores, swapChain->swapChain, imageIndex);
-    queueFamilies->presentQueue.presentKHR(presentInfo);
+    queueFamilies->queueMap.at(queueFamilies->presentQueueFamily).presentKHR(presentInfo);
 }
 
 void VulkanContext::Await()
@@ -95,6 +97,7 @@ void VulkanContext::Await()
 void VulkanContext::Dispose()
 {
     swapChain->Dispose();
+    commandBufferDispatcher->Dispose();
     commandBuffer->Dispose();
     pipeline->Dispose();
     renderPass->Dispose();

@@ -11,8 +11,6 @@ RenderVisitor::RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline, s
 
 void RenderVisitor::Visit(const RenderObject& renderObject)
 {
-	//if (renderObject.name != "Torus") return;
-
 	BindPipeline(pipeline);
 
 	vk::Buffer vertexBuffers[] = { renderObject.vertexBuffer->buffer };

@@ -8,11 +8,12 @@ class SwapChain;
 class RenderPass;
 class RenderObjectVertexData;
 class RenderObject;
+class VulkanContext;
 
 class CommandBuffer
 {
 public:
-	CommandBuffer(const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
+	CommandBuffer(VulkanContext& vulkanContext, const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
 		std::shared_ptr<Pipeline> pipeline, std::shared_ptr<SwapChain> swapChain,
 		std::shared_ptr<RenderPass> renderPass);
 	void Dispose();
@@ -29,6 +30,7 @@ public:
 	vk::CommandPool commandPool;
 
 private:
+	VulkanContext& vulkanContext;
 	const vk::Device& device;
 	std::shared_ptr<QueueFamilies> queueFamilies;
 	std::shared_ptr<Pipeline> pipeline;

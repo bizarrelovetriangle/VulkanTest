@@ -7,28 +7,28 @@ QueueFamilies::QueueFamilies(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR&
 {
     findQueueFamilies();
 
-    auto graphicQueueFamily = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
+    auto graphicQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
         [](auto& family) { return family.flags.contains(vk::QueueFlagBits::eGraphics); });
 
-    auto presentQueueFamily = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
+    auto presentQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
         [](auto& family) { return family.presentSupport; });
 
-    auto transferFamilyQueue = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
-        [graphicQueueFamily, presentQueueFamily](auto& family)
+    auto transferQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
+        [graphicQueueFamily_, presentQueueFamily_](auto& family)
         {
-            auto pipelineQueue = family.index == graphicQueueFamily->index || family.index == presentQueueFamily->index;
+            auto pipelineQueue = family.index == graphicQueueFamily_->index || family.index == presentQueueFamily_->index;
             return !pipelineQueue && family.flags.contains(vk::QueueFlagBits::eTransfer);
         });
 
-    if (transferFamilyQueue == std::end(queueFamilies))
+    if (transferQueueFamily_ == std::end(queueFamilies))
     {
-        transferFamilyQueue = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
+        transferQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
             [](auto& family) { return family.flags.contains(vk::QueueFlagBits::eTransfer); });
     }
 
-    graphicQueueFamilyIndex = graphicQueueFamily->index;
-    presentQueueFamilyIndex = presentQueueFamily->index;
-    transferQueueFamilyIndex = transferFamilyQueue->index;
+    graphicQueueFamily = graphicQueueFamily_->index;
+    presentQueueFamily = presentQueueFamily_->index;
+    transferQueueFamily = transferQueueFamily_->index;
 }
 
 void QueueFamilies::findQueueFamilies()

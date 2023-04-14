@@ -8,11 +8,13 @@
 #include "RenderPass.h"
 #include "../Primitives/RenderObject.h"
 #include "../RenderVisitor.h";
+#include "../VulkanContext.h";
 
-CommandBuffer::CommandBuffer(const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
+CommandBuffer::CommandBuffer(VulkanContext& vulkanContext,
+	const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
 	std::shared_ptr<Pipeline> pipeline, std::shared_ptr<SwapChain> swapChain,
 	std::shared_ptr<RenderPass> renderPass)
-	: device(device), queueFamilies(queueFamilies), pipeline(pipeline), swapChain(swapChain), renderPass(renderPass)
+	: vulkanContext(vulkanContext), device(device), queueFamilies(queueFamilies), pipeline(pipeline), swapChain(swapChain), renderPass(renderPass)
 {
 	CreateCommandPool();
 	CreateCommandBuffer();
@@ -60,11 +62,9 @@ void CommandBuffer::CommandBuffer::Reset() {
 
 void CommandBuffer::CreateCommandPool()
 {
-	auto graphicQueueFamily = std::find_if(std::begin(queueFamilies->queueFamilies), std::end(queueFamilies->queueFamilies),
-		[](auto& family) { return family.flags.contains(vk::QueueFlagBits::eGraphics) && family.presentSupport; });
-
 	vk::CommandPoolCreateInfo poolInfo(
-		vk::CommandPoolCreateFlagBits::eResetCommandBuffer, graphicQueueFamily->index);
+		vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+		vulkanContext.queueFamilies->graphicQueueFamily);
 
 	commandPool = device.createCommandPool(poolInfo);
 }
