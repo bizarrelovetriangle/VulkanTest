@@ -27,7 +27,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 
 		image = std::make_unique<ImageMemory>(vulkanContext,
 			imageInfo.first, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled,
-			MemoryType::HostLocal);
+			MemoryType::DeviceLocal);
 
 		image->FlushData(imageInfo.second);
 	}

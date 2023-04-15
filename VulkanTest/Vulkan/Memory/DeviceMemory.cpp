@@ -22,16 +22,9 @@ void DeviceMemory::AllocateMemory(const vk::MemoryRequirements& memoryRequiremen
 
 void DeviceMemory::FlushData(std::span<std::byte> data)
 {
-	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
-	{
-		auto dataPointer = vulkanContext.deviceController->device.mapMemory(memory, 0, data.size());
-		memcpy(dataPointer, data.data(), data.size());
-		vulkanContext.deviceController->device.unmapMemory(memory);
-	}
-	else
-	{
-		StagingFlush(data);
-	}
+	auto dataPointer = vulkanContext.deviceController->device.mapMemory(memory, 0, data.size());
+	memcpy(dataPointer, data.data(), data.size());
+	vulkanContext.deviceController->device.unmapMemory(memory);
 }
 
 uint32_t DeviceMemory::FindMemoryTypeIndex(uint32_t typeFilter, vk::MemoryPropertyFlags properties)

@@ -29,8 +29,14 @@ BufferMemory<T>::BufferMemory(VulkanContext& vulkanContext,
 }
 
 template<class T>
-void BufferMemory<T>::StagingFlush(std::span<std::byte> data)
+void BufferMemory<T>::FlushData(std::span<std::byte> data)
 {
+	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
+	{
+		DeviceMemory::FlushData(data);
+		return;
+	}
+
 	BufferMemory<std::byte> stagingBuffer(vulkanContext, data, MemoryType::HostLocal, vk::BufferUsageFlagBits::eTransferSrc);
 
 	uint32_t transferQueueFamily = vulkanContext.queueFamilies->transferQueueFamily;

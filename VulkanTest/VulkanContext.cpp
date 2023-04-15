@@ -51,13 +51,14 @@ void VulkanContext::Init(GLFWwindow* window)
     queueFamilies->queueMap[queueFamilies->presentQueueFamily] = deviceController->device.getQueue(queueFamilies->presentQueueFamily, 0);
     queueFamilies->queueMap[queueFamilies->transferQueueFamily] = deviceController->device.getQueue(queueFamilies->transferQueueFamily, 0);
 
+    commandBufferDispatcher = std::make_shared<CommandBufferDispatcher>(*this);
+
     swapChain = std::make_shared<SwapChain>(*this);
     renderPass = std::make_shared<RenderPass>(deviceController->device, swapChain->swapChainImageFormat);
     swapChain->CreateFramebuffers(renderPass->renderPass);
     pipeline = std::make_shared<Pipeline>(*this, deviceController->device, renderPass->renderPass, swapChain);
     commandBuffer = std::make_shared<CommandBuffer>(*this, deviceController->device,
         queueFamilies, pipeline, swapChain, renderPass);
-    commandBufferDispatcher = std::make_shared<CommandBufferDispatcher>(*this);
 
     vk::SemaphoreCreateInfo semaphoreInfo{};
     imageAvailableSemaphore = deviceController->device.createSemaphore(semaphoreInfo);

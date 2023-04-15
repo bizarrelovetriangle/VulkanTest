@@ -11,8 +11,7 @@ class DeviceMemory
 public:
 	DeviceMemory(VulkanContext& vulkanContext, MemoryType memoryType);
 	void AllocateMemory(const vk::MemoryRequirements& memoryRequirements);
-	void FlushData(std::span<std::byte> data);
-	virtual void StagingFlush(std::span<std::byte> data) = 0;
+	virtual void FlushData(std::span<std::byte> data);
 	void Dispose();
 
 protected:

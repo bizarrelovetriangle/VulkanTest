@@ -5,22 +5,34 @@
 #include <string>
 #include "../../Dependencies/stb_image.h"
 #include "../../Math/Vector2.hpp"
+#include "../CommandBufferDispatcher.h"
+#include "../QueueFamilies.h"
 
 ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage,
 		MemoryType memoryType)
-	: DeviceMemory(vulkanContext, memoryType), resolution(resolution), format(format)
+	: DeviceMemory(vulkanContext, memoryType), resolution(resolution), format(format), usage(usage)
 {
 	auto& device = vulkanContext.deviceController->device;
+	vk::ImageTiling tiling{};
 
-	auto tiling = memoryType == MemoryType::DeviceLocal ? vk::ImageTiling::eOptimal : vk::ImageTiling::eLinear;
+	if (memoryType == MemoryType::DeviceLocal) {
+		imageLayout = vk::ImageLayout::eUndefined;
+		tiling = vk::ImageTiling::eOptimal;
+		usage |= vk::ImageUsageFlagBits::eTransferDst;
+	}
+	else {
+		imageLayout = vk::ImageLayout::ePreinitialized;
+		tiling = vk::ImageTiling::eLinear;
+	}
+
 	imageType = vk::ImageType::e2D;
 	imageViewType = vk::ImageViewType::e2D;
 
-	vk::Extent3D extend(resolution.x, resolution.x, 1);
+	vk::Extent3D extent(resolution.x, resolution.x, 1);
 	vk::ImageCreateInfo createImageInfo(
-		{}, vk::ImageType::e2D, format, extend, 1, 1, vk::SampleCountFlagBits::e1,
-		tiling, usage, vk::SharingMode::eExclusive);
+		{}, vk::ImageType::e2D, format, extent, 1, 1, vk::SampleCountFlagBits::e1,
+		tiling, usage, vk::SharingMode::eExclusive, {}, imageLayout);
 
 	image = device.createImage(createImageInfo);
 
@@ -31,14 +43,84 @@ ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 	CreateImageViewAndSampler();
 }
 
-void ImageMemory::StagingFlush(std::span<std::byte> data)
+void ImageMemory::FlushData(std::span<std::byte> data)
 {
+	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
+	{
+		DeviceMemory::FlushData(data);
+		TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+		return;
+	}
 
+	ImageMemory stagingImage(vulkanContext, resolution, format, usage | vk::ImageUsageFlagBits::eTransferSrc,
+		MemoryType::HostLocal);
+	stagingImage.FlushData(data);
+	stagingImage.TransitionLayout(vk::ImageLayout::eTransferSrcOptimal);
+	TransitionLayout(vk::ImageLayout::eTransferDstOptimal);
+
+	uint32_t queueFamily = vulkanContext.queueFamilies->graphicQueueFamily;
+	vulkanContext.commandBufferDispatcher->Invoke(queueFamily, [this, &stagingImage](vk::CommandBuffer& cb)
+		{
+			vk::ImageSubresourceLayers subresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+			vk::Extent3D extent(resolution.x, resolution.x, 1);
+			vk::ImageCopy region(subresourceLayers, {}, subresourceLayers, {}, extent);
+			cb.copyImage(stagingImage.image, stagingImage.imageLayout, this->image, this->imageLayout, region);
+		});
+
+	TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+	stagingImage.Dispose();
 }
 
-void ImageMemory::TransitionLayout()
+void ImageMemory::TransitionLayout(const vk::ImageLayout& newImageLayout)
 {
+	uint32_t queueFamily = vulkanContext.queueFamilies->graphicQueueFamily;
+	vulkanContext.commandBufferDispatcher->Invoke(queueFamily, [this, &newImageLayout](auto& cb)
+		{
+			vk::PipelineStageFlagBits srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
+			vk::AccessFlagBits srcAccess{};
+			vk::PipelineStageFlagBits dstStage{};
+			vk::AccessFlagBits dstAccess{};
 
+			if (imageLayout == vk::ImageLayout::eUndefined) {}
+			if (imageLayout == vk::ImageLayout::ePreinitialized) {}
+
+			if (imageLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
+				srcStage = vk::PipelineStageFlagBits::eFragmentShader;
+				srcAccess = vk::AccessFlagBits::eShaderRead;
+			}
+
+			if (imageLayout == vk::ImageLayout::eTransferDstOptimal) {
+				srcStage = vk::PipelineStageFlagBits::eTransfer;
+				srcAccess = vk::AccessFlagBits::eTransferWrite;
+			}
+
+			if (newImageLayout == vk::ImageLayout::eTransferSrcOptimal) {
+				dstStage = vk::PipelineStageFlagBits::eTransfer;
+				dstAccess = vk::AccessFlagBits::eTransferRead;
+			}
+
+			if (newImageLayout == vk::ImageLayout::eTransferDstOptimal) {
+				dstStage = vk::PipelineStageFlagBits::eTransfer;
+				dstAccess = vk::AccessFlagBits::eTransferWrite;
+			}
+
+			if (newImageLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
+				dstStage = vk::PipelineStageFlagBits::eFragmentShader;
+				dstAccess = vk::AccessFlagBits::eShaderRead;
+			}
+
+			vk::ImageSubresourceRange subresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+			vk::ImageMemoryBarrier imageBarrier(
+				srcAccess, dstAccess,
+				imageLayout, newImageLayout,
+				{}, {},
+				image, subresourceRange);
+
+			cb.pipelineBarrier(srcStage, dstStage, {}, {}, {}, imageBarrier);
+		});
+
+	imageLayout = newImageLayout;
 }
 
 void ImageMemory::CreateImageViewAndSampler()

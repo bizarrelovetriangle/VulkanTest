@@ -11,8 +11,8 @@ public:
 	ImageMemory(VulkanContext& vulkanContext,
 		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage,
 		MemoryType memoryType);
-	void StagingFlush(std::span<std::byte> data) override;
-	void TransitionLayout();
+	void FlushData(std::span<std::byte> data) override;
+	void TransitionLayout(const vk::ImageLayout& newImageLayout);
 	void CreateImageViewAndSampler();
 	void Dispose();
 
@@ -26,6 +26,8 @@ public:
 private:
 	Vector2u resolution;
 	vk::Format format;
+	vk::ImageUsageFlags usage;
+	vk::ImageLayout imageLayout;
 	vk::ImageType imageType;
 	vk::ImageViewType imageViewType;
 };

@@ -11,7 +11,7 @@ class BufferMemory : public DeviceMemory
 public:
 	BufferMemory(VulkanContext& vulkanContext,
 		std::span<T> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-	void StagingFlush(std::span<std::byte> data) override;
+	void FlushData(std::span<std::byte> data) override;
 	void Dispose();
 
 public:
