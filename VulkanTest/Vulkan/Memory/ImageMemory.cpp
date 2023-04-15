@@ -41,6 +41,8 @@ ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 	device.bindImageMemory(image, memory, 0);
 
 	CreateImageViewAndSampler();
+
+	TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 }
 
 void ImageMemory::FlushData(std::span<std::byte> data)

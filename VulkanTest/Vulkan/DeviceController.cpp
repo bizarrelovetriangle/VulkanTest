@@ -6,58 +6,58 @@
 #include <vulkan/vulkan.hpp>
 
 DeviceController::DeviceController(vk::Instance& instance, ValidationLayersInfo& validationLayersInfo)
-    : instance(instance), validationLayersInfo(validationLayersInfo)
+	: instance(instance), validationLayersInfo(validationLayersInfo)
 {
-    pickPhysicalDevice();
+	pickPhysicalDevice();
 }
 
 void DeviceController::createDevice(QueueFamilies& queueFamilies, std::vector<uint32_t> queueFamilyIndexes)
 {
-    std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-    queueFamilyIndexes.erase(std::unique(std::begin(queueFamilyIndexes), std::end(queueFamilyIndexes)), std::end(queueFamilyIndexes));
+	std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+	queueFamilyIndexes.erase(std::unique(std::begin(queueFamilyIndexes), std::end(queueFamilyIndexes)), std::end(queueFamilyIndexes));
 
-    for (auto index : queueFamilyIndexes) {
-        float queuePriority[] = { 1.0f };
-        vk::DeviceQueueCreateInfo queueCreateInfo({}, index, queuePriority);
-        queueCreateInfos.push_back(queueCreateInfo);
-    }
+	for (auto index : queueFamilyIndexes) {
+		float queuePriority[] = { 1.0f };
+		vk::DeviceQueueCreateInfo queueCreateInfo({}, index, queuePriority);
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
 
-    vk::PhysicalDeviceFeatures deviceFeatures;
-    deviceFeatures.fillModeNonSolid = true;
-    deviceFeatures.samplerAnisotropy = true;
+	vk::PhysicalDeviceFeatures deviceFeatures;
+	deviceFeatures.fillModeNonSolid = true;
+	deviceFeatures.samplerAnisotropy = true;
 
-    vk::DeviceCreateInfo createInfo({}, queueCreateInfos, {}, {}, &deviceFeatures);
+	vk::DeviceCreateInfo createInfo({}, queueCreateInfos, {}, {}, &deviceFeatures);
 
-    if (validationLayersInfo.enableValidationLayers) {
-        createInfo.enabledLayerCount = validationLayersInfo.validationLayers.size();
-        createInfo.ppEnabledLayerNames = validationLayersInfo.validationLayers.data();
-    }
+	if (validationLayersInfo.enableValidationLayers) {
+		createInfo.enabledLayerCount = validationLayersInfo.validationLayers.size();
+		createInfo.ppEnabledLayerNames = validationLayersInfo.validationLayers.data();
+	}
 
-    createInfo.enabledExtensionCount = deviceExtensions.size();
-    createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+	createInfo.enabledExtensionCount = deviceExtensions.size();
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-    device = physicalDevice.createDevice(createInfo);
+	device = physicalDevice.createDevice(createInfo);
 }
 
 void DeviceController::Dispose() {
-    device.destroy();
+	device.destroy();
 }
 
 void DeviceController::pickPhysicalDevice() {
-    auto physicalDevices = instance.enumeratePhysicalDevices();
+	auto physicalDevices = instance.enumeratePhysicalDevices();
 
-    for (const auto& device : physicalDevices) {
-        auto deviceProperties = device.getProperties();
+	for (const auto& device : physicalDevices) {
+		auto deviceProperties = device.getProperties();
 
-        auto deviceType = vk::PhysicalDeviceType::eIntegratedGpu;
-        //auto deviceType = vk::PhysicalDeviceType::eDiscreteGpu;
+		auto deviceType = vk::PhysicalDeviceType::eIntegratedGpu;
+		//auto deviceType = vk::PhysicalDeviceType::eDiscreteGpu;
 
-        if (deviceProperties.deviceType == deviceType) {
-            physicalDevice = device;
-        }
-    }
+		if (deviceProperties.deviceType == deviceType) {
+			physicalDevice = device;
+		}
+	}
 
-    if (!physicalDevice) {
-        throw std::runtime_error("failed to find a suitable GPU!");
-    }
+	if (!physicalDevice) {
+		throw std::runtime_error("failed to find a suitable GPU!");
+	}
 }

@@ -4,25 +4,25 @@
 
 class VulkanAuxiliary {
 public:
-    VulkanAuxiliary(ValidationLayersInfo& validationLayersInfo);
+	VulkanAuxiliary(ValidationLayersInfo& validationLayersInfo);
 
-    void Dispose();
+	void Dispose();
 
 private:
-    void createInstance();
-    std::vector<const char*> getRequiredExtensions();
+	void createInstance();
+	std::vector<const char*> getRequiredExtensions();
 
 public:
-    vk::DebugUtilsMessengerEXT debugMessenger;
-    vk::Instance instance;
-    vk::SurfaceKHR surface;
+	vk::DebugUtilsMessengerEXT debugMessenger;
+	vk::Instance instance;
+	vk::SurfaceKHR surface;
 
 private:
-    ValidationLayersInfo validationLayersInfo;
+	ValidationLayersInfo validationLayersInfo;
 
-    struct DebugDispatch {
-        int getVkHeaderVersion() const { return 239; };
-        PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = 0;
-        PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = 0;
-    } debugDispatch;
+	struct DebugDispatch {
+		int getVkHeaderVersion() const { return 239; };
+		PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = 0;
+		PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = 0;
+	} debugDispatch;
 };
