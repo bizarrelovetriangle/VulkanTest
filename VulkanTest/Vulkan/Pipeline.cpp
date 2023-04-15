@@ -1,18 +1,27 @@
 #include "Pipeline.h"
 #include <vector>
 #include <string>
+#include <sstream>
 #include <fstream>
 #include "SwapChain.h"
 #include "../Primitives/RenderObject.h"
 #include "Memory/ImageMemory.h"
 #include "../VulkanContext.h"
+#include "../Utils/ShaderCompiler.h"
 
 Pipeline::Pipeline(VulkanContext& vulkanContext,
 	const vk::Device& device, const vk::RenderPass& renderPass, std::shared_ptr<SwapChain> swapChain)
 	: vulkanContext(vulkanContext), device(device), renderPass(renderPass), swapChain(swapChain)
 {
-	vertShaderModule = CreateShaderModule("E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/spir-v/triangle.vert.spv");
-	fragShaderModule = CreateShaderModule("E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/spir-v/triangle.frag.spv");
+	auto vertexSpirv = ShaderCompiler::CompileShader(
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/triangle.vert",
+		shaderc_vertex_shader, false);
+	vertShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, vertexSpirv));
+
+	auto fragmentSpirv = ShaderCompiler::CompileShader(
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/triangle.frag",
+		shaderc_fragment_shader, false);
+	fragShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, fragmentSpirv));
 
 	vk::PipelineShaderStageCreateInfo vertShaderStageInfo(
 		{}, vk::ShaderStageFlagBits::eVertex, vertShaderModule, "main");
@@ -20,7 +29,6 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 		{}, vk::ShaderStageFlagBits::eFragment, fragShaderModule, "main");
 
 	shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
-
 
 	{
 		auto imageInfo = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
@@ -133,19 +141,4 @@ vk::Rect2D Pipeline::CreateScissors()
 {
 	vk::Rect2D scissors({}, swapChain->swapChainExtent);
 	return scissors;
-}
-
-vk::ShaderModule Pipeline::CreateShaderModule(std::string path) {
-	std::vector<char> code;
-	std::ifstream file(path, std::ios::ate | std::ios::binary);
-	if (!file) throw std::runtime_error("file is not found");
-	size_t fileSize = (size_t) file.tellg();
-	code.resize(fileSize);
-	file.seekg(0);
-	file.read(code.data(), fileSize);
-
-	std::vector<uint32_t> packedCode(code.size() / sizeof(uint32_t));
-	std::memcpy(packedCode.data(), code.data(), code.size());
-	vk::ShaderModuleCreateInfo createInfo({}, packedCode);
-	return device.createShaderModule(createInfo);
 }

@@ -17,7 +17,6 @@ public:
 	vk::Rect2D CreateScissors();
 
 private:
-	vk::ShaderModule CreateShaderModule(std::string path);
 	void CreateDescriptorSetLayout();
 
 public:

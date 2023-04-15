@@ -21,7 +21,7 @@ private:
 	ValidationLayersInfo validationLayersInfo;
 
 	struct DebugDispatch {
-		int getVkHeaderVersion() const { return 239; };
+		int getVkHeaderVersion() const { return 243; };
 		PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = 0;
 		PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = 0;
 	} debugDispatch;
