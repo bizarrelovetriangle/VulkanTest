@@ -14,25 +14,21 @@ public:
 	static std::vector<uint32_t> CompileShader(
 		const std::filesystem::path& path, vk::ShaderStageFlagBits shaderStage, bool optimize = false)
 	{
-		const std::filesystem::path rootSpirevPath = "spirev";
-		std::string optimizeFlag = optimize ? ".spirev_opt" : ".spirev";
-		auto spirevPath = rootSpirevPath / (path.relative_path().string() + optimizeFlag);
+		const std::filesystem::path rootSpirevPath = std::filesystem::current_path() / "spirv";
+		std::string optimizeFlag = optimize ? ".spirv_opt" : ".spirv";
+		auto spirvPath = rootSpirevPath / (path.relative_path().string() + optimizeFlag);
 		bool outdated = true;
 
-		if (std::filesystem::exists(spirevPath))
+		if (std::filesystem::exists(spirvPath))
 		{
 			auto codeLastModified = std::filesystem::last_write_time(path).time_since_epoch();
-			auto spirevLastModified = std::filesystem::last_write_time(spirevPath).time_since_epoch();
-
-			if (codeLastModified < spirevLastModified)
-			{
-				outdated = false;
-			}
+			auto spirvLastModified = std::filesystem::last_write_time(spirvPath).time_since_epoch();
+			if (codeLastModified < spirvLastModified) outdated = false;
 		}
 
 		if (outdated)
 		{
-			std::filesystem::create_directories(spirevPath.parent_path());
+			std::filesystem::create_directories(spirvPath.parent_path());
 
 			std::string code = ReadFile(path);
 			auto fileName = path.filename();
@@ -52,13 +48,14 @@ public:
 				throw std::exception(module.GetErrorMessage().c_str());
 			}
 
+			std::cout << fileName << " - successfully recompilled" <<std::endl;
 
-			WriteFile(spirevPath, std::vector<uint32_t>(module.cbegin(), module.cend()));
+			WriteFile(spirvPath, std::vector<uint32_t>(module.cbegin(), module.cend()));
 		}
 
-		std::string spirevCode = ReadFile(spirevPath);
-		auto spirvData = (uint32_t*)spirevCode.c_str();
-		return std::vector<uint32_t>(spirvData, spirvData + spirevCode.length() / sizeof(uint32_t));
+		std::string spirvCode = ReadFile(spirvPath);
+		auto spirvData = (uint32_t*)spirvCode.c_str();
+		return std::vector<uint32_t>(spirvData, spirvData + spirvCode.length() / sizeof(uint32_t));
 	}
 
 private:

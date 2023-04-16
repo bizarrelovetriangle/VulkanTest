@@ -4,5 +4,6 @@ x64
 x86
 .vs
 packages
-spir-v
+spir-v/
+spirv/
 /VulkanTest/x64/Debug/VulkanTest.tlog/CL.command.1.tlog

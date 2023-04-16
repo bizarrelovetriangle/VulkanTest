@@ -161,6 +161,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />
     <ClInclude Include="Dependencies\stb_image.h" />
     <ClInclude Include="Vulkan\Memory\DeviceMemory.h" />
