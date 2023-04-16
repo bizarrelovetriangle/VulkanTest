@@ -26,32 +26,7 @@ public:
 			if (codeLastModified < spirvLastModified) outdated = false;
 		}
 
-		if (outdated)
-		{
-			std::filesystem::create_directories(spirvPath.parent_path());
-
-			std::string code = ReadFile(path);
-			auto fileName = path.filename();
-
-			shaderc::Compiler compiler;
-			shaderc::CompileOptions options;
-
-			// Like -DMY_DEFINE=1
-			options.AddMacroDefinition("MY_DEFINE", "1");
-			if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_performance);
-
-			shaderc_shader_kind shaderKind = shaderKindMap[shaderStage];
-			auto module = compiler.CompileGlslToSpv(code, shaderKind, fileName.string().c_str(), options);
-
-			if (module.GetCompilationStatus() != shaderc_compilation_status_success)
-			{
-				throw std::exception(module.GetErrorMessage().c_str());
-			}
-
-			std::cout << fileName << " - successfully recompilled" <<std::endl;
-
-			WriteFile(spirvPath, std::vector<uint32_t>(module.cbegin(), module.cend()));
-		}
+		if (outdated) UpdateSpirv(path, spirvPath, shaderStage, optimize);
 
 		std::string spirvCode = ReadFile(spirvPath);
 		auto spirvData = (uint32_t*)spirvCode.c_str();
@@ -59,6 +34,34 @@ public:
 	}
 
 private:
+	static void UpdateSpirv(const std::filesystem::path& path, const std::filesystem::path& spirvPath,
+		vk::ShaderStageFlagBits shaderStage, bool optimize = false)
+	{
+		std::filesystem::create_directories(spirvPath.parent_path());
+
+		std::string code = ReadFile(path);
+		auto fileName = path.filename();
+
+		shaderc::Compiler compiler;
+		shaderc::CompileOptions options;
+
+		// Like -DMY_DEFINE=1
+		options.AddMacroDefinition("MY_DEFINE", "1");
+		if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_performance);
+
+		shaderc_shader_kind shaderKind = shaderKindMap[shaderStage];
+		auto module = compiler.CompileGlslToSpv(code, shaderKind, fileName.string().c_str(), options);
+
+		if (module.GetCompilationStatus() != shaderc_compilation_status_success)
+		{
+			throw std::exception(module.GetErrorMessage().c_str());
+		}
+
+		std::cout << fileName << " - successfully recompilled" << std::endl;
+
+		WriteFile(spirvPath, std::vector<uint32_t>(module.cbegin(), module.cend()));
+	}
+
 	static std::string ReadFile(const std::filesystem::path& path)
 	{
 		std::ifstream file(path, std::ios::binary);
