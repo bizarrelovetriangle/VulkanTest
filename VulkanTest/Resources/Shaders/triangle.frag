@@ -10,5 +10,5 @@ void main()
 {
 	vec4 textureColor = texture(texSampler, fragTexturePos);
 	outColor = vec4(fragTexturePos, 0., 1.0);
-	outColor = textureColor;
+	outColor = vec4(fragColor, 1.) * textureColor;
 }

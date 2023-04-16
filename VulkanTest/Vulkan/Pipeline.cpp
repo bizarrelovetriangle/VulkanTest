@@ -15,12 +15,12 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 {
 	auto vertexSpirv = ShaderCompiler::CompileShader(
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/triangle.vert",
-		shaderc_vertex_shader, false);
+		vk::ShaderStageFlagBits::eVertex, false);
 	vertShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, vertexSpirv));
 
 	auto fragmentSpirv = ShaderCompiler::CompileShader(
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/triangle.frag",
-		shaderc_fragment_shader, false);
+		vk::ShaderStageFlagBits::eFragment, false);
 	fragShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, fragmentSpirv));
 
 	vk::PipelineShaderStageCreateInfo vertShaderStageInfo(
