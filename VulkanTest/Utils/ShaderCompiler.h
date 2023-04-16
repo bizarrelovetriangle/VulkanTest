@@ -54,7 +54,8 @@ private:
 
 		if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 		{
-			throw std::exception(module.GetErrorMessage().c_str());
+			std::cerr << module.GetErrorMessage().c_str() << std::endl;
+			throw std::exception();
 		}
 
 		std::cout << fileName << " - successfully recompilled" << std::endl;

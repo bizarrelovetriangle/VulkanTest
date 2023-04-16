@@ -14,7 +14,7 @@ void CommandBufferDispatcher::Dispose()
 		vulkanContext.deviceController->device.destroyCommandPool(commandPool);
 }
 
-void CommandBufferDispatcher::Invoke(uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> lambda)
+void CommandBufferDispatcher::Invoke(uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> command)
 {
 	if (auto it = commandPoolMap.emplace(queueFamily, vk::CommandPool()); it.second) {
 		vk::CommandPoolCreateInfo commandPoolInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer, queueFamily);
@@ -28,7 +28,7 @@ void CommandBufferDispatcher::Invoke(uint32_t queueFamily, std::function<void(vk
 
 	vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 	commandBuffer.begin(beginInfo);
-	lambda(commandBuffer);
+	command(commandBuffer);
 	commandBuffer.end();
 
 	vk::SubmitInfo submitInfo({}, {}, commandBuffer, {});

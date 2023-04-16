@@ -9,7 +9,7 @@ class CommandBufferDispatcher
 {
 public:
 	CommandBufferDispatcher(VulkanContext& vulkanContext);
-	void Invoke(uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> lambda);
+	void Invoke(uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> command);
 	void Dispose();
 
 private:

@@ -1,4 +1,4 @@
-#pragma once;
+#pragma once
 #include "../Math/Vector3.hpp"
 #include "../Math/Vector2.hpp"
 #include "../Math/Matrix4.hpp"
@@ -22,6 +22,7 @@ public:
 	Vector3f position;
 	Vector3f normal;
 	Vector2f textureCoord;
+	Vector4f color;
 
 	static vk::VertexInputBindingDescription BindingDescription()
 	{
@@ -30,14 +31,16 @@ public:
 
 	static std::vector<vk::VertexInputAttributeDescription> AttributeDescriptions()
 	{
-		vk::VertexInputAttributeDescription position(
+		vk::VertexInputAttributeDescription positionDescription(
 			0, 0, vk::Format::eR32G32B32Sfloat, offsetof(RenderObjectVertexData, position));
-		vk::VertexInputAttributeDescription normal(
+		vk::VertexInputAttributeDescription normalDescription(
 			1, 0, vk::Format::eR32G32B32Sfloat, offsetof(RenderObjectVertexData, normal));
-		vk::VertexInputAttributeDescription textureCoord(
+		vk::VertexInputAttributeDescription textureCoordDescription(
 			2, 0, vk::Format::eR32G32Sfloat, offsetof(RenderObjectVertexData, textureCoord));
+		vk::VertexInputAttributeDescription colorDescription(
+			3, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(RenderObjectVertexData, color));
 
-		return { position, normal, textureCoord };
+		return { positionDescription, normalDescription, textureCoordDescription, colorDescription };
 	}
 };
 

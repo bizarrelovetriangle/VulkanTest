@@ -1,4 +1,4 @@
-#pragma once;
+#pragma once
 #include <vulkan/vulkan.hpp>
 
 class CommandBuffer;
@@ -10,7 +10,7 @@ class RenderPass;
 class Pipeline;
 class VertexData;
 class RenderObject;
-class GLFWwindow;
+struct GLFWwindow;
 template <class T>
 class BufferMemory;
 class CommandBufferDispatcher;

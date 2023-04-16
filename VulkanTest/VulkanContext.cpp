@@ -1,4 +1,4 @@
-#pragma once;
+#pragma once
 
 #define VK_USE_PLATFORM_WIN32_KHR
 #define NTDDI_VERSION NTDDI_WIN10_RS1 // work around linker failure MapViewOfFileNuma2@36

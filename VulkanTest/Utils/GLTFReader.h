@@ -13,6 +13,7 @@ namespace
 	const std::string Position = "POSITION";
 	const std::string Normal = "NORMAL";
 	const std::string TextureCoord = "TEXCOORD_0";
+	const std::string Color = "COLOR_0";
 }
 
 class GLTFReader
@@ -32,34 +33,44 @@ public:
 			if (node.mesh < 0) continue;
 			auto& mesh = glTFModel.meshes[node.mesh];
 
-			auto& renderObject = *renderObjects.emplace_back(std::make_unique<RenderObject>());
+			RenderObject renderObject;
 			renderObject.name = node.name;
 			renderObject.model = ComposeMatrix(node);
 
 			for (auto& primitive : mesh.primitives)
 			{
-				Vector3<uint16_t> vec;
+				std::vector<uint32_t> indexes = ReadBuffer<uint32_t>(primitive.indices);
+				std::vector<Vector3f> positions;
+				std::vector<Vector3f> normals;
+				std::vector<Vector2f> textureCoords;
+				std::vector<Vector4f> colors;
 
-				auto positionsId = primitive.attributes.at(Position);
-				auto nomalsId = primitive.attributes.at(Normal);
-				auto textureCoordsId = primitive.attributes.at(TextureCoord);
-
-				auto indexes = ReadBuffer<uint32_t>(primitive.indices);
-				auto positions = ReadBuffer<Vector3f>(positionsId);
-				auto normals = ReadBuffer<Vector3f>(nomalsId);
-				auto textureCoords = ReadBuffer<Vector2f>(textureCoordsId);
+				for (auto& [name, index] : primitive.attributes)
+				{
+					if (name == Position)		positions = ReadBuffer<Vector3f>(index);
+					if (name == Normal)			normals = ReadBuffer<Vector3f>(index);
+					if (name == TextureCoord)	textureCoords = ReadBuffer<Vector2f>(index);
+					if (name == Color)			colors = ReadBuffer<Vector4f>(index);
+				}
 
 				for (auto index : indexes)
 				{
 					RenderObjectVertexData vertexData
 					{
 						.position = positions[index],
-						.normal = normals[index],
-						.textureCoord = textureCoords[index]
+						.normal = normals[index]
 					};
+
+					if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
+					if (!colors.empty())		vertexData.color = colors[index];
 
 					renderObject.vertexData.push_back(vertexData);
 				}
+			}
+
+			if (renderObject.vertexData.size() > 0)
+			{
+				renderObjects.emplace_back(std::make_unique<RenderObject>(std::move(renderObject)));
 			}
 		}
 	}
@@ -108,12 +119,14 @@ private:
 	template <class O>
 	std::vector<O> TypeMarshal(size_t componentType, size_t componentCount, const std::vector<std::byte>& buffer)
 	{
+		if (componentCount == TINYGLTF_TYPE_SCALAR)
+			return InnerTypeMarshal<Scalar, O>(componentType, buffer);
 		if (componentCount == TINYGLTF_TYPE_VEC2)
 			return InnerTypeMarshal<Vector2, O>(componentType, buffer);
 		if (componentCount == TINYGLTF_TYPE_VEC3)
 			return InnerTypeMarshal<Vector3, O>(componentType, buffer);
-		if(componentCount == TINYGLTF_TYPE_SCALAR)
-			return InnerTypeMarshal<Scalar, O>(componentType, buffer);
+		if (componentCount == TINYGLTF_TYPE_VEC4)
+			return InnerTypeMarshal<Vector4, O>(componentType, buffer);
 		throw std::exception("gosh");
 	}
 
