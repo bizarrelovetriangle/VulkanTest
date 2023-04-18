@@ -42,4 +42,10 @@ public:
 		z *= s;
 		w *= s;
 	}
+
+	template <class T>
+	static Vector4<T> FromGLTF(const Vector4<T>& vec)
+	{
+		return Vector4<T>(vec.x, vec.y, -vec.z, vec.w);
+	}
 };

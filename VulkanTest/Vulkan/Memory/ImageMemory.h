@@ -9,7 +9,7 @@ class ImageMemory : public DeviceMemory
 {
 public:
 	ImageMemory(VulkanContext& vulkanContext,
-		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage,
+		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlags imageAspect,
 		MemoryType memoryType);
 	void FlushData(std::span<std::byte> data) override;
 	void TransitionLayout(const vk::ImageLayout& newImageLayout);
@@ -30,5 +30,6 @@ private:
 	vk::ImageLayout imageLayout;
 	vk::ImageType imageType;
 	vk::ImageViewType imageViewType;
+	vk::ImageAspectFlags imageAspect;
 };
 

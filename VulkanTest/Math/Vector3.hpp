@@ -71,4 +71,10 @@ public:
 	{
 		return std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2);
 	}
+
+	template <class T>
+	static Vector3<T> FromGLTF(const Vector3<T>& vec)
+	{
+		return Vector3<T>(vec.x, vec.y, -vec.z);
+	}
 };

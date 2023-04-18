@@ -4,6 +4,7 @@
 #include <memory>
 
 class VulkanContext;
+class ImageMemory;
 
 class SwapChain {
 public:
@@ -33,6 +34,8 @@ public:
 	vk::Extent2D swapChainExtent;
 	std::vector<vk::ImageView> swapChainImageViews;
 	std::vector<vk::Framebuffer> swapChainFramebuffers;
+
+	std::unique_ptr<ImageMemory> depthBuffer;
 
 	size_t frameCount = 0;
 private:

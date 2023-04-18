@@ -9,9 +9,9 @@
 #include "../QueueFamilies.h"
 
 ImageMemory::ImageMemory(VulkanContext& vulkanContext,
-		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage,
+		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlags imageAspect,
 		MemoryType memoryType)
-	: DeviceMemory(vulkanContext, memoryType), resolution(resolution), format(format), usage(usage)
+	: DeviceMemory(vulkanContext, memoryType), resolution(resolution), format(format), usage(usage), imageAspect(imageAspect)
 {
 	auto& device = vulkanContext.deviceController->device;
 	vk::ImageTiling tiling{};
@@ -41,8 +41,6 @@ ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 	device.bindImageMemory(image, memory, 0);
 
 	CreateImageViewAndSampler();
-
-	TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 }
 
 void ImageMemory::FlushData(std::span<std::byte> data)
@@ -50,11 +48,10 @@ void ImageMemory::FlushData(std::span<std::byte> data)
 	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
 	{
 		DeviceMemory::FlushData(data);
-		TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 		return;
 	}
 
-	ImageMemory stagingImage(vulkanContext, resolution, format, usage | vk::ImageUsageFlagBits::eTransferSrc,
+	ImageMemory stagingImage(vulkanContext, resolution, format, usage | vk::ImageUsageFlagBits::eTransferSrc, imageAspect,
 		MemoryType::HostLocal);
 	stagingImage.FlushData(data);
 	stagingImage.TransitionLayout(vk::ImageLayout::eTransferSrcOptimal);
@@ -63,13 +60,11 @@ void ImageMemory::FlushData(std::span<std::byte> data)
 	uint32_t queueFamily = vulkanContext.queueFamilies->graphicQueueFamily;
 	vulkanContext.commandBufferDispatcher->Invoke(queueFamily, [this, &stagingImage](vk::CommandBuffer& cb)
 		{
-			vk::ImageSubresourceLayers subresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+			vk::ImageSubresourceLayers subresourceLayers(imageAspect, 0, 0, 1);
 			vk::Extent3D extent(resolution.x, resolution.x, 1);
 			vk::ImageCopy region(subresourceLayers, {}, subresourceLayers, {}, extent);
 			cb.copyImage(stagingImage.image, stagingImage.imageLayout, this->image, this->imageLayout, region);
 		});
-
-	TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
 	stagingImage.Dispose();
 }
@@ -79,10 +74,10 @@ void ImageMemory::TransitionLayout(const vk::ImageLayout& newImageLayout)
 	uint32_t queueFamily = vulkanContext.queueFamilies->graphicQueueFamily;
 	vulkanContext.commandBufferDispatcher->Invoke(queueFamily, [this, &newImageLayout](auto& cb)
 		{
-			vk::PipelineStageFlagBits srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
-			vk::AccessFlagBits srcAccess{};
-			vk::PipelineStageFlagBits dstStage{};
-			vk::AccessFlagBits dstAccess{};
+			vk::PipelineStageFlags srcStage = vk::PipelineStageFlagBits::eTopOfPipe;
+			vk::AccessFlags srcAccess{};
+			vk::PipelineStageFlags dstStage{};
+			vk::AccessFlags dstAccess{};
 
 			if (imageLayout == vk::ImageLayout::eUndefined) {}
 			if (imageLayout == vk::ImageLayout::ePreinitialized) {}
@@ -112,7 +107,12 @@ void ImageMemory::TransitionLayout(const vk::ImageLayout& newImageLayout)
 				dstAccess = vk::AccessFlagBits::eShaderRead;
 			}
 
-			vk::ImageSubresourceRange subresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+			if (newImageLayout == vk::ImageLayout::eDepthStencilReadOnlyOptimal) {
+				dstStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
+				dstAccess = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+			}
+
+			vk::ImageSubresourceRange subresourceRange(imageAspect, 0, 1, 0, 1);
 			vk::ImageMemoryBarrier imageBarrier(
 				srcAccess, dstAccess,
 				imageLayout, newImageLayout,
@@ -128,7 +128,7 @@ void ImageMemory::TransitionLayout(const vk::ImageLayout& newImageLayout)
 void ImageMemory::CreateImageViewAndSampler()
 {
 	vk::ComponentMapping components{};
-	vk::ImageSubresourceRange subresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+	vk::ImageSubresourceRange subresourceRange(imageAspect, 0, 1, 0, 1);
 	vk::ImageViewCreateInfo imageViewInfo({}, image, imageViewType, format, components, subresourceRange );
 	imageView = vulkanContext.deviceController->device.createImageView(imageViewInfo);
 

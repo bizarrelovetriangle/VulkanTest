@@ -93,9 +93,9 @@ public:
 		float sin = std::sin(radians);
 
 		return Matrix4{
-			{ cos,  0., sin,  0.},
+			{ cos,  0.,-sin,  0.},
 			{  0.,  1.,  0.,  0.},
-			{-sin,  0., cos,  0.},
+			{ sin,  0., cos,  0.},
 			{  0.,  0.,  0.,  1.}};
 	}
 	

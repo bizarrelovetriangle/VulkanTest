@@ -25,13 +25,9 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 	float degen = float(0. + seconds / 2);
 
 	Matrix4 world;
-
-	//world = Matrix4::Rotate(Vector4f(degen, 0, 0, 0)) * world;
 	world = Matrix4::RotateY(degen) * world;
-	world = Matrix4::Translation(Vector3f(0, 0, 0.9)) * world;
-
-	world = Matrix4::Translation({ 0., 0., 0 }) * Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
-	//Matrix4 world = Matrix4::Translation(Vector3f( 0., 0., 0 )) * Matrix4::Scale({ 0.3, 0.3, 0.3 });
+	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
+	world = Matrix4::Translation(Vector3f(0, 0, 0.7)) * world;
 
 	world.j *= -1;
 

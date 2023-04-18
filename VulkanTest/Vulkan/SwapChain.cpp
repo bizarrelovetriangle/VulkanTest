@@ -20,6 +20,8 @@ SwapChain::SwapChain(VulkanContext& vulkanContext)
 
 void SwapChain::Dispose()
 {
+	depthBuffer->Dispose();
+
 	for (auto& imageView : swapChainImageViews) {
 		vulkanContext.deviceController->device.destroyImageView(imageView);
 	}
@@ -36,7 +38,8 @@ void SwapChain::CreateFramebuffers(vk::RenderPass& renderPass) {
 
 	for (size_t i = 0; i < swapChainImageViews.size(); i++) {
 		vk::ImageView attachments[] = {
-			swapChainImageViews[i]
+			swapChainImageViews[i],
+			depthBuffer->imageView
 		};
 
 		vk::FramebufferCreateInfo framebufferInfo(
@@ -75,10 +78,11 @@ void SwapChain::CreateSwapChain()
 	swapChainExtent = extent;
 
 	{
-		//vk::Extent3D extent3D(extent.width, extent.height, 1);
-		//ImageMemory image(vulkanContext,
-		//    extent3D, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment,
-		//    MemoryType::DeviceLocal);
+		Vector2f resolution(extent.width, extent.height);
+		depthBuffer = std::make_unique<ImageMemory>(vulkanContext,
+			resolution, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,
+			MemoryType::DeviceLocal);
+		depthBuffer->TransitionLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
 	}
 }
 

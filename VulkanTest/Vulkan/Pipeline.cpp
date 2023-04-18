@@ -34,10 +34,10 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 		auto imageInfo = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
 
 		image = std::make_unique<ImageMemory>(vulkanContext,
-			imageInfo.first, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled,
+			imageInfo.first, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
 			MemoryType::DeviceLocal);
-
 		image->FlushData(imageInfo.second);
+		image->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 	}
 
 	CreateDescriptorSetLayout();
@@ -48,39 +48,42 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 	auto binding = RenderObjectVertexData::BindingDescription();
 	auto attributes = RenderObjectVertexData::AttributeDescriptions();
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo({}, binding, attributes);;
-	vk::PipelineInputAssemblyStateCreateInfo inputAssembly({}, vk::PrimitiveTopology::eTriangleList, VK_FALSE);
+	vk::PipelineInputAssemblyStateCreateInfo inputAssembly({}, vk::PrimitiveTopology::eTriangleList, false);
 
 	std::vector<vk::DynamicState> dynamicStates{vk::DynamicState::eViewport, vk::DynamicState::eScissor};
 	vk::PipelineViewportStateCreateInfo viewportState({}, 1, nullptr, 1, nullptr);
 	vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicStates);
 
 	vk::PipelineRasterizationStateCreateInfo rasterizer(
-		{}, VK_FALSE, VK_FALSE,
-		vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise,
-		VK_FALSE, 0.0f, 0.0f, 0.0f,
+		{}, false, false,
+		vk::PolygonMode::eFill, vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise,
+		false, 0.0f, 0.0f, 0.0f,
 		1.);
 
 	vk::PipelineMultisampleStateCreateInfo multisampling(
 		{}, vk::SampleCountFlagBits::e1,
-		VK_FALSE, 1.0f, nullptr, VK_FALSE, VK_FALSE);
+		false, 1.0f, nullptr, false, false);
+
+	vk::PipelineDepthStencilStateCreateInfo depthStencil(
+		{}, true, true, vk::CompareOp::eLess, false, false, {}, {}, 0., 1.);
 
 	vk::PipelineColorBlendAttachmentState colorBlendAttachment(
-		VK_FALSE,
+		false,
 		vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd,
 		vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd,
 		vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
 		vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
 	);
 
-	vk::PipelineColorBlendStateCreateInfo colorBlending({}, VK_FALSE, vk::LogicOp::eCopy, colorBlendAttachment);
+	vk::PipelineColorBlendStateCreateInfo colorBlending({}, false, vk::LogicOp::eCopy, colorBlendAttachment);
 
 	vk::GraphicsPipelineCreateInfo pipelineInfo(
 		{}, shaderStages, &vertexInputInfo, &inputAssembly, nullptr,
 		&viewportState, &rasterizer, &multisampling,
-		nullptr, &colorBlending, &dynamicState,
+		&depthStencil, &colorBlending, &dynamicState,
 		pipelineLayout, renderPass, 0);
 
-	auto res = device.createGraphicsPipeline(VK_NULL_HANDLE, pipelineInfo);
+	auto res = device.createGraphicsPipeline(nullptr, pipelineInfo);
 
 	if (res.result != vk::Result::eSuccess){
 		throw std::runtime_error("failed to create graphics pipeline!");

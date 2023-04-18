@@ -57,8 +57,8 @@ public:
 				{
 					RenderObjectVertexData vertexData
 					{
-						.position = positions[index],
-						.normal = normals[index]
+						.position = Vector3f::FromGLTF(positions[index]),
+						.normal = Vector3f::FromGLTF(normals[index])
 					};
 
 					if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
@@ -85,9 +85,9 @@ private:
 		auto rotation = GetVector<Vector4f>(node.rotation);
 
 		Matrix4 matrix;
-		if (scale) matrix = Matrix4::Scale(*scale) * matrix;
-		if (rotation) matrix = Matrix4::Rotate(*rotation) * matrix;
-		if (translation) matrix = Matrix4::Translation(*translation) * matrix;
+		if (scale) matrix = Matrix4::Scale(Vector3f::FromGLTF(*scale)) * matrix;
+		if (rotation) matrix = Matrix4::Rotate(Vector4f::FromGLTF(*rotation)) * matrix;
+		if (translation) matrix = Matrix4::Translation(Vector3f::FromGLTF(*translation)) * matrix;
 		return matrix;
 	}
 

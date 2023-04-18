@@ -34,8 +34,9 @@ void CommandBuffer::RecordCommandBuffer(size_t imageIndex,
 	{
 		vk::Rect2D renderArea({ 0, 0 }, swapChain->swapChainExtent);
 
-		vk::ClearColorValue clearColorValue(std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f});
-		vk::ClearValue clearColor(clearColorValue);
+		vk::ClearColorValue clearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
+		vk::ClearDepthStencilValue clearDepthStencilValue(1., 0.);
+		std::vector<vk::ClearValue> clearColor{ clearColorValue, clearDepthStencilValue };
 
 		vk::RenderPassBeginInfo renderPassInfo(
 			renderPass->renderPass, swapChain->swapChainFramebuffers[imageIndex],
