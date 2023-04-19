@@ -65,6 +65,7 @@ public:
 
 					if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
 					if (!colors.empty())		vertexData.color = colors[index];
+					if (!colors.empty())		renderObject.uniform.hasColors = true;
 
 					renderObject.vertexData.push_back(vertexData);
 				}
@@ -82,6 +83,7 @@ public:
 						std::vector<std::byte> data(image.image.size());
 						std::memcpy(data.data(), image.image.data(), image.image.size());
 						renderObject.textureData = std::make_pair(Vector2u(image.width, image.height), data);
+						renderObject.uniform.hasTexture = true;
 					}
 				}
 			}
