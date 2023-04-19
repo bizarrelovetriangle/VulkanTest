@@ -3,14 +3,15 @@
 #include "VulkanContext.h"
 #include "Utils/GLTFReader.h"
 #include "Primitives/RenderObject.h"
-#include "Vulkan/Memory/ImageMemory.h"
+#include "Vulkan/DescriptorSets.h"
+#include "Vulkan/Pipeline.h"
+#include "Vulkan/SwapChain.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #undef LoadImage;
-
 
 class Scene
 {
@@ -22,8 +23,8 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
-		GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
-		//GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
+		//GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
+		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
 
 		renderObjects = std::move(glTFReader.renderObjects);
 
@@ -31,6 +32,32 @@ public:
 		{
 			renderObject->vertexBuffer = std::make_unique<BufferMemory<RenderObjectVertexData>>(
 				vulkanContext, renderObject->vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+
+			renderObject->descriptorSets = std::make_unique<DescriptorSets>(
+				vulkanContext, vulkanContext.pipeline->descriptorSetLayout, vulkanContext.swapChain->frameCount);
+
+			if (renderObject->textureData)
+			{
+				auto& [resolution, imageData] = *renderObject->textureData;
+				renderObject->textureBuffer = std::make_unique<ImageMemory>(
+					vulkanContext, resolution, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
+					MemoryType::Universal);
+				renderObject->textureBuffer->FlushData(imageData);
+				renderObject->textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+				renderObject->descriptorSets->UpdateDescriptor(*renderObject->textureBuffer);
+			}
+			else
+			{
+				auto [resolution, imageData] = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
+				renderObject->textureBuffer = std::make_unique<ImageMemory>(
+					vulkanContext, resolution, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
+					MemoryType::Universal);
+				//renderObject->textureBuffer->FlushData(imageData);
+				renderObject->textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+				renderObject->descriptorSets->UpdateDescriptor(*renderObject->textureBuffer);
+			}
 		}
 	}
 
@@ -45,7 +72,7 @@ public:
 	~Scene()
 	{
 		vulkanContext.Await();
-		for (auto& renderObject : renderObjects) renderObject->vertexBuffer->Dispose();
+		for (auto& renderObject : renderObjects) renderObject->Dispose();
 		vulkanContext.Dispose();
 		glfwDestroyWindow(window);
 		glfwTerminate();

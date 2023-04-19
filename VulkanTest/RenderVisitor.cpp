@@ -3,6 +3,7 @@
 #include "Primitives/RenderObject.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Pipeline.h"
+#include "Vulkan/DescriptorSets.h"
 
 RenderVisitor::RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline, size_t imageIndex)
 	: commandBuffer(commandBuffer.commandBuffer), pipeline(pipeline), imageIndex(imageIndex)
@@ -12,6 +13,9 @@ RenderVisitor::RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline, s
 void RenderVisitor::Visit(const RenderObject& renderObject)
 {
 	BindPipeline(pipeline);
+
+	commandBuffer.bindDescriptorSets(
+		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0, renderObject.descriptorSets->descriptorSets[imageIndex], {});
 
 	vk::Buffer vertexBuffers[] = { renderObject.vertexBuffer->buffer };
 	vk::DeviceSize vertexOffsets[] = { 0 };
@@ -42,8 +46,6 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 void RenderVisitor::BindPipeline(Pipeline& pipeline)
 {
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphicsPipeline);
-	commandBuffer.bindDescriptorSets(
-		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0, pipeline.descriptorSets[imageIndex], {});
 	auto viewport = pipeline.CreateViewport();
 	auto scissors = pipeline.CreateScissors();
 	commandBuffer.setViewport(0, 1, &viewport);

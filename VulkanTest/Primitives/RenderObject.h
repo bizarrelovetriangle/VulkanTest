@@ -3,11 +3,12 @@
 #include "../Math/Vector2.hpp"
 #include "../Math/Matrix4.hpp"
 #include "../Vulkan/Memory/BufferMemory.h"
-
-#undef VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
+#include <optional>
 #include <vulkan/vulkan.hpp>
 
 class RenderVisitor;
+class ImageMemory;
+class DescriptorSets;
 
 class RenderObjectPushConstantRange
 {
@@ -51,5 +52,14 @@ public:
 	Matrix4 model;
 	std::vector<RenderObjectVertexData> vertexData;
 	std::unique_ptr<BufferMemory<RenderObjectVertexData>> vertexBuffer;
+
+	Vector4f baseColor;
+	std::optional<std::pair<Vector2u, std::vector<std::byte>>> textureData;
+	std::unique_ptr<ImageMemory> textureBuffer;
+
+	std::unique_ptr<DescriptorSets> descriptorSets;
+
+	RenderObject();
 	virtual void Accept(RenderVisitor& renderVisitor) const;
+	void Dispose();
 };

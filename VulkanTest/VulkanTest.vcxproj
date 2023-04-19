@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />
     <ClCompile Include="Vulkan\Memory\DeviceMemory.cpp" />
     <ClCompile Include="Vulkan\Memory\ImageMemory.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />
     <ClInclude Include="Dependencies\stb_image.h" />

@@ -5,6 +5,8 @@
 #include "../Math/Vector2.hpp"
 #include "../Math/Vector3.hpp"
 #include "../Math/Matrix4.hpp"
+#include "../Vulkan/Memory/ImageMemory.h"
+#include "Vulkan/DescriptorSets.h"
 #include <string>
 #include <optional>
 
@@ -65,6 +67,22 @@ public:
 					if (!colors.empty())		vertexData.color = colors[index];
 
 					renderObject.vertexData.push_back(vertexData);
+				}
+
+				if (primitive.material != -1)
+				{
+					auto& material = glTFModel.materials[primitive.material];
+					auto& roughness = material.pbrMetallicRoughness;
+					renderObject.baseColor = *GetVector<Vector4f>(roughness.baseColorFactor);
+
+					if (roughness.baseColorTexture.index != -1)
+					{
+						auto& texture = glTFModel.textures[roughness.baseColorTexture.index];
+						auto& image = glTFModel.images[texture.source];
+						std::vector<std::byte> data(image.image.size());
+						std::memcpy(data.data(), image.image.data(), image.image.size());
+						renderObject.textureData = std::make_pair(Vector2u(image.width, image.height), data);
+					}
 				}
 			}
 

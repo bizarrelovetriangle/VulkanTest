@@ -23,7 +23,7 @@ void main()
 	vec3 rotatedNormal = vec3(matrix * vec4(normal, 0.));
 
 	vec3 view = vec3(0., 0., -1.);
-	fragFactor = max(dot(view, rotatedNormal), 0);
+	fragFactor = dot(view, rotatedNormal);
 	fragColor = color;
 	fragTexturePos = texturePos;
 }

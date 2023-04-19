@@ -22,9 +22,6 @@ private:
 public:
 	vk::Pipeline graphicsPipeline;
 	vk::PipelineLayout pipelineLayout;
-
-	vk::DescriptorPool descriptorPool;
-	std::vector<vk::DescriptorSet> descriptorSets;
 	vk::DescriptorSetLayout descriptorSetLayout;
 
 private:

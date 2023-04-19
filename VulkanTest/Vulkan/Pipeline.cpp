@@ -97,7 +97,6 @@ void Pipeline::Dispose()
 	image->Dispose();
 
 	device.destroyDescriptorSetLayout(descriptorSetLayout);
-	device.destroyDescriptorPool(descriptorPool);
 
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipelineLayout(pipelineLayout);
@@ -112,23 +111,6 @@ void Pipeline::CreateDescriptorSetLayout()
 		0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment);
 	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, binding);
 	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
-
-	vk::DescriptorPoolSize descriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, swapChain->frameCount);
-	vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo({}, swapChain->frameCount, descriptorPoolSize);
-	descriptorPool = device.createDescriptorPool(descriptorPoolCreateInfo);
-
-	std::vector<vk::DescriptorSetLayout> layouts(swapChain->frameCount, descriptorSetLayout);
-	vk::DescriptorSetAllocateInfo descriptorSetAllocateInfo(descriptorPool, layouts);
-	descriptorSets = device.allocateDescriptorSets(descriptorSetAllocateInfo);
-
-	for (size_t i = 0; i < swapChain->frameCount; ++i)
-	{
-		vk::DescriptorImageInfo descriptorImageInfo(
-			image->sampler, image->imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
-		vk::WriteDescriptorSet writeDescriptorSet(
-			descriptorSets[i], 0, 0, vk::DescriptorType::eCombinedImageSampler, descriptorImageInfo, {}, {});
-		device.updateDescriptorSets(writeDescriptorSet, {});
-	}
 }
 
 vk::Viewport Pipeline::CreateViewport()

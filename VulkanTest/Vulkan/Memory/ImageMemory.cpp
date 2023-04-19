@@ -29,7 +29,7 @@ ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 	imageType = vk::ImageType::e2D;
 	imageViewType = vk::ImageViewType::e2D;
 
-	vk::Extent3D extent(resolution.x, resolution.x, 1);
+	vk::Extent3D extent(resolution.x, resolution.y, 1);
 	vk::ImageCreateInfo createImageInfo(
 		{}, vk::ImageType::e2D, format, extent, 1, 1, vk::SampleCountFlagBits::e1,
 		tiling, usage, vk::SharingMode::eExclusive, {}, imageLayout);

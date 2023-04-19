@@ -32,4 +32,3 @@ private:
 	vk::ImageViewType imageViewType;
 	vk::ImageAspectFlags imageAspect;
 };
-
