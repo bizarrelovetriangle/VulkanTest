@@ -73,7 +73,7 @@ public:
 				{
 					auto& material = glTFModel.materials[primitive.material];
 					auto& roughness = material.pbrMetallicRoughness;
-					renderObject.baseColor = *GetVector<Vector4f>(roughness.baseColorFactor);
+					renderObject.uniform.baseColor = *GetVector<Vector4f>(roughness.baseColorFactor);
 
 					if (roughness.baseColorTexture.index != -1)
 					{

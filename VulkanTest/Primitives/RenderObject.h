@@ -45,6 +45,14 @@ public:
 	}
 };
 
+class RenderObjectUniform
+{
+public:
+	alignas(16) Vector4f baseColor;
+	alignas(4) bool hasTexture = false;
+	alignas(4) bool hasColors = false;
+};
+
 class RenderObject
 {
 public:
@@ -53,9 +61,11 @@ public:
 	std::vector<RenderObjectVertexData> vertexData;
 	std::unique_ptr<BufferMemory<RenderObjectVertexData>> vertexBuffer;
 
-	Vector4f baseColor;
 	std::optional<std::pair<Vector2u, std::vector<std::byte>>> textureData;
 	std::unique_ptr<ImageMemory> textureBuffer;
+
+	RenderObjectUniform uniform;
+	std::unique_ptr<BufferMemory<RenderObjectUniform>> uniformBuffer;
 
 	std::unique_ptr<DescriptorSets> descriptorSets;
 

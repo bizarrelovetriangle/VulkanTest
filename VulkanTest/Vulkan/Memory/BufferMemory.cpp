@@ -58,5 +58,6 @@ void BufferMemory<T>::Dispose()
 }
 
 template BufferMemory<RenderObjectVertexData>;
+template BufferMemory<RenderObjectUniform>;
 template BufferMemory<uint16_t>;
 template BufferMemory<std::byte>;

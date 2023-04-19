@@ -31,7 +31,7 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 	Matrix4 world;
 	world = Matrix4::RotateY(degen) * world;
 	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
-	world = Matrix4::Translation(Vector3f(0, 0, 0.7)) * world;
+	world = Matrix4::Translation(Vector3f(0, 0, 2)) * world;
 
 	world.j *= -1;
 

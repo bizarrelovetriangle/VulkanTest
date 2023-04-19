@@ -19,6 +19,7 @@ void main()
 {
 	mat4 matrix = Matrixes.world * Matrixes.model;
 	gl_Position = matrix * vec4(pos, 1.0);
+	gl_Position.z /= 10;
 
 	vec3 rotatedNormal = vec3(matrix * vec4(normal, 0.));
 

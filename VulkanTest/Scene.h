@@ -45,7 +45,7 @@ public:
 				renderObject->textureBuffer->FlushData(imageData);
 				renderObject->textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
-				renderObject->descriptorSets->UpdateDescriptor(*renderObject->textureBuffer);
+				renderObject->uniform.hasTexture = true;
 			}
 			else
 			{
@@ -53,11 +53,14 @@ public:
 				renderObject->textureBuffer = std::make_unique<ImageMemory>(
 					vulkanContext, resolution, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
 					MemoryType::Universal);
-				//renderObject->textureBuffer->FlushData(imageData);
 				renderObject->textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
-
-				renderObject->descriptorSets->UpdateDescriptor(*renderObject->textureBuffer);
 			}
+
+			std::span<RenderObjectUniform> uniformSpan(&renderObject->uniform, &renderObject->uniform + 1);
+			renderObject->uniformBuffer = std::make_unique<BufferMemory<RenderObjectUniform>>(
+				vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+
+			renderObject->descriptorSets->UpdateDescriptor(*renderObject->uniformBuffer, *renderObject->textureBuffer);
 		}
 	}
 

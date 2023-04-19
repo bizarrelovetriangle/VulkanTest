@@ -107,9 +107,14 @@ void Pipeline::Dispose()
 
 void Pipeline::CreateDescriptorSetLayout()
 {
-	vk::DescriptorSetLayoutBinding binding(
-		0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment);
-	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, binding);
+	std::vector<vk::DescriptorSetLayoutBinding> bindings
+	{
+		vk::DescriptorSetLayoutBinding(
+			0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(
+			1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment)
+	};
+	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
 	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
 }
 

@@ -16,6 +16,7 @@ void RenderObject::Accept(RenderVisitor& renderVisitor) const
 void RenderObject::Dispose()
 {
 	vertexBuffer->Dispose();
+	uniformBuffer->Dispose();
 	if (textureBuffer) textureBuffer->Dispose();
 	descriptorSets->Dispose();
 }

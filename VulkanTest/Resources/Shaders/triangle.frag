@@ -3,15 +3,22 @@
 layout(location = 0) in float fragFactor;
 layout(location = 1) in vec4 fragColor;
 layout(location = 2) in vec2 fragTexturePos;
-layout(binding = 0) uniform sampler2D texSampler;
+layout(binding = 0) uniform Uniform
+{
+	vec4 baseColor;
+	bool hasTexture;
+	bool hasColors;
+};
+layout(binding = 1) uniform sampler2D texSampler;
 
 layout(location = 0) out vec4 outColor;
 
 void main()
 {
-	vec4 textureColor = texture(texSampler, fragTexturePos);
-
-	vec4 color = textureColor;
+	vec4 color;
+	if (hasTexture)		color = texture(texSampler, fragTexturePos);
+	else if (hasColors)	color = fragColor;
+	else				color = baseColor;
 
 	float factor = abs(fragFactor);
 
