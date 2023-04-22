@@ -23,8 +23,8 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
-		GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
-		//GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
+		//GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
+		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
 
 		renderObjects = std::move(glTFReader.renderObjects);
 
@@ -33,8 +33,7 @@ public:
 			renderObject->vertexBuffer = std::make_unique<BufferMemory<RenderObjectVertexData>>(
 				vulkanContext, renderObject->vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 
-			renderObject->descriptorSets = std::make_unique<DescriptorSets>(
-				vulkanContext, vulkanContext.pipeline->descriptorSetLayout, vulkanContext.swapChain->frameCount);
+			renderObject->descriptorSets = std::make_unique<DescriptorSets>(vulkanContext);
 
 			if (renderObject->textureData)
 			{

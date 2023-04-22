@@ -9,6 +9,7 @@
 class RenderVisitor;
 class ImageMemory;
 class DescriptorSets;
+class Pipeline;
 
 class RenderObjectPushConstantRange
 {
@@ -73,3 +74,4 @@ public:
 	virtual void Accept(RenderVisitor& renderVisitor) const;
 	void Dispose();
 };
+

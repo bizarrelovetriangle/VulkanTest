@@ -12,6 +12,9 @@ public:
 	void Dispose();
 	void CreateFramebuffers(vk::RenderPass& renderPass);
 
+	vk::Viewport CreateViewport();
+	vk::Rect2D CreateScissors();
+
 private:
 	struct SwapChainSupportDetails {
 		vk::SurfaceCapabilitiesKHR capabilities;

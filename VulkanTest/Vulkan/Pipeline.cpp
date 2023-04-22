@@ -4,15 +4,18 @@
 #include <sstream>
 #include <fstream>
 #include "SwapChain.h"
+#include "DeviceController.h"
+#include "RenderPass.h"
 #include "../Primitives/RenderObject.h"
 #include "Memory/ImageMemory.h"
 #include "../VulkanContext.h"
 #include "../Utils/ShaderCompiler.h"
 
-Pipeline::Pipeline(VulkanContext& vulkanContext,
-	const vk::Device& device, const vk::RenderPass& renderPass, std::shared_ptr<SwapChain> swapChain)
-	: vulkanContext(vulkanContext), device(device), renderPass(renderPass), swapChain(swapChain)
+Pipeline::Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout)
+	: vulkanContext(vulkanContext)
 {
+	auto& device = vulkanContext.deviceController->device;
+
 	auto vertexSpirv = ShaderCompiler::CompileShader(
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/triangle.vert",
 		vk::ShaderStageFlagBits::eVertex, false);
@@ -30,17 +33,6 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 
 	shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
-	{
-		auto imageInfo = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
-
-		image = std::make_unique<ImageMemory>(vulkanContext,
-			imageInfo.first, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
-			MemoryType::DeviceLocal);
-		image->FlushData(imageInfo.second);
-		image->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
-	}
-
-	CreateDescriptorSetLayout();
 	vk::PushConstantRange pushConstant(vk::ShaderStageFlagBits::eVertex, 0, sizeof(RenderObjectPushConstantRange));
 	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, descriptorSetLayout, pushConstant);
 	pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
@@ -81,7 +73,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 		{}, shaderStages, &vertexInputInfo, &inputAssembly, nullptr,
 		&viewportState, &rasterizer, &multisampling,
 		&depthStencil, &colorBlending, &dynamicState,
-		pipelineLayout, renderPass, 0);
+		pipelineLayout, vulkanContext.renderPass->renderPass, 0);
 
 	auto res = device.createGraphicsPipeline(nullptr, pipelineInfo);
 
@@ -94,41 +86,11 @@ Pipeline::Pipeline(VulkanContext& vulkanContext,
 
 void Pipeline::Dispose()
 {
-	image->Dispose();
-
-	device.destroyDescriptorSetLayout(descriptorSetLayout);
+	auto& device = vulkanContext.deviceController->device;
 
 	device.destroyPipeline(graphicsPipeline);
 	device.destroyPipelineLayout(pipelineLayout);
 
 	device.destroyShaderModule(fragShaderModule);
 	device.destroyShaderModule(vertShaderModule);
-}
-
-void Pipeline::CreateDescriptorSetLayout()
-{
-	std::vector<vk::DescriptorSetLayoutBinding> bindings
-	{
-		vk::DescriptorSetLayoutBinding(
-			0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
-		vk::DescriptorSetLayoutBinding(
-			1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment)
-	};
-	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
-	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
-}
-
-vk::Viewport Pipeline::CreateViewport()
-{
-	vk::Viewport viewport(
-		0., 0.,
-		(float)swapChain->swapChainExtent.width, (float)swapChain->swapChainExtent.height,
-		0., 1.);
-	return viewport;
-}
-
-vk::Rect2D Pipeline::CreateScissors()
-{
-	vk::Rect2D scissors({}, swapChain->swapChainExtent);
-	return scissors;
 }

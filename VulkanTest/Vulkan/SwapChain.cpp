@@ -101,6 +101,21 @@ void SwapChain::CreateImageViews()
 	}
 }
 
+vk::Viewport SwapChain::CreateViewport()
+{
+	vk::Viewport viewport(
+		0., 0.,
+		(float)swapChainExtent.width, (float)swapChainExtent.height,
+		0., 1.);
+	return viewport;
+}
+
+vk::Rect2D SwapChain::CreateScissors()
+{
+	vk::Rect2D scissors({}, swapChainExtent);
+	return scissors;
+}
+
 SwapChain::SwapChainSupportDetails SwapChain::querySwapChainSupport(const vk::PhysicalDevice& physicalDevice)
 {
 	SwapChainSupportDetails details

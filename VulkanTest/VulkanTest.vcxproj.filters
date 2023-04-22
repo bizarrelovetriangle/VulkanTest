@@ -66,6 +66,9 @@
     <ClCompile Include="Vulkan\DescriptorSets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vulkan\PipelineProvider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">
@@ -150,6 +153,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\DescriptorSets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vulkan\PipelineProvider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,9 +12,9 @@
 
 CommandBuffer::CommandBuffer(VulkanContext& vulkanContext,
 	const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
-	std::shared_ptr<Pipeline> pipeline, std::shared_ptr<SwapChain> swapChain,
+	std::shared_ptr<SwapChain> swapChain,
 	std::shared_ptr<RenderPass> renderPass)
-	: vulkanContext(vulkanContext), device(device), queueFamilies(queueFamilies), pipeline(pipeline), swapChain(swapChain), renderPass(renderPass)
+	: vulkanContext(vulkanContext), device(device), queueFamilies(queueFamilies), swapChain(swapChain), renderPass(renderPass)
 {
 	CreateCommandPool();
 	CreateCommandBuffer();
@@ -44,7 +44,7 @@ void CommandBuffer::RecordCommandBuffer(size_t imageIndex,
 
 		commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
-		RenderVisitor renderVisitor(*this, *pipeline, imageIndex);
+		RenderVisitor renderVisitor(vulkanContext, *this, imageIndex);
 
 		for (auto& renderObject : renderObjects)
 		{

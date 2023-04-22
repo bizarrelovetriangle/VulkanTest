@@ -10,27 +10,16 @@ class VulkanContext;
 class Pipeline
 {
 public:
-	Pipeline(VulkanContext& vulkanContext,
-		const vk::Device& device, const vk::RenderPass& renderPass, std::shared_ptr<SwapChain> swapChain);
+	Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout);
 	void Dispose();
-	vk::Viewport CreateViewport();
-	vk::Rect2D CreateScissors();
-
-private:
-	void CreateDescriptorSetLayout();
 
 public:
 	vk::Pipeline graphicsPipeline;
 	vk::PipelineLayout pipelineLayout;
-	vk::DescriptorSetLayout descriptorSetLayout;
 
 private:
 	vk::ShaderModule vertShaderModule;
 	vk::ShaderModule fragShaderModule;
 	std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
-	const vk::Device& device;
-	const vk::RenderPass& renderPass;
-	std::shared_ptr<SwapChain> swapChain;
 	VulkanContext& vulkanContext;
-	std::unique_ptr<ImageMemory> image;
 };

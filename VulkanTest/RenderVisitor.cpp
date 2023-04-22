@@ -4,14 +4,18 @@
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/DescriptorSets.h"
+#include "Vulkan/PipelineProvider.h"
+#include "Vulkan/SwapChain.h"
+#include "VulkanContext.h"
 
-RenderVisitor::RenderVisitor(CommandBuffer& commandBuffer, Pipeline& pipeline, size_t imageIndex)
-	: commandBuffer(commandBuffer.commandBuffer), pipeline(pipeline), imageIndex(imageIndex)
+RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex)
+	: vulkanContext(vulkanContext), commandBuffer(commandBuffer.commandBuffer), imageIndex(imageIndex)
 {
 }
 
 void RenderVisitor::Visit(const RenderObject& renderObject)
 {
+	auto& pipeline = *vulkanContext.pipelineProvider->GetPipeline(renderObject);
 	BindPipeline(pipeline);
 
 	commandBuffer.bindDescriptorSets(
@@ -46,8 +50,8 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 void RenderVisitor::BindPipeline(Pipeline& pipeline)
 {
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphicsPipeline);
-	auto viewport = pipeline.CreateViewport();
-	auto scissors = pipeline.CreateScissors();
+	auto viewport = vulkanContext.swapChain->CreateViewport();
+	auto scissors = vulkanContext.swapChain->CreateScissors();
 	commandBuffer.setViewport(0, 1, &viewport);
 	commandBuffer.setScissor(0, 1, &scissors);
 }
