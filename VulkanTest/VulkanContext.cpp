@@ -23,7 +23,6 @@
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Memory/BufferMemory.h"
-#include "Utils/ObjReader.hpp"
 #include "Utils/GLTFReader.h"
 #include "Vulkan/Memory/ImageMemory.h"
 #include "Vulkan/CommandBufferDispatcher.h"

@@ -1,12 +1,9 @@
 #undef max
 #define STBI_MSC_SECURE_CRT
 #include "../Dependencies/tiny_gltf/tiny_gltf.h"
-#include "../Primitives/RenderObject.h"
 #include "../Math/Vector2.hpp"
 #include "../Math/Vector3.hpp"
 #include "../Math/Matrix4.hpp"
-#include "../Vulkan/Memory/ImageMemory.h"
-#include "Vulkan/DescriptorSets.h"
 #include <string>
 #include <optional>
 
@@ -17,6 +14,24 @@ namespace
 	const std::string TextureCoord = "TEXCOORD_0";
 	const std::string Color = "COLOR_0";
 }
+
+struct DeserializedObjectVertexData
+{
+	Vector3f position;
+	Vector3f normal;
+	Vector2f textureCoord;
+	Vector4f color;
+};
+
+struct DeserializedObject
+{
+	std::string name;
+	Matrix4 model;
+	std::vector<DeserializedObjectVertexData> vertexData;
+	std::optional<std::pair<Vector2u, std::vector<std::byte>>> textureData;
+	Vector4f baseColor;
+	bool hasColors = false;
+};
 
 class GLTFReader
 {
@@ -35,9 +50,9 @@ public:
 			if (node.mesh < 0) continue;
 			auto& mesh = glTFModel.meshes[node.mesh];
 
-			RenderObject renderObject;
-			renderObject.name = node.name;
-			renderObject.model = ComposeMatrix(node);
+			DeserializedObject deserializedObject;
+			deserializedObject.name = node.name;
+			deserializedObject.model = ComposeMatrix(node);
 
 			for (auto& primitive : mesh.primitives)
 			{
@@ -57,7 +72,7 @@ public:
 
 				for (auto index : indexes)
 				{
-					RenderObjectVertexData vertexData
+					DeserializedObjectVertexData vertexData
 					{
 						.position = Vector3f::FromGLTF(positions[index]),
 						.normal = Vector3f::FromGLTF(normals[index])
@@ -65,16 +80,16 @@ public:
 
 					if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
 					if (!colors.empty())		vertexData.color = colors[index];
-					if (!colors.empty())		renderObject.uniform.hasColors = true;
+					if (!colors.empty())		deserializedObject.hasColors = true;
 
-					renderObject.vertexData.push_back(vertexData);
+					deserializedObject.vertexData.push_back(vertexData);
 				}
 
 				if (primitive.material != -1)
 				{
 					auto& material = glTFModel.materials[primitive.material];
 					auto& roughness = material.pbrMetallicRoughness;
-					renderObject.uniform.baseColor = *GetVector<Vector4f>(roughness.baseColorFactor);
+					deserializedObject.baseColor = *GetVector<Vector4f>(roughness.baseColorFactor);
 
 					if (roughness.baseColorTexture.index != -1)
 					{
@@ -82,20 +97,19 @@ public:
 						auto& image = glTFModel.images[texture.source];
 						std::vector<std::byte> data(image.image.size());
 						std::memcpy(data.data(), image.image.data(), image.image.size());
-						renderObject.textureData = std::make_pair(Vector2u(image.width, image.height), data);
-						renderObject.uniform.hasTexture = true;
+						deserializedObject.textureData = std::make_pair(Vector2u(image.width, image.height), data);
 					}
 				}
 			}
 
-			if (renderObject.vertexData.size() > 0)
+			if (deserializedObject.vertexData.size() > 0)
 			{
-				renderObjects.emplace_back(std::make_unique<RenderObject>(std::move(renderObject)));
+				deserializedObjects.emplace_back(std::move(deserializedObject));
 			}
 		}
 	}
 
-	std::vector<std::unique_ptr<RenderObject>> renderObjects;
+	std::vector<DeserializedObject> deserializedObjects;
 
 private:
 	Matrix4 ComposeMatrix(const tinygltf::Node& node)

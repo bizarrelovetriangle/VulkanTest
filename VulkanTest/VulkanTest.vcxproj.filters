@@ -104,9 +104,6 @@
     <ClInclude Include="VulkanContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\ObjReader.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Dependencies\tiny_gltf\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -179,7 +179,6 @@
     <ClInclude Include="Primitives\RenderObject.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Utils\GLTFReader.h" />
-    <ClInclude Include="Utils\ObjReader.hpp" />
     <ClInclude Include="Dependencies\tiny_gltf\json.hpp" />
     <ClInclude Include="Dependencies\tiny_gltf\stb_image.h" />
     <ClInclude Include="Dependencies\tiny_gltf\stb_image_write.h" />

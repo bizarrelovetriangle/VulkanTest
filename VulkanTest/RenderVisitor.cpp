@@ -7,6 +7,8 @@
 #include "Vulkan/PipelineProvider.h"
 #include "Vulkan/SwapChain.h"
 #include "VulkanContext.h"
+#include "Vulkan/Memory/BufferMemory.h"
+#include "Vulkan/Memory/BufferMemory.h"
 
 RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex)
 	: vulkanContext(vulkanContext), commandBuffer(commandBuffer.commandBuffer), imageIndex(imageIndex)

@@ -11,7 +11,6 @@
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#undef LoadImage;
 
 class Scene
 {
@@ -26,38 +25,10 @@ public:
 		//GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
 		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
 
-		renderObjects = std::move(glTFReader.renderObjects);
-
-		for (auto& renderObject : renderObjects)
+		for (auto& deserializedObject : glTFReader.deserializedObjects)
 		{
-			renderObject->vertexBuffer = std::make_unique<BufferMemory<RenderObjectVertexData>>(
-				vulkanContext, renderObject->vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
-
-			renderObject->descriptorSets = std::make_unique<DescriptorSets>(vulkanContext);
-
-			if (renderObject->textureData)
-			{
-				auto& [resolution, imageData] = *renderObject->textureData;
-				renderObject->textureBuffer = std::make_unique<ImageMemory>(
-					vulkanContext, resolution, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
-					MemoryType::Universal);
-				renderObject->textureBuffer->FlushData(imageData);
-				renderObject->textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
-			}
-			else
-			{
-				auto [resolution, imageData] = ImageMemory::LoadImage("E:/Images/testImage.jpeg");
-				renderObject->textureBuffer = std::make_unique<ImageMemory>(
-					vulkanContext, resolution, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
-					MemoryType::Universal);
-				renderObject->textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
-			}
-
-			std::span<RenderObjectUniform> uniformSpan(&renderObject->uniform, &renderObject->uniform + 1);
-			renderObject->uniformBuffer = std::make_unique<BufferMemory<RenderObjectUniform>>(
-				vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
-
-			renderObject->descriptorSets->UpdateDescriptor(*renderObject->uniformBuffer, *renderObject->textureBuffer);
+			auto renderObject = std::make_unique<RenderObject>(vulkanContext, deserializedObject);
+			renderObjects.push_back(std::move(renderObject));
 		}
 	}
 
