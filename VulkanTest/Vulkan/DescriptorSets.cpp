@@ -6,7 +6,7 @@
 #include "Memory/ImageMemory.h"
 #include "../Primitives/RenderObject.h"
 
-DescriptorSets::DescriptorSets(VulkanContext& vulkanContext)
+DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, std::vector<vk::DescriptorSetLayoutBinding>& bindings)
 	: vulkanContext(vulkanContext)
 {
 	size_t count = vulkanContext.swapChain->frameCount;
@@ -21,13 +21,6 @@ DescriptorSets::DescriptorSets(VulkanContext& vulkanContext)
 	vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo({}, count, descriptorPoolSizes);
 	descriptorPool = device.createDescriptorPool(descriptorPoolCreateInfo);
 
-	std::vector<vk::DescriptorSetLayoutBinding> bindings
-	{
-		vk::DescriptorSetLayoutBinding(
-			0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
-		vk::DescriptorSetLayoutBinding(
-			1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment)
-	};
 	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
 	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
 
@@ -36,24 +29,27 @@ DescriptorSets::DescriptorSets(VulkanContext& vulkanContext)
 	descriptorSets = device.allocateDescriptorSets(descriptorSetAllocateInfo);
 }
 
-void DescriptorSets::UpdateDescriptor(BufferMemory<RenderObjectUniform>& uniform, ImageMemory& imageMemory)
+void DescriptorSets::UpdateUniformDescriptor(BufferMemory<RenderObjectUniform>& uniform, uint32_t binding)
 {
 	for (size_t i = 0; i < descriptorSets.size(); ++i)
 	{
 		vk::DescriptorBufferInfo descriptorBufferInfo(
 			uniform.buffer, 0, sizeof(RenderObjectUniform));
+		vk::WriteDescriptorSet writeDescriptorSet(
+			descriptorSets[i], binding, 0, vk::DescriptorType::eUniformBuffer, {}, descriptorBufferInfo, {});
+		vulkanContext.deviceController->device.updateDescriptorSets(writeDescriptorSet, {});
+	}
+}
+
+void DescriptorSets::UpdateImageDescriptor(ImageMemory& imageMemory, uint32_t binding)
+{
+	for (size_t i = 0; i < descriptorSets.size(); ++i)
+	{
 		vk::DescriptorImageInfo descriptorImageInfo(
 			imageMemory.sampler, imageMemory.imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
-
-		std::vector<vk::WriteDescriptorSet> writesDescriptorSet
-		{
-			vk::WriteDescriptorSet(
-				descriptorSets[i], 0, 0, vk::DescriptorType::eUniformBuffer, {}, descriptorBufferInfo, {}),
-			vk::WriteDescriptorSet(
-				descriptorSets[i], 1, 0, vk::DescriptorType::eCombinedImageSampler, descriptorImageInfo, {}, {})
-		};
-
-		vulkanContext.deviceController->device.updateDescriptorSets(writesDescriptorSet, {});
+		vk::WriteDescriptorSet writeDescriptorSet(
+			descriptorSets[i], binding, 0, vk::DescriptorType::eCombinedImageSampler, descriptorImageInfo, {}, {});
+		vulkanContext.deviceController->device.updateDescriptorSets(writeDescriptorSet, {});
 	}
 }
 

@@ -50,8 +50,6 @@ RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObjec
 	vertexBuffer = std::make_unique<BufferMemory<RenderObjectVertexData>>(
 		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext);
-
 	if (textureData)
 	{
 		auto& [resolution, imageData] = *textureData;
@@ -74,7 +72,17 @@ RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObjec
 	uniformBuffer = std::make_unique<BufferMemory<RenderObjectUniform>>(
 		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 
-	descriptorSets->UpdateDescriptor(*uniformBuffer, *textureBuffer);
+	std::vector<vk::DescriptorSetLayoutBinding> bindings
+	{
+		vk::DescriptorSetLayoutBinding(
+			0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(
+			1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment)
+	};
+
+	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, bindings);
+	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
+	descriptorSets->UpdateImageDescriptor(*textureBuffer, 1);
 }
 
 RenderObject::~RenderObject() = default;

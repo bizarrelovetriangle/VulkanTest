@@ -15,8 +15,11 @@ std::shared_ptr<Pipeline> PipelineProvider::GetPipeline(const RenderObject& rend
 
 	if (auto it = pipelines.emplace(typeId, nullptr); it.second)
 	{
+		auto vertexDataBinding = RenderObject::VertexDataType::BindingDescription();
+		auto vertexDataAttributes = RenderObject::VertexDataType::AttributeDescriptions();
 		auto& descriptorLayout = renderObject.descriptorSets->descriptorSetLayout;
-		it.first->second = std::make_shared<Pipeline>(vulkanContext, descriptorLayout);
+		it.first->second = std::make_shared<Pipeline>(
+			vulkanContext, descriptorLayout, vertexDataBinding, vertexDataAttributes);
 	}
 
 	return pipelines.at(typeId);

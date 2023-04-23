@@ -47,6 +47,8 @@ public:
 class RenderObject
 {
 public:
+	using VertexDataType = RenderObjectVertexData;
+
 	RenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
 	~RenderObject();
 	virtual void Accept(RenderVisitor& renderVisitor) const;

@@ -10,7 +10,9 @@ class VulkanContext;
 class Pipeline
 {
 public:
-	Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout);
+	Pipeline(VulkanContext& vulkanContext,vk::DescriptorSetLayout& descriptorSetLayout,
+		const vk::VertexInputBindingDescription& vertexDataBinding,
+		const std::vector<vk::VertexInputAttributeDescription>& vertexDataAttributes);
 	void Dispose();
 
 public:

@@ -11,7 +11,9 @@
 #include "../VulkanContext.h"
 #include "../Utils/ShaderCompiler.h"
 
-Pipeline::Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout)
+Pipeline::Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout,
+	const vk::VertexInputBindingDescription& vertexDataBinding,
+	const std::vector<vk::VertexInputAttributeDescription>& vertexDataAttributes)
 	: vulkanContext(vulkanContext)
 {
 	auto& device = vulkanContext.deviceController->device;
@@ -37,9 +39,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descri
 	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, descriptorSetLayout, pushConstant);
 	pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
-	auto binding = RenderObjectVertexData::BindingDescription();
-	auto attributes = RenderObjectVertexData::AttributeDescriptions();
-	vk::PipelineVertexInputStateCreateInfo vertexInputInfo({}, binding, attributes);;
+	vk::PipelineVertexInputStateCreateInfo vertexInputInfo({}, vertexDataBinding, vertexDataAttributes);;
 	vk::PipelineInputAssemblyStateCreateInfo inputAssembly({}, vk::PrimitiveTopology::eTriangleList, false);
 
 	std::vector<vk::DynamicState> dynamicStates{vk::DynamicState::eViewport, vk::DynamicState::eScissor};
