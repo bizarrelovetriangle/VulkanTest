@@ -8,12 +8,10 @@
 
 class RenderVisitor;
 class DescriptorSets;
-class Pipeline;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
 template <class T>
 class BufferMemory;
-class ImageMemory;
 
 class RenderObjectPushConstantRange
 {
@@ -30,38 +28,17 @@ public:
 	alignas(4) bool hasColors = false;
 };
 
-class RenderObjectVertexData
-{
-public:
-	RenderObjectVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData);
-	static vk::VertexInputBindingDescription BindingDescription();
-	static std::vector<vk::VertexInputAttributeDescription> AttributeDescriptions();
-
-public:
-	Vector3f position;
-	Vector3f normal;
-	Vector2f textureCoord;
-	Vector4f color;
-};
-
 class RenderObject
 {
 public:
-	using VertexDataType = RenderObjectVertexData;
-
 	RenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
 	~RenderObject();
 	virtual void Accept(RenderVisitor& renderVisitor) const;
-	void Dispose();
+	virtual void Dispose();
 
 public:
 	std::string name;
 	Matrix4 model;
-	std::vector<RenderObjectVertexData> vertexData;
-	std::unique_ptr<BufferMemory<RenderObjectVertexData>> vertexBuffer;
-
-	std::optional<std::pair<Vector2u, std::vector<std::byte>>> textureData;
-	std::unique_ptr<ImageMemory> textureBuffer;
 
 	RenderObjectUniform uniform;
 	std::unique_ptr<BufferMemory<RenderObjectUniform>> uniformBuffer;

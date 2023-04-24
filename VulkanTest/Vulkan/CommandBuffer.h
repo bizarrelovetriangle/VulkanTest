@@ -6,7 +6,6 @@ class QueueFamilies;
 class Pipeline;
 class SwapChain;
 class RenderPass;
-class RenderObjectVertexData;
 class RenderObject;
 class VulkanContext;
 

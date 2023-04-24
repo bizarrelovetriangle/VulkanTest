@@ -5,6 +5,9 @@
 #include "../QueueFamilies.h"
 #include "../CommandBuffer.h"
 #include "../CommandBufferDispatcher.h"
+#include "../../Primitives/TexturedRenderObject.h"
+#include "../../Primitives/ColoredRenderObject.h"
+#include "../../Primitives/VertexedRenderObject.h"
 
 template <class T>
 BufferMemory<T>::BufferMemory(VulkanContext& vulkanContext,
@@ -57,7 +60,9 @@ void BufferMemory<T>::Dispose()
 	DeviceMemory::Dispose();
 }
 
-template BufferMemory<RenderObjectVertexData>;
+template BufferMemory<VertexData>;
+template BufferMemory<TexturedRenderObjectVertexData>;
+template BufferMemory<ColoredRenderObjectVertexData>;
 template BufferMemory<RenderObjectUniform>;
 template BufferMemory<uint16_t>;
 template BufferMemory<std::byte>;
