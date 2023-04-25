@@ -169,6 +169,7 @@
     <ClInclude Include="Primitives\ColoredRenderObject.h" />
     <ClInclude Include="Primitives\TexturedRenderObject.h" />
     <ClInclude Include="Primitives\VertexedRenderObject.h" />
+    <ClInclude Include="Utils\SingletonManager.h" />
     <ClInclude Include="Vulkan\PipelineProvider.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
@@ -199,8 +200,12 @@
     <ClInclude Include="Vulkan\VulkanAuxiliary.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\triangle.frag" />
-    <None Include="Resources\Shaders\triangle.vert" />
+    <None Include="Resources\Shaders\colored.frag" />
+    <None Include="Resources\Shaders\colored.vert" />
+    <None Include="Resources\Shaders\textured.frag" />
+    <None Include="Resources\Shaders\textured.vert" />
+    <None Include="Resources\Shaders\vertexed.frag" />
+    <None Include="Resources\Shaders\vertexed.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

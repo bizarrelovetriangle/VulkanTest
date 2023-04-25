@@ -2,12 +2,8 @@
 
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 texturePos;
-layout(location = 3) in vec4 color;
 
 layout(location = 0) out float fragFactor;
-layout(location = 1) out vec4 fragColor;
-layout(location = 2) out vec2 fragTexturePos;
 
 layout (push_constant) uniform constans
 {
@@ -25,6 +21,4 @@ void main()
 
 	vec3 view = vec3(0., 0., -1.);
 	fragFactor = dot(view, rotatedNormal);
-	fragColor = color;
-	fragTexturePos = texturePos;
 }

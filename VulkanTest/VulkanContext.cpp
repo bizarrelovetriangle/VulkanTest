@@ -23,10 +23,11 @@
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Memory/BufferMemory.h"
+#include "Vulkan/PipelineProvider.h"
 #include "Utils/GLTFReader.h"
+#include "Utils/SingletonManager.h"
 #include "Vulkan/Memory/ImageMemory.h"
 #include "Vulkan/CommandBufferDispatcher.h"
-#include "Vulkan/PipelineProvider.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -51,14 +52,15 @@ void VulkanContext::Init(GLFWwindow* window)
     queueFamilies->queueMap[queueFamilies->presentQueueFamily] = deviceController->device.getQueue(queueFamilies->presentQueueFamily, 0);
     queueFamilies->queueMap[queueFamilies->transferQueueFamily] = deviceController->device.getQueue(queueFamilies->transferQueueFamily, 0);
 
+    singletonManager = std::make_shared<SingletonManager>();
     commandBufferDispatcher = std::make_shared<CommandBufferDispatcher>(*this);
-    pipelineProvider = std::make_shared<PipelineProvider>(*this);
 
     swapChain = std::make_shared<SwapChain>(*this);
     renderPass = std::make_shared<RenderPass>(deviceController->device, swapChain->swapChainImageFormat);
     swapChain->CreateFramebuffers(renderPass->renderPass);
     commandBuffer = std::make_shared<CommandBuffer>(*this, deviceController->device,
         queueFamilies, swapChain, renderPass);
+    pipelineProvider = std::make_shared<PipelineProvider>(*this);
 
     vk::SemaphoreCreateInfo semaphoreInfo{};
     imageAvailableSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
@@ -66,6 +68,8 @@ void VulkanContext::Init(GLFWwindow* window)
     vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
     inFlightFence = deviceController->device.createFence(fenceInfo);
 }
+
+VulkanContext::~VulkanContext() = default;
 
 void VulkanContext::DrawFrame(std::vector<std::unique_ptr<RenderObject>>& renderObjects)
 {
@@ -98,6 +102,7 @@ void VulkanContext::Await()
 void VulkanContext::Dispose()
 {
     swapChain->Dispose();
+    singletonManager->Dispose();
     commandBufferDispatcher->Dispose();
     pipelineProvider->Dispose();
     commandBuffer->Dispose();

@@ -26,14 +26,18 @@ public:
 class TexturedRenderObject : public VertexedRenderObject<TexturedRenderObjectVertexData>
 {
 public:
-	using VertexDataType = TexturedRenderObjectVertexData;
-
 	TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
+	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	~TexturedRenderObject();
 	virtual void Accept(RenderVisitor& renderVisitor) const;
 	void Dispose();
 
 public:
+	inline static std::string VertexShader =
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/textured.vert";
+	inline static std::string FragmentShader =
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/textured.frag";
+
 	std::pair<Vector2u, std::vector<std::byte>> textureData;
 	std::unique_ptr<ImageMemory> textureBuffer;
 };

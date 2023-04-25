@@ -33,5 +33,11 @@ public:
 	ColoredRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
 	~ColoredRenderObject();
 	virtual void Accept(RenderVisitor& renderVisitor) const;
+
+public:
+	inline static std::string VertexShader =
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/colored.vert";
+	inline static std::string FragmentShader =
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/colored.frag";
 };
 

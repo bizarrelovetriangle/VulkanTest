@@ -27,6 +27,12 @@ public:
 	virtual void Accept(RenderVisitor& renderVisitor) const;
 	virtual void Dispose() override;
 
+public:
+	inline static std::string VertexShader =
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/vertexed.vert";
+	inline static std::string FragmentShader =
+		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/vertexed.frag";
+
 	std::vector<T> vertexData;
 	std::unique_ptr<BufferMemory<T>> vertexBuffer;
 };

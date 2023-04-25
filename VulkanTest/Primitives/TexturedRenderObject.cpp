@@ -2,10 +2,11 @@
 #include "../RenderVisitor.h"
 #include "../Vulkan/Memory/ImageMemory.h"
 #include "../Vulkan/DescriptorSets.h"
+#include "../Vulkan/DeviceController.h"
 #include "../Utils/GLTFReader.h"
 #include "../Vulkan/Memory/ImageMemory.h"
 #include "../Vulkan/Memory/BufferMemory.h"
-#include "../RenderVisitor.h"
+#include "../Utils/SingletonManager.h"
 #undef LoadImage;
 
 TexturedRenderObjectVertexData::TexturedRenderObjectVertexData(
@@ -44,14 +45,18 @@ TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const D
 	textureBuffer->FlushData(imageData);
 	textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
-	std::vector<vk::DescriptorSetLayoutBinding> bindings
-	{
+	auto& shared = vulkanContext.singletonManager->Get<Shared<TexturedRenderObject>>();
+	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared.descriptorSetLayout);
+	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
+	descriptorSets->UpdateImageDescriptor(*textureBuffer, 1);
+}
+
+std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderObject::DescriptorSetLayoutBinding()
+{
+	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
 		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment)
 	};
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, bindings);
-	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
-	descriptorSets->UpdateImageDescriptor(*textureBuffer, 1);
 }
 
 TexturedRenderObject::~TexturedRenderObject() = default;
@@ -66,4 +71,3 @@ void TexturedRenderObject::Dispose()
 	VertexedRenderObject<TexturedRenderObjectVertexData>::Dispose();
 	textureBuffer->Dispose();
 }
-

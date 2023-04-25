@@ -5,6 +5,7 @@
 #include "../Utils/GLTFReader.h"
 #include "../Vulkan/Memory/ImageMemory.h"
 #include "../Vulkan/Memory/BufferMemory.h"
+#include "../VulkanContext.h"
 
 RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
 {
@@ -18,13 +19,13 @@ RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObjec
 	std::span<RenderObjectUniform> uniformSpan(&uniform, &uniform + 1);
 	uniformBuffer = std::make_unique<BufferMemory<RenderObjectUniform>>(
 		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+}
 
-	std::vector<vk::DescriptorSetLayoutBinding> bindings
-	{
-		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
+std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBinding()
+{
+	return {
+		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll) 
 	};
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, bindings);
-	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
 }
 
 RenderObject::~RenderObject() = default;
@@ -39,4 +40,3 @@ void RenderObject::Dispose()
 	uniformBuffer->Dispose();
 	descriptorSets->Dispose();
 }
-

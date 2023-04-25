@@ -15,11 +15,13 @@ template <class T>
 class BufferMemory;
 class CommandBufferDispatcher;
 class PipelineProvider;
+class SingletonManager;
 
 class VulkanContext
 {
 public:
     void Init(GLFWwindow* window);
+    ~VulkanContext();
     void DrawFrame(std::vector<std::unique_ptr<RenderObject>>& renderObjects);
     void Await();
     void Dispose();
@@ -35,6 +37,7 @@ public:
     std::shared_ptr<RenderPass> renderPass;
     std::shared_ptr<CommandBufferDispatcher> commandBufferDispatcher;
     std::shared_ptr<PipelineProvider> pipelineProvider;
+    std::shared_ptr<SingletonManager> singletonManager;
 
 private:
     vk::Semaphore imageAvailableSemaphore;

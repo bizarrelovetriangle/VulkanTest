@@ -173,9 +173,16 @@
     <ClInclude Include="Primitives\VertexedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\SingletonManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\triangle.frag" />
-    <None Include="Resources\Shaders\triangle.vert" />
+    <None Include="Resources\Shaders\textured.frag" />
+    <None Include="Resources\Shaders\textured.vert" />
+    <None Include="Resources\Shaders\colored.vert" />
+    <None Include="Resources\Shaders\vertexed.frag" />
+    <None Include="Resources\Shaders\vertexed.vert" />
+    <None Include="Resources\Shaders\colored.frag" />
   </ItemGroup>
 </Project>

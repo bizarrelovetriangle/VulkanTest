@@ -10,7 +10,7 @@ class BufferMemory;
 class DescriptorSets
 {
 public:
-	DescriptorSets(VulkanContext& vulkanContext, std::vector<vk::DescriptorSetLayoutBinding>& bindings);
+	DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout);
 	void UpdateUniformDescriptor(BufferMemory<RenderObjectUniform>& uniform, uint32_t binding);
 	void UpdateImageDescriptor(ImageMemory& imageMemory, uint32_t binding);
 	void Dispose();

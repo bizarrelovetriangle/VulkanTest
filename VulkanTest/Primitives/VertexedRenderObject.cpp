@@ -6,6 +6,7 @@
 #include "../RenderVisitor.h"
 #include "../Vulkan/Memory/BufferMemory.h"
 #include "../Vulkan/DescriptorSets.h"
+#include "../Utils/SingletonManager.h"
 
 VertexData::VertexData(const DeserializedObjectVertexData& deserializingObjectVertexData)
 {
@@ -28,7 +29,6 @@ std::vector<vk::VertexInputAttributeDescription> VertexData::AttributeDescriptio
 	return { positionDescription, normalDescription };
 }
 
-
 template <class T>
 VertexedRenderObject<T>::VertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
 	: RenderObject(vulkanContext, deserializedObject)
@@ -37,12 +37,18 @@ VertexedRenderObject<T>::VertexedRenderObject(VulkanContext& vulkanContext, cons
 		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
 	vertexBuffer = std::make_unique<BufferMemory<T>>(
 		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+}
 
-	std::vector<vk::DescriptorSetLayoutBinding> bindings
-	{
-		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
-	};
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, bindings);
+VertexedRenderObject<VertexData>::VertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
+	: RenderObject(vulkanContext, deserializedObject)
+{
+	vertexData = std::vector<VertexData>(
+		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
+	vertexBuffer = std::make_unique<BufferMemory<VertexData>>(
+		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+
+	auto& shared = vulkanContext.singletonManager->Get<Shared<VertexedRenderObject<VertexData>>>();
+	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared.descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
 }
 

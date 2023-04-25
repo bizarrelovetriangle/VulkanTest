@@ -6,13 +6,12 @@
 
 class SwapChain;
 class VulkanContext;
+class RenderObjectShared;
 
 class Pipeline
 {
 public:
-	Pipeline(VulkanContext& vulkanContext,vk::DescriptorSetLayout& descriptorSetLayout,
-		const vk::VertexInputBindingDescription& vertexDataBinding,
-		const std::vector<vk::VertexInputAttributeDescription>& vertexDataAttributes);
+	Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjectShared);
 	void Dispose();
 
 public:

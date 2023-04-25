@@ -11,20 +11,16 @@
 #include "../VulkanContext.h"
 #include "../Utils/ShaderCompiler.h"
 
-Pipeline::Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout,
-	const vk::VertexInputBindingDescription& vertexDataBinding,
-	const std::vector<vk::VertexInputAttributeDescription>& vertexDataAttributes)
+Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjectShared)
 	: vulkanContext(vulkanContext)
 {
 	auto& device = vulkanContext.deviceController->device;
 
-	auto vertexSpirv = ShaderCompiler::CompileShader(
-		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/triangle.vert",
+	auto vertexSpirv = ShaderCompiler::CompileShader(renderObjectShared.vertexShader,
 		vk::ShaderStageFlagBits::eVertex, false);
 	vertShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, vertexSpirv));
 
-	auto fragmentSpirv = ShaderCompiler::CompileShader(
-		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/triangle.frag",
+	auto fragmentSpirv = ShaderCompiler::CompileShader(renderObjectShared.fragmentShader,
 		vk::ShaderStageFlagBits::eFragment, false);
 	fragShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, fragmentSpirv));
 
@@ -36,10 +32,11 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descri
 	shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
 	vk::PushConstantRange pushConstant(vk::ShaderStageFlagBits::eVertex, 0, sizeof(RenderObjectPushConstantRange));
-	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, descriptorSetLayout, pushConstant);
+	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, renderObjectShared.descriptorSetLayout, pushConstant);
 	pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
-	vk::PipelineVertexInputStateCreateInfo vertexInputInfo({}, vertexDataBinding, vertexDataAttributes);;
+	vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
+		{}, renderObjectShared.vertexDataBinding, renderObjectShared.vertexDataAttributes);;
 	vk::PipelineInputAssemblyStateCreateInfo inputAssembly({}, vk::PrimitiveTopology::eTriangleList, false);
 
 	std::vector<vk::DynamicState> dynamicStates{vk::DynamicState::eViewport, vk::DynamicState::eScissor};

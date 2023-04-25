@@ -6,8 +6,8 @@
 #include "Memory/ImageMemory.h"
 #include "../Primitives/RenderObject.h"
 
-DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, std::vector<vk::DescriptorSetLayoutBinding>& bindings)
-	: vulkanContext(vulkanContext)
+DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout)
+	: vulkanContext(vulkanContext), descriptorSetLayout(descriptorSetLayout)
 {
 	size_t count = vulkanContext.swapChain->frameCount;
 	auto& device = vulkanContext.deviceController->device;
@@ -20,9 +20,6 @@ DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, std::vector<vk::Des
 
 	vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo({}, count, descriptorPoolSizes);
 	descriptorPool = device.createDescriptorPool(descriptorPoolCreateInfo);
-
-	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
-	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
 
 	std::vector<vk::DescriptorSetLayout> layouts(count, descriptorSetLayout);
 	vk::DescriptorSetAllocateInfo descriptorSetAllocateInfo(descriptorPool, layouts);
@@ -55,6 +52,5 @@ void DescriptorSets::UpdateImageDescriptor(ImageMemory& imageMemory, uint32_t bi
 
 void DescriptorSets::Dispose()
 {
-	vulkanContext.deviceController->device.destroyDescriptorSetLayout(descriptorSetLayout);
 	vulkanContext.deviceController->device.destroyDescriptorPool(descriptorPool);
 }

@@ -23,6 +23,9 @@ public:
 	void Dispose();
 
 private:
+	template <class T>
+	void CreatePipeline();
+
 	VulkanContext& vulkanContext;
 	std::unordered_map<std::type_index, std::shared_ptr<Pipeline>> pipelines;
 };
