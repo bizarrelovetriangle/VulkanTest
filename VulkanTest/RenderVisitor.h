@@ -15,9 +15,8 @@ public:
 	RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex);
 
 	void Visit(const RenderObject& renderObject);
-	void Visit(const VertexedRenderObject<VertexData>& renderObject);
-	void Visit(const ColoredRenderObject& renderObject);
-	void Visit(const TexturedRenderObject& renderObject);
+	template <class T>
+	void Visit(const VertexedRenderObject<T>& renderObject);
 
 private:
 	void BindPipeline(Pipeline& pipeline);

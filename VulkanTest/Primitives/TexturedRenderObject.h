@@ -12,10 +12,10 @@ struct DeserializedObject;
 struct DeserializedObjectVertexData;
 class ImageMemory;
 
-class TexturedRenderObjectVertexData : public VertexData
+class TexturedVertexData : public VertexData
 {
 public:
-	TexturedRenderObjectVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData);
+	TexturedVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData);
 	static vk::VertexInputBindingDescription BindingDescription();
 	static std::vector<vk::VertexInputAttributeDescription> AttributeDescriptions();
 
@@ -23,7 +23,7 @@ public:
 	Vector2f textureCoord;
 };
 
-class TexturedRenderObject : public VertexedRenderObject<TexturedRenderObjectVertexData>
+class TexturedRenderObject : public VertexedRenderObject<TexturedVertexData>
 {
 public:
 	TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);

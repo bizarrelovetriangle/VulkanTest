@@ -17,9 +17,6 @@ class PipelineProvider
 public:
 	PipelineProvider(VulkanContext& vulkanContext);
 	std::shared_ptr<Pipeline> GetPipeline(const RenderObject& renderObject);
-	std::shared_ptr<Pipeline> GetPipeline(const ColoredRenderObject& renderObject);
-	std::shared_ptr<Pipeline> GetPipeline(const TexturedRenderObject& renderObject);
-	std::shared_ptr<Pipeline> GetPipeline(const VertexedRenderObject<VertexData>& renderObject);
 	void Dispose();
 
 private:

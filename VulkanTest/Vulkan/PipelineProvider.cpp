@@ -35,24 +35,6 @@ void PipelineProvider::CreatePipeline()
 
 std::shared_ptr<Pipeline> PipelineProvider::GetPipeline(const RenderObject& renderObject)
 {
-	throw std::exception("gosh");
-}
-
-std::shared_ptr<Pipeline> PipelineProvider::GetPipeline(const ColoredRenderObject& renderObject)
-{
-	std::type_index typeId = typeid(renderObject);
-	return pipelines.at(typeId);
-}
-
-
-std::shared_ptr<Pipeline> PipelineProvider::GetPipeline(const TexturedRenderObject& renderObject)
-{
-	std::type_index typeId = typeid(renderObject);
-	return pipelines.at(typeId);
-}
-
-std::shared_ptr<Pipeline> PipelineProvider::GetPipeline(const VertexedRenderObject<VertexData>& renderObject)
-{
 	std::type_index typeId = typeid(renderObject);
 	return pipelines.at(typeId);
 }

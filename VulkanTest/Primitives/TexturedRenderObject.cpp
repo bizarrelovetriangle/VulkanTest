@@ -9,33 +9,33 @@
 #include "../Utils/SingletonManager.h"
 #undef LoadImage;
 
-TexturedRenderObjectVertexData::TexturedRenderObjectVertexData(
+TexturedVertexData::TexturedVertexData(
 	const DeserializedObjectVertexData& deserializingObjectVertexData)
 	: VertexData(deserializingObjectVertexData)
 {
 	textureCoord = deserializingObjectVertexData.textureCoord;
 }
 
-vk::VertexInputBindingDescription TexturedRenderObjectVertexData::BindingDescription()
+vk::VertexInputBindingDescription TexturedVertexData::BindingDescription()
 {
-	return vk::VertexInputBindingDescription(0, sizeof(TexturedRenderObjectVertexData), vk::VertexInputRate::eVertex);
+	return vk::VertexInputBindingDescription(0, sizeof(TexturedVertexData), vk::VertexInputRate::eVertex);
 }
 
-std::vector<vk::VertexInputAttributeDescription> TexturedRenderObjectVertexData::AttributeDescriptions()
+std::vector<vk::VertexInputAttributeDescription> TexturedVertexData::AttributeDescriptions()
 {
 	vk::VertexInputAttributeDescription positionDescription(
-		0, 0, vk::Format::eR32G32B32Sfloat, offsetof(TexturedRenderObjectVertexData, position));
+		0, 0, vk::Format::eR32G32B32Sfloat, offsetof(TexturedVertexData, position));
 	vk::VertexInputAttributeDescription normalDescription(
-		1, 0, vk::Format::eR32G32B32Sfloat, offsetof(TexturedRenderObjectVertexData, normal));
+		1, 0, vk::Format::eR32G32B32Sfloat, offsetof(TexturedVertexData, normal));
 	vk::VertexInputAttributeDescription textureCoordDescription(
-		2, 0, vk::Format::eR32G32Sfloat, offsetof(TexturedRenderObjectVertexData, textureCoord));
+		2, 0, vk::Format::eR32G32Sfloat, offsetof(TexturedVertexData, textureCoord));
 
 	return { positionDescription, normalDescription, textureCoordDescription };
 }
 
 
 TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: VertexedRenderObject<TexturedRenderObjectVertexData>(vulkanContext, deserializedObject)
+	: VertexedRenderObject<TexturedVertexData>(vulkanContext, deserializedObject)
 {
 	textureData = *deserializedObject.textureData;
 	auto& [resolution, imageData] = textureData;
@@ -68,6 +68,6 @@ void TexturedRenderObject::Accept(RenderVisitor& renderVisitor) const
 
 void TexturedRenderObject::Dispose()
 {
-	VertexedRenderObject<TexturedRenderObjectVertexData>::Dispose();
+	VertexedRenderObject<TexturedVertexData>::Dispose();
 	textureBuffer->Dispose();
 }

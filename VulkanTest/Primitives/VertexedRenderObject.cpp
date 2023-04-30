@@ -68,7 +68,7 @@ void VertexedRenderObject<T>::Dispose()
 	vertexBuffer->Dispose();
 }
 
-template VertexedRenderObject<ColoredRenderObjectVertexData>;
-template VertexedRenderObject<TexturedRenderObjectVertexData>;
+template VertexedRenderObject<ColoredVertexData>;
+template VertexedRenderObject<TexturedVertexData>;
 template VertexedRenderObject<VertexData>;
 

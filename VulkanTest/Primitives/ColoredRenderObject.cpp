@@ -8,33 +8,33 @@
 #include "../RenderVisitor.h"
 #include "../Utils/SingletonManager.h"
 
-ColoredRenderObjectVertexData::ColoredRenderObjectVertexData(
+ColoredVertexData::ColoredVertexData(
 	const DeserializedObjectVertexData& deserializingObjectVertexData)
 	: VertexData(deserializingObjectVertexData)
 {
 	color = deserializingObjectVertexData.color;
 }
 
-vk::VertexInputBindingDescription ColoredRenderObjectVertexData::BindingDescription()
+vk::VertexInputBindingDescription ColoredVertexData::BindingDescription()
 {
-	return vk::VertexInputBindingDescription(0, sizeof(ColoredRenderObjectVertexData), vk::VertexInputRate::eVertex);
+	return vk::VertexInputBindingDescription(0, sizeof(ColoredVertexData), vk::VertexInputRate::eVertex);
 }
 
-std::vector<vk::VertexInputAttributeDescription> ColoredRenderObjectVertexData::AttributeDescriptions()
+std::vector<vk::VertexInputAttributeDescription> ColoredVertexData::AttributeDescriptions()
 {
 	vk::VertexInputAttributeDescription positionDescription(
-		0, 0, vk::Format::eR32G32B32Sfloat, offsetof(ColoredRenderObjectVertexData, position));
+		0, 0, vk::Format::eR32G32B32Sfloat, offsetof(ColoredVertexData, position));
 	vk::VertexInputAttributeDescription normalDescription(
-		1, 0, vk::Format::eR32G32B32Sfloat, offsetof(ColoredRenderObjectVertexData, normal));
+		1, 0, vk::Format::eR32G32B32Sfloat, offsetof(ColoredVertexData, normal));
 	vk::VertexInputAttributeDescription colorDescription(
-		2, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(ColoredRenderObjectVertexData, color));
+		2, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(ColoredVertexData, color));
 
 	return { positionDescription, normalDescription, colorDescription };
 }
 
 
 ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: VertexedRenderObject<ColoredRenderObjectVertexData>(vulkanContext, deserializedObject)
+	: VertexedRenderObject<ColoredVertexData>(vulkanContext, deserializedObject)
 {
 	auto& shared = vulkanContext.singletonManager->Get<Shared<ColoredRenderObject>>();
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared.descriptorSetLayout);

@@ -16,10 +16,10 @@ template <class T>
 class BufferMemory;
 class ImageMemory;
 
-class ColoredRenderObjectVertexData : public VertexData
+class ColoredVertexData : public VertexData
 {
 public:
-	ColoredRenderObjectVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData);
+	ColoredVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData);
 	static vk::VertexInputBindingDescription BindingDescription();
 	static std::vector<vk::VertexInputAttributeDescription> AttributeDescriptions();
 
@@ -27,7 +27,7 @@ public:
 	Vector4f color;
 };
 
-class ColoredRenderObject : public VertexedRenderObject<ColoredRenderObjectVertexData>
+class ColoredRenderObject : public VertexedRenderObject<ColoredVertexData>
 {
 public:
 	ColoredRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
