@@ -5,16 +5,13 @@
 #include "../VulkanContext.h"
 #include <optional>
 #include <vulkan/vulkan.hpp>
-#include "VertexedRenderObject.h"
+#include "Interfaces/VertexedRenderObject.h"
 
 class RenderVisitor;
 class DescriptorSets;
 class Pipeline;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
-template <class T>
-class BufferMemory;
-class ImageMemory;
 
 class ColoredVertexData : public VertexData
 {
@@ -27,9 +24,11 @@ public:
 	Vector4f color;
 };
 
-class ColoredRenderObject : public VertexedRenderObject<ColoredVertexData>
+class ColoredRenderObject : public VertexedRenderObject
 {
 public:
+	using VertexDataType = ColoredVertexData;
+
 	ColoredRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
 	~ColoredRenderObject();
 	virtual void Accept(RenderVisitor& renderVisitor) const;
@@ -39,5 +38,8 @@ public:
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/colored.vert";
 	inline static std::string FragmentShader =
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/colored.frag";
+
+private:
+	std::vector<ColoredVertexData> vertexData;
 };
 

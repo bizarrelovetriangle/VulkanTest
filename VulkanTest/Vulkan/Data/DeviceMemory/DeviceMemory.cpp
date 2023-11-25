@@ -1,6 +1,6 @@
 #include "DeviceMemory.h"
-#include "../DeviceController.h"
-#include "../../VulkanContext.h"
+#include "../../DeviceController.h"
+#include "../../../VulkanContext.h"
 
 DeviceMemory::DeviceMemory(VulkanContext& vulkanContext, MemoryType memoryType)
 	: vulkanContext(vulkanContext), memoryType(memoryType)

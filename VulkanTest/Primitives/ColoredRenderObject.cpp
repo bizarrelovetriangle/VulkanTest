@@ -1,10 +1,9 @@
 #include "ColoredRenderObject.h"
 #include "../RenderVisitor.h"
-#include "../Vulkan/Memory/ImageMemory.h"
 #include "../Vulkan/DescriptorSets.h"
 #include "../Utils/GLTFReader.h"
-#include "../Vulkan/Memory/ImageMemory.h"
-#include "../Vulkan/Memory/BufferMemory.h"
+#include "../Vulkan/Data/ImageData.h"
+#include "../Vulkan/Data/BufferData.h"
 #include "../RenderVisitor.h"
 #include "../Utils/SingletonManager.h"
 
@@ -34,8 +33,13 @@ std::vector<vk::VertexInputAttributeDescription> ColoredVertexData::AttributeDes
 
 
 ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: VertexedRenderObject<ColoredVertexData>(vulkanContext, deserializedObject)
+	: VertexedRenderObject(vulkanContext, deserializedObject)
 {
+	vertexData = std::vector<ColoredVertexData>(
+		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
+	vertexBuffer = std::make_unique<BufferData>(BufferData::Create<ColoredVertexData>(
+		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer));
+
 	auto& shared = vulkanContext.singletonManager->Get<Shared<ColoredRenderObject>>();
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared.descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);

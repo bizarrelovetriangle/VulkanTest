@@ -42,22 +42,22 @@
     <ClCompile Include="Vulkan\VulkanAuxiliary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\Memory\BufferMemory.cpp">
+    <ClCompile Include="Vulkan\Data\BufferData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderVisitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Primitives\RenderObject.cpp">
+    <ClCompile Include="Primitives\Interfaces\RenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\Memory\ImageMemory.cpp">
+    <ClCompile Include="Vulkan\Data\ImageData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VulkanContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\Memory\DeviceMemory.cpp">
+    <ClCompile Include="Vulkan\Data\DeviceMemory\DeviceMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp">
@@ -75,7 +75,10 @@
     <ClCompile Include="Primitives\TexturedRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Primitives\VertexedRenderObject.cpp">
+    <ClCompile Include="Primitives\Interfaces\VertexedRenderObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitives\PlaneVertexedRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,7 +104,7 @@
     <ClInclude Include="Vulkan\CommandBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\Memory\BufferMemory.h">
+    <ClInclude Include="Vulkan\Data\BufferData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Math\Vector2.hpp">
@@ -128,7 +131,7 @@
     <ClInclude Include="Utils\GLTFReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\RenderObject.h">
+    <ClInclude Include="Primitives\Interfaces\RenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Math\Matrix4.hpp">
@@ -143,10 +146,10 @@
     <ClInclude Include="RenderVisitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\Memory\ImageMemory.h">
+    <ClInclude Include="Vulkan\Data\ImageData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\Memory\DeviceMemory.h">
+    <ClInclude Include="Vulkan\Data\DeviceMemory\DeviceMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dependencies\stb_image.h">
@@ -170,10 +173,13 @@
     <ClInclude Include="Primitives\TexturedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\VertexedRenderObject.h">
+    <ClInclude Include="Primitives\Interfaces\VertexedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\SingletonManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\PlaneVertexedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

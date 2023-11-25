@@ -2,17 +2,16 @@
 #include <vector>
 #include <vulkan/vulkan.hpp>
 class VulkanContext;
-class ImageMemory;
+class ImageData;
 class RenderObjectUniform;
-template <class T>
-class BufferMemory;
+class BufferData;
 
 class DescriptorSets
 {
 public:
 	DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout);
-	void UpdateUniformDescriptor(BufferMemory<RenderObjectUniform>& uniform, uint32_t binding);
-	void UpdateImageDescriptor(ImageMemory& imageMemory, uint32_t binding);
+	void UpdateUniformDescriptor(BufferData& uniform, uint32_t binding);
+	void UpdateImageDescriptor(ImageData& imageMemory, uint32_t binding);
 	void Dispose();
 
 	vk::DescriptorSetLayout descriptorSetLayout;

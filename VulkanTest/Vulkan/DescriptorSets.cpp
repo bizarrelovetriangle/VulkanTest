@@ -2,9 +2,9 @@
 #include "../VulkanContext.h"
 #include "DeviceController.h"
 #include "SwapChain.h"
-#include "Memory/BufferMemory.h"
-#include "Memory/ImageMemory.h"
-#include "../Primitives/RenderObject.h"
+#include "Data/BufferData.h"
+#include "Data/ImageData.h"
+#include "../Primitives/Interfaces/RenderObject.h"
 
 DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout)
 	: vulkanContext(vulkanContext), descriptorSetLayout(descriptorSetLayout)
@@ -26,7 +26,7 @@ DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLa
 	descriptorSets = device.allocateDescriptorSets(descriptorSetAllocateInfo);
 }
 
-void DescriptorSets::UpdateUniformDescriptor(BufferMemory<RenderObjectUniform>& uniform, uint32_t binding)
+void DescriptorSets::UpdateUniformDescriptor(BufferData& uniform, uint32_t binding)
 {
 	for (size_t i = 0; i < descriptorSets.size(); ++i)
 	{
@@ -38,12 +38,12 @@ void DescriptorSets::UpdateUniformDescriptor(BufferMemory<RenderObjectUniform>& 
 	}
 }
 
-void DescriptorSets::UpdateImageDescriptor(ImageMemory& imageMemory, uint32_t binding)
+void DescriptorSets::UpdateImageDescriptor(ImageData& imageData, uint32_t binding)
 {
 	for (size_t i = 0; i < descriptorSets.size(); ++i)
 	{
 		vk::DescriptorImageInfo descriptorImageInfo(
-			imageMemory.sampler, imageMemory.imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
+			imageData.sampler, imageData.imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
 		vk::WriteDescriptorSet writeDescriptorSet(
 			descriptorSets[i], binding, 0, vk::DescriptorType::eCombinedImageSampler, descriptorImageInfo, {}, {});
 		vulkanContext.deviceController->device.updateDescriptorSets(writeDescriptorSet, {});

@@ -1,11 +1,10 @@
 #include "TexturedRenderObject.h"
 #include "../RenderVisitor.h"
-#include "../Vulkan/Memory/ImageMemory.h"
 #include "../Vulkan/DescriptorSets.h"
 #include "../Vulkan/DeviceController.h"
 #include "../Utils/GLTFReader.h"
-#include "../Vulkan/Memory/ImageMemory.h"
-#include "../Vulkan/Memory/BufferMemory.h"
+#include "../Vulkan/Data/ImageData.h"
+#include "../Vulkan/Data/BufferData.h"
 #include "../Utils/SingletonManager.h"
 #undef LoadImage;
 
@@ -35,11 +34,16 @@ std::vector<vk::VertexInputAttributeDescription> TexturedVertexData::AttributeDe
 
 
 TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: VertexedRenderObject<TexturedVertexData>(vulkanContext, deserializedObject)
+	: VertexedRenderObject(vulkanContext, deserializedObject)
 {
+	vertexData = std::vector<TexturedVertexData>(
+		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
+	vertexBuffer = std::make_unique<BufferData>(BufferData::Create<TexturedVertexData>(
+		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer));
+
 	textureData = *deserializedObject.textureData;
 	auto& [resolution, imageData] = textureData;
-	textureBuffer = std::make_unique<ImageMemory>(
+	textureBuffer = std::make_unique<ImageData>(
 		vulkanContext, resolution, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
 		MemoryType::Universal);
 	textureBuffer->FlushData(imageData);
@@ -68,6 +72,6 @@ void TexturedRenderObject::Accept(RenderVisitor& renderVisitor) const
 
 void TexturedRenderObject::Dispose()
 {
-	VertexedRenderObject<TexturedVertexData>::Dispose();
+	VertexedRenderObject::Dispose();
 	textureBuffer->Dispose();
 }

@@ -5,12 +5,12 @@
 #include "../VulkanContext.h"
 #include <optional>
 #include <vulkan/vulkan.hpp>
-#include "VertexedRenderObject.h"
+#include "Interfaces/VertexedRenderObject.h"
 
 class RenderVisitor;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
-class ImageMemory;
+class ImageData;
 
 class TexturedVertexData : public VertexData
 {
@@ -23,9 +23,11 @@ public:
 	Vector2f textureCoord;
 };
 
-class TexturedRenderObject : public VertexedRenderObject<TexturedVertexData>
+class TexturedRenderObject : public VertexedRenderObject
 {
 public:
+	using VertexDataType = TexturedVertexData;
+
 	TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	~TexturedRenderObject();
@@ -39,6 +41,9 @@ public:
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/textured.frag";
 
 	std::pair<Vector2u, std::vector<std::byte>> textureData;
-	std::unique_ptr<ImageMemory> textureBuffer;
+	std::unique_ptr<ImageData> textureBuffer;
+
+private:
+	std::vector<TexturedVertexData> vertexData;
 };
 

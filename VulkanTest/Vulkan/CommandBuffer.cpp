@@ -6,7 +6,7 @@
 #include "Pipeline.h"
 #include "SwapChain.h"
 #include "RenderPass.h"
-#include "../Primitives/RenderObject.h"
+#include "../Primitives/Interfaces/RenderObject.h"
 #include "../RenderVisitor.h";
 #include "../VulkanContext.h";
 

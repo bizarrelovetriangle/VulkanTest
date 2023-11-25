@@ -1,13 +1,12 @@
 #include <memory>
 #include "VulkanContext.h"
 #include "Utils/GLTFReader.h"
-#include "Primitives/RenderObject.h"
 #include "Vulkan/DescriptorSets.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/SwapChain.h"
 #include "Primitives/ColoredRenderObject.h"
 #include "Primitives/TexturedRenderObject.h"
-#include "Primitives/VertexedRenderObject.h"
+#include "Primitives/PlaneVertexedRenderObject.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -35,7 +34,7 @@ public:
 			else if (deserializedObject.hasColors)
 				renderObject = std::make_unique<ColoredRenderObject>(vulkanContext, deserializedObject);
 			else if (!deserializedObject.vertexData.empty())
-				renderObject = std::make_unique<VertexedRenderObject<VertexData>>(vulkanContext, deserializedObject);
+				renderObject = std::make_unique<PlaneVertexedRenderObject>(vulkanContext, deserializedObject);
 			renderObjects.push_back(std::move(renderObject));
 		}
 	}

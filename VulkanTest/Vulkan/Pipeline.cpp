@@ -6,8 +6,7 @@
 #include "SwapChain.h"
 #include "DeviceController.h"
 #include "RenderPass.h"
-#include "../Primitives/RenderObject.h"
-#include "Memory/ImageMemory.h"
+#include "../Primitives/Interfaces/RenderObject.h"
 #include "../VulkanContext.h"
 #include "../Utils/ShaderCompiler.h"
 

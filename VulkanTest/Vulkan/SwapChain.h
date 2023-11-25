@@ -4,11 +4,12 @@
 #include <memory>
 
 class VulkanContext;
-class ImageMemory;
+class ImageData;
 
 class SwapChain {
 public:
 	SwapChain(VulkanContext& vulkanContext);
+	~SwapChain();
 	void Dispose();
 	void CreateFramebuffers(vk::RenderPass& renderPass);
 
@@ -38,7 +39,7 @@ public:
 	std::vector<vk::ImageView> swapChainImageViews;
 	std::vector<vk::Framebuffer> swapChainFramebuffers;
 
-	std::unique_ptr<ImageMemory> depthBuffer;
+	std::unique_ptr<ImageData> depthBuffer;
 
 	size_t frameCount = 0;
 private:

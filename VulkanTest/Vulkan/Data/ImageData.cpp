@@ -1,14 +1,13 @@
-#include "ImageMemory.h"
+#include "ImageData.h"
 #include "..\..\VulkanContext.h"
 #include "..\DeviceController.h"
-#include "BufferMemory.h"
 #include <string>
 #include "../../Dependencies/stb_image.h"
 #include "../../Math/Vector2.hpp"
 #include "../CommandBufferDispatcher.h"
 #include "../QueueFamilies.h"
 
-ImageMemory::ImageMemory(VulkanContext& vulkanContext,
+ImageData::ImageData(VulkanContext& vulkanContext,
 		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlags imageAspect,
 		MemoryType memoryType)
 	: DeviceMemory(vulkanContext, memoryType), resolution(resolution), format(format), usage(usage), imageAspect(imageAspect)
@@ -43,7 +42,7 @@ ImageMemory::ImageMemory(VulkanContext& vulkanContext,
 	CreateImageViewAndSampler();
 }
 
-void ImageMemory::FlushData(std::span<std::byte> data)
+void ImageData::FlushData(std::span<std::byte> data)
 {
 	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
 	{
@@ -51,7 +50,7 @@ void ImageMemory::FlushData(std::span<std::byte> data)
 		return;
 	}
 
-	ImageMemory stagingImage(vulkanContext, resolution, format, usage | vk::ImageUsageFlagBits::eTransferSrc, imageAspect,
+	ImageData stagingImage(vulkanContext, resolution, format, usage | vk::ImageUsageFlagBits::eTransferSrc, imageAspect,
 		MemoryType::HostLocal);
 	stagingImage.FlushData(data);
 	stagingImage.TransitionLayout(vk::ImageLayout::eTransferSrcOptimal);
@@ -69,7 +68,7 @@ void ImageMemory::FlushData(std::span<std::byte> data)
 	stagingImage.Dispose();
 }
 
-void ImageMemory::TransitionLayout(const vk::ImageLayout& newImageLayout)
+void ImageData::TransitionLayout(const vk::ImageLayout& newImageLayout)
 {
 	uint32_t queueFamily = vulkanContext.queueFamilies->graphicQueueFamily;
 	vulkanContext.commandBufferDispatcher->Invoke(queueFamily, [this, &newImageLayout](auto& cb)
@@ -125,7 +124,7 @@ void ImageMemory::TransitionLayout(const vk::ImageLayout& newImageLayout)
 	imageLayout = newImageLayout;
 }
 
-void ImageMemory::CreateImageViewAndSampler()
+void ImageData::CreateImageViewAndSampler()
 {
 	vk::ComponentMapping components{};
 	vk::ImageSubresourceRange subresourceRange(imageAspect, 0, 1, 0, 1);
@@ -145,7 +144,7 @@ void ImageMemory::CreateImageViewAndSampler()
 	sampler = vulkanContext.deviceController->device.createSampler(samplerInfo);
 }
 
-void ImageMemory::Dispose()
+void ImageData::Dispose()
 {
 	vulkanContext.deviceController->device.destroySampler(sampler);
 	vulkanContext.deviceController->device.destroyImageView(imageView);
@@ -153,7 +152,7 @@ void ImageMemory::Dispose()
 	DeviceMemory::Dispose();
 }
 
-std::pair<Vector2u, std::vector<std::byte>> ImageMemory::LoadImage(const std::string& path)
+std::pair<Vector2u, std::vector<std::byte>> ImageData::LoadImage(const std::string& path)
 {
 	int width, height, channels;
 	std::byte* pixels = (std::byte*) stbi_load(

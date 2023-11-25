@@ -7,8 +7,6 @@ class VulkanContext;
 class RenderObject;
 class ColoredRenderObject;
 class TexturedRenderObject;
-template <class T>
-class VertexedRenderObject;
 class Pipeline;
 class VertexData;
 

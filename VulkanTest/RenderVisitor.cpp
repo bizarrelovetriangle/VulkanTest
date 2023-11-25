@@ -1,8 +1,8 @@
 #include <vulkan/vulkan.hpp>
 #include "RenderVisitor.h"
-#include "Primitives/RenderObject.h"
+#include "Primitives/Interfaces/RenderObject.h"
 #include "Primitives/ColoredRenderObject.h"
-#include "Primitives/VertexedRenderObject.h"
+#include "Primitives/Interfaces/VertexedRenderObject.h"
 #include "Primitives/TexturedRenderObject.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Pipeline.h"
@@ -10,8 +10,7 @@
 #include "Vulkan/PipelineProvider.h"
 #include "Vulkan/SwapChain.h"
 #include "VulkanContext.h"
-#include "Vulkan/Memory/BufferMemory.h"
-#include "Vulkan/Memory/BufferMemory.h"
+#include "Vulkan/Data/BufferData.h"
 
 RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex)
 	: vulkanContext(vulkanContext), commandBuffer(commandBuffer.commandBuffer), imageIndex(imageIndex)
@@ -22,8 +21,7 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 {
 }
 
-template <class T>
-void RenderVisitor::Visit(const VertexedRenderObject<T>& renderObject)
+void RenderVisitor::Visit(const VertexedRenderObject& renderObject)
 {
 	auto& pipeline = *vulkanContext.pipelineProvider->GetPipeline(renderObject);
 	BindPipeline(pipeline);
@@ -66,6 +64,3 @@ void RenderVisitor::BindPipeline(Pipeline& pipeline)
 	commandBuffer.setScissor(0, 1, &scissors);
 }
 
-template void RenderVisitor::Visit<VertexData>(const VertexedRenderObject<VertexData>&);
-template void RenderVisitor::Visit<ColoredVertexData>(const VertexedRenderObject<ColoredVertexData>&);
-template void RenderVisitor::Visit<TexturedVertexData>(const VertexedRenderObject<TexturedVertexData>&);

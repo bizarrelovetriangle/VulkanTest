@@ -22,11 +22,9 @@
 #include "Vulkan/SwapChain.h"
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/CommandBuffer.h"
-#include "Vulkan/Memory/BufferMemory.h"
 #include "Vulkan/PipelineProvider.h"
 #include "Utils/GLTFReader.h"
 #include "Utils/SingletonManager.h"
-#include "Vulkan/Memory/ImageMemory.h"
 #include "Vulkan/CommandBufferDispatcher.h"
 
 #define GLFW_INCLUDE_VULKAN

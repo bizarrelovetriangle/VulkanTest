@@ -1,18 +1,17 @@
 #pragma once
-#include "../Math/Vector3.hpp"
-#include "../Math/Vector2.hpp"
-#include "../Math/Matrix4.hpp"
-#include "../VulkanContext.h"
+#include "../../Math/Vector3.hpp"
+#include "../../Math/Vector2.hpp"
+#include "../../Math/Matrix4.hpp"
+#include "../../VulkanContext.h"
 #include <optional>
 #include <vulkan/vulkan.hpp>
-#include "../Vulkan/DeviceController.h"
+#include "../../Vulkan/DeviceController.h"
 
 class RenderVisitor;
 class DescriptorSets;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
-template <class T>
-class BufferMemory;
+class BufferData;
 
 class RenderObjectPushConstantRange
 {
@@ -79,7 +78,7 @@ public:
 	std::string name;
 	Matrix4 model;
 	RenderObjectUniform uniform;
-	std::unique_ptr<BufferMemory<RenderObjectUniform>> uniformBuffer;
+	std::unique_ptr<BufferData> uniformBuffer;
 	std::unique_ptr<DescriptorSets> descriptorSets;
 };
 

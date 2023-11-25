@@ -1,3 +1,4 @@
+#pragma once
 #undef max
 #define STBI_MSC_SECURE_CRT
 #include "../Dependencies/tiny_gltf/tiny_gltf.h"

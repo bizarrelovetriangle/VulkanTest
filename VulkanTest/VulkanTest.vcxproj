@@ -144,18 +144,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Primitives\ColoredRenderObject.cpp" />
+    <ClCompile Include="Primitives\PlaneVertexedRenderObject.cpp" />
     <ClCompile Include="Primitives\TexturedRenderObject.cpp" />
-    <ClCompile Include="Primitives\VertexedRenderObject.cpp" />
+    <ClCompile Include="Primitives\Interfaces\VertexedRenderObject.cpp" />
     <ClCompile Include="Vulkan\PipelineProvider.cpp" />
     <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />
-    <ClCompile Include="Vulkan\Memory\DeviceMemory.cpp" />
-    <ClCompile Include="Vulkan\Memory\ImageMemory.cpp" />
-    <ClCompile Include="Primitives\RenderObject.cpp" />
+    <ClCompile Include="Vulkan\Data\DeviceMemory\DeviceMemory.cpp" />
+    <ClCompile Include="Vulkan\Data\ImageData.cpp" />
+    <ClCompile Include="Primitives\Interfaces\RenderObject.cpp" />
     <ClCompile Include="RenderVisitor.cpp" />
     <ClCompile Include="Vulkan\CommandBuffer.cpp" />
     <ClCompile Include="Vulkan\DeviceController.cpp" />
-    <ClCompile Include="Vulkan\Memory\BufferMemory.cpp" />
+    <ClCompile Include="Vulkan\Data\BufferData.cpp" />
     <ClCompile Include="Vulkan\Pipeline.cpp" />
     <ClCompile Include="Vulkan\QueueFamilies.cpp" />
     <ClCompile Include="Vulkan\RenderPass.cpp" />
@@ -167,23 +168,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Primitives\ColoredRenderObject.h" />
+    <ClInclude Include="Primitives\PlaneVertexedRenderObject.h" />
     <ClInclude Include="Primitives\TexturedRenderObject.h" />
-    <ClInclude Include="Primitives\VertexedRenderObject.h" />
+    <ClInclude Include="Primitives\Interfaces\VertexedRenderObject.h" />
     <ClInclude Include="Utils\SingletonManager.h" />
     <ClInclude Include="Vulkan\PipelineProvider.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />
     <ClInclude Include="Dependencies\stb_image.h" />
-    <ClInclude Include="Vulkan\Memory\DeviceMemory.h" />
-    <ClInclude Include="Vulkan\Memory\ImageMemory.h" />
+    <ClInclude Include="Vulkan\Data\DeviceMemory\DeviceMemory.h" />
+    <ClInclude Include="Vulkan\Data\ImageData.h" />
     <ClInclude Include="Math\Matrix4.hpp" />
     <ClInclude Include="Math\Vector2.hpp" />
     <ClInclude Include="Math\Vector3.hpp" />
     <ClInclude Include="Math\Vector4.hpp" />
     <ClInclude Include="RenderVisitor.h" />
     <ClInclude Include="VulkanContext.h" />
-    <ClInclude Include="Primitives\RenderObject.h" />
+    <ClInclude Include="Primitives\Interfaces\RenderObject.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Utils\GLTFReader.h" />
     <ClInclude Include="Dependencies\tiny_gltf\json.hpp" />
@@ -192,7 +194,7 @@
     <ClInclude Include="Dependencies\tiny_gltf\tiny_gltf.h" />
     <ClInclude Include="Vulkan\CommandBuffer.h" />
     <ClInclude Include="Vulkan\DeviceController.h" />
-    <ClInclude Include="Vulkan\Memory\BufferMemory.h" />
+    <ClInclude Include="Vulkan\Data\BufferData.h" />
     <ClInclude Include="Vulkan\Pipeline.h" />
     <ClInclude Include="Vulkan\QueueFamilies.h" />
     <ClInclude Include="Vulkan\RenderPass.h" />

@@ -1,11 +1,10 @@
 #include "RenderObject.h"
-#include "../RenderVisitor.h"
-#include "../Vulkan/Memory/ImageMemory.h"
-#include "../Vulkan/DescriptorSets.h"
-#include "../Utils/GLTFReader.h"
-#include "../Vulkan/Memory/ImageMemory.h"
-#include "../Vulkan/Memory/BufferMemory.h"
-#include "../VulkanContext.h"
+#include "../../RenderVisitor.h"
+#include "../../Vulkan/DescriptorSets.h"
+#include "../../Utils/GLTFReader.h"
+#include "../../Vulkan/Data/BufferData.h"
+#include "../../VulkanContext.h"
+#include "../../Utils/GLTFReader.h"
 
 RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
 {
@@ -17,8 +16,8 @@ RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObjec
 	uniform.baseColor = deserializedObject.baseColor;
 
 	std::span<RenderObjectUniform> uniformSpan(&uniform, &uniform + 1);
-	uniformBuffer = std::make_unique<BufferMemory<RenderObjectUniform>>(
-		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+	uniformBuffer = std::make_unique<BufferData>(BufferData::Create<RenderObjectUniform>(
+		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
 }
 
 std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBinding()

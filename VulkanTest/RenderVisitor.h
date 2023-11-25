@@ -3,7 +3,6 @@ class CommandBuffer;
 class RenderObject;
 class ColoredRenderObject;
 class TexturedRenderObject;
-template <class T>
 class VertexedRenderObject;
 class VulkanContext;
 class Pipeline;
@@ -15,8 +14,7 @@ public:
 	RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex);
 
 	void Visit(const RenderObject& renderObject);
-	template <class T>
-	void Visit(const VertexedRenderObject<T>& renderObject);
+	void Visit(const VertexedRenderObject& renderObject);
 
 private:
 	void BindPipeline(Pipeline& pipeline);

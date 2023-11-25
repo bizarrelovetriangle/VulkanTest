@@ -2,7 +2,6 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include "Memory/ImageMemory.h"
 
 class SwapChain;
 class VulkanContext;

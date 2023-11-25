@@ -1,14 +1,14 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
-#include "DeviceMemory.h"
+#include "DeviceMemory/DeviceMemory.h"
 #include "../../Math/Vector2.hpp"
 
 class VulkanContext;
 
-class ImageMemory : public DeviceMemory
+class ImageData : public DeviceMemory
 {
 public:
-	ImageMemory(VulkanContext& vulkanContext,
+	ImageData(VulkanContext& vulkanContext,
 		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlags imageAspect,
 		MemoryType memoryType);
 	void FlushData(std::span<std::byte> data) override;

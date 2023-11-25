@@ -1,7 +1,7 @@
 #include "SwapChain.h"
 #include "..\VulkanContext.h"
 #include "DeviceController.h"
-#include "Memory/ImageMemory.h"
+#include "Data/ImageData.h"
 #include <algorithm>
 
 #define GLFW_INCLUDE_VULKAN
@@ -17,6 +17,8 @@ SwapChain::SwapChain(VulkanContext& vulkanContext)
 	CreateSwapChain();
 	CreateImageViews();
 }
+
+SwapChain::~SwapChain() = default;
 
 void SwapChain::Dispose()
 {
@@ -79,7 +81,7 @@ void SwapChain::CreateSwapChain()
 
 	{
 		Vector2f resolution(extent.width, extent.height);
-		depthBuffer = std::make_unique<ImageMemory>(vulkanContext,
+		depthBuffer = std::make_unique<ImageData>(vulkanContext,
 			resolution, vk::Format::eD32Sfloat, vk::ImageUsageFlagBits::eDepthStencilAttachment, vk::ImageAspectFlagBits::eDepth,
 			MemoryType::DeviceLocal);
 		depthBuffer->TransitionLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);

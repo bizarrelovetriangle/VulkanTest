@@ -2,8 +2,7 @@
 #include "Pipeline.h"
 #include "DescriptorSets.h"
 #include "../VulkanContext.h"
-#include "../Primitives/RenderObject.h";
-#include "../Primitives/VertexedRenderObject.h"
+#include "../Primitives/PlaneVertexedRenderObject.h"
 #include "../Primitives/ColoredRenderObject.h"
 #include "../Primitives/TexturedRenderObject.h"
 #include "../Utils/SingletonManager.h"
@@ -13,7 +12,7 @@
 PipelineProvider::PipelineProvider(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
 {
-	CreatePipeline<VertexedRenderObject<VertexData>>();
+	CreatePipeline<PlaneVertexedRenderObject>();
 	CreatePipeline<ColoredRenderObject>();
 	CreatePipeline<TexturedRenderObject>();
 }
