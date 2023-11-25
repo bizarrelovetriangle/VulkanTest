@@ -7,7 +7,6 @@
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/DescriptorSets.h"
-#include "Vulkan/PipelineProvider.h"
 #include "Vulkan/SwapChain.h"
 #include "VulkanContext.h"
 #include "Vulkan/Data/BufferData.h"
@@ -23,7 +22,7 @@ void RenderVisitor::Visit(const RenderObject& renderObject)
 
 void RenderVisitor::Visit(const VertexedRenderObject& renderObject)
 {
-	auto& pipeline = *vulkanContext.pipelineProvider->GetPipeline(renderObject);
+	auto& pipeline = *renderObject.shared->pipeline;
 	BindPipeline(pipeline);
 
 	commandBuffer.bindDescriptorSets(

@@ -14,8 +14,6 @@ struct GLFWwindow;
 template <class T>
 class BufferMemory;
 class CommandBufferDispatcher;
-class PipelineProvider;
-class SingletonManager;
 
 class VulkanContext
 {
@@ -36,8 +34,6 @@ public:
     std::shared_ptr<SwapChain> swapChain;
     std::shared_ptr<RenderPass> renderPass;
     std::shared_ptr<CommandBufferDispatcher> commandBufferDispatcher;
-    std::shared_ptr<PipelineProvider> pipelineProvider;
-    std::shared_ptr<SingletonManager> singletonManager;
 
 private:
     vk::Semaphore imageAvailableSemaphore;

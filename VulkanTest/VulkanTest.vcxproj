@@ -147,7 +147,6 @@
     <ClCompile Include="Primitives\PlaneVertexedRenderObject.cpp" />
     <ClCompile Include="Primitives\TexturedRenderObject.cpp" />
     <ClCompile Include="Primitives\Interfaces\VertexedRenderObject.cpp" />
-    <ClCompile Include="Vulkan\PipelineProvider.cpp" />
     <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />
     <ClCompile Include="Vulkan\Data\DeviceMemory\DeviceMemory.cpp" />
@@ -171,8 +170,6 @@
     <ClInclude Include="Primitives\PlaneVertexedRenderObject.h" />
     <ClInclude Include="Primitives\TexturedRenderObject.h" />
     <ClInclude Include="Primitives\Interfaces\VertexedRenderObject.h" />
-    <ClInclude Include="Utils\SingletonManager.h" />
-    <ClInclude Include="Vulkan\PipelineProvider.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />

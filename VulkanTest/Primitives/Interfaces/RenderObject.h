@@ -3,8 +3,7 @@
 #include "../../Math/Vector2.hpp"
 #include "../../Math/Matrix4.hpp"
 #include "../../VulkanContext.h"
-#include <optional>
-#include <vulkan/vulkan.hpp>
+#include <memory>
 #include "../../Vulkan/DeviceController.h"
 
 class RenderVisitor;
@@ -12,6 +11,7 @@ class DescriptorSets;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
 class BufferData;
+class Pipeline;
 
 class RenderObjectPushConstantRange
 {
@@ -31,39 +31,31 @@ public:
 class RenderObjectShared
 {
 public:
+	RenderObjectShared(VulkanContext& vulkanContext);
+	~RenderObjectShared();
+
 	vk::DescriptorSetLayout descriptorSetLayout;
 	vk::VertexInputBindingDescription vertexDataBinding;
 	std::vector<vk::VertexInputAttributeDescription> vertexDataAttributes;
 	std::string vertexShader;
 	std::string fragmentShader;
+	std::unique_ptr<Pipeline> pipeline;
+
+private:
+	VulkanContext& vulkanContext;
 };
 
 template <class T>
 class Shared : public RenderObjectShared
 {
 public:
-	Shared(VulkanContext& vulkanContext)
-		: vulkanContext(vulkanContext)
-	{
-		auto& device = vulkanContext.deviceController->device;
-		auto bindings = T::DescriptorSetLayoutBinding();
-		vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
-		descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
-		vertexDataBinding = T::VertexDataType::BindingDescription();
-		vertexDataAttributes = T::VertexDataType::AttributeDescriptions();
-		vertexShader = T::VertexShader;
-		fragmentShader = T::FragmentShader;
-	}
-
-	void Dispose()
-	{
-		auto& device = vulkanContext.deviceController->device;
-		device.destroyDescriptorSetLayout(descriptorSetLayout);
-	}
+	static std::shared_ptr<Shared<T>> getInstance(VulkanContext& vulkanContext);
+	Shared(VulkanContext& vulkanContext);
 
 private:
-	VulkanContext& vulkanContext;
+	static std::weak_ptr<Shared<T>> instance;
 };
+
 
 class RenderObject
 {
@@ -80,5 +72,6 @@ public:
 	RenderObjectUniform uniform;
 	std::unique_ptr<BufferData> uniformBuffer;
 	std::unique_ptr<DescriptorSets> descriptorSets;
+	std::shared_ptr<RenderObjectShared> shared;
 };
 

@@ -2,14 +2,9 @@
 #include "../Math/Vector3.hpp"
 #include "../Math/Vector2.hpp"
 #include "../Math/Matrix4.hpp"
-#include "../VulkanContext.h"
-#include <optional>
-#include <vulkan/vulkan.hpp>
 #include "Interfaces/VertexedRenderObject.h"
 
-class RenderVisitor;
-class DescriptorSets;
-class Pipeline;
+class VulcanContext;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
 
@@ -28,10 +23,7 @@ class ColoredRenderObject : public VertexedRenderObject
 {
 public:
 	using VertexDataType = ColoredVertexData;
-
 	ColoredRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
-	~ColoredRenderObject();
-	virtual void Accept(RenderVisitor& renderVisitor) const;
 
 public:
 	inline static std::string VertexShader =

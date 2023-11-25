@@ -5,6 +5,49 @@
 #include "../../Vulkan/Data/BufferData.h"
 #include "../../VulkanContext.h"
 #include "../../Utils/GLTFReader.h"
+#include "../../Vulkan/Pipeline.h"
+#include "../PlaneVertexedRenderObject.h"
+#include "../ColoredRenderObject.h"
+#include "../TexturedRenderObject.h"
+
+RenderObjectShared::RenderObjectShared(VulkanContext& vulkanContext)
+	: vulkanContext(vulkanContext)
+{
+}
+
+RenderObjectShared::~RenderObjectShared()
+{
+	auto& device = vulkanContext.deviceController->device;
+	device.destroyDescriptorSetLayout(descriptorSetLayout);
+	pipeline->Dispose();
+}
+
+template <class T>
+std::shared_ptr<Shared<T>> Shared<T>::getInstance(VulkanContext& vulkanContext)
+{
+	auto ptr = instance.lock();
+	if (!ptr) ptr = std::make_shared<Shared<T>>(vulkanContext);
+	return ptr;
+}
+
+template <class T>
+Shared<T>::Shared(VulkanContext& vulkanContext)
+	: RenderObjectShared(vulkanContext)
+{
+	auto& device = vulkanContext.deviceController->device;
+	auto bindings = T::DescriptorSetLayoutBinding();
+	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
+	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
+	vertexDataBinding = T::VertexDataType::BindingDescription();
+	vertexDataAttributes = T::VertexDataType::AttributeDescriptions();
+	vertexShader = T::VertexShader;
+	fragmentShader = T::FragmentShader;
+	pipeline = std::make_unique<Pipeline>(vulkanContext, *this);
+}
+
+template <class T>
+std::weak_ptr<Shared<T>> Shared<T>::instance;
+
 
 RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
 {
@@ -38,4 +81,9 @@ void RenderObject::Dispose()
 {
 	uniformBuffer->Dispose();
 	descriptorSets->Dispose();
+	shared.reset();
 }
+
+template Shared<PlaneVertexedRenderObject>;
+template Shared<ColoredRenderObject>;
+template Shared<TexturedRenderObject>;

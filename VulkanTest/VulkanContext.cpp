@@ -22,9 +22,7 @@
 #include "Vulkan/SwapChain.h"
 #include "Vulkan/RenderPass.h"
 #include "Vulkan/CommandBuffer.h"
-#include "Vulkan/PipelineProvider.h"
 #include "Utils/GLTFReader.h"
-#include "Utils/SingletonManager.h"
 #include "Vulkan/CommandBufferDispatcher.h"
 
 #define GLFW_INCLUDE_VULKAN
@@ -50,7 +48,6 @@ void VulkanContext::Init(GLFWwindow* window)
     queueFamilies->queueMap[queueFamilies->presentQueueFamily] = deviceController->device.getQueue(queueFamilies->presentQueueFamily, 0);
     queueFamilies->queueMap[queueFamilies->transferQueueFamily] = deviceController->device.getQueue(queueFamilies->transferQueueFamily, 0);
 
-    singletonManager = std::make_shared<SingletonManager>();
     commandBufferDispatcher = std::make_shared<CommandBufferDispatcher>(*this);
 
     swapChain = std::make_shared<SwapChain>(*this);
@@ -58,7 +55,6 @@ void VulkanContext::Init(GLFWwindow* window)
     swapChain->CreateFramebuffers(renderPass->renderPass);
     commandBuffer = std::make_shared<CommandBuffer>(*this, deviceController->device,
         queueFamilies, swapChain, renderPass);
-    pipelineProvider = std::make_shared<PipelineProvider>(*this);
 
     vk::SemaphoreCreateInfo semaphoreInfo{};
     imageAvailableSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
@@ -100,9 +96,7 @@ void VulkanContext::Await()
 void VulkanContext::Dispose()
 {
     swapChain->Dispose();
-    singletonManager->Dispose();
     commandBufferDispatcher->Dispose();
-    pipelineProvider->Dispose();
     commandBuffer->Dispose();
     renderPass->Dispose();
 

@@ -1,13 +1,8 @@
 #pragma once
-#include "../Math/Vector3.hpp"
-#include "../Math/Vector2.hpp"
-#include "../Math/Matrix4.hpp"
-#include "../VulkanContext.h"
 #include <optional>
-#include <vulkan/vulkan.hpp>
 #include "Interfaces/VertexedRenderObject.h"
 
-class RenderVisitor;
+class VulcanContext;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
 class ImageData;
@@ -29,9 +24,8 @@ public:
 	using VertexDataType = TexturedVertexData;
 
 	TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
-	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	~TexturedRenderObject();
-	virtual void Accept(RenderVisitor& renderVisitor) const;
+	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	void Dispose();
 
 public:

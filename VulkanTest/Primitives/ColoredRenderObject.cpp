@@ -5,10 +5,9 @@
 #include "../Vulkan/Data/ImageData.h"
 #include "../Vulkan/Data/BufferData.h"
 #include "../RenderVisitor.h"
-#include "../Utils/SingletonManager.h"
+#include "../VulkanContext.h"
 
-ColoredVertexData::ColoredVertexData(
-	const DeserializedObjectVertexData& deserializingObjectVertexData)
+ColoredVertexData::ColoredVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData)
 	: VertexData(deserializingObjectVertexData)
 {
 	color = deserializingObjectVertexData.color;
@@ -40,14 +39,7 @@ ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const Des
 	vertexBuffer = std::make_unique<BufferData>(BufferData::Create<ColoredVertexData>(
 		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer));
 
-	auto& shared = vulkanContext.singletonManager->Get<Shared<ColoredRenderObject>>();
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared.descriptorSetLayout);
+	shared = Shared<ColoredRenderObject>::getInstance(vulkanContext);
+	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
-}
-
-ColoredRenderObject::~ColoredRenderObject() = default;
-
-void ColoredRenderObject::Accept(RenderVisitor& renderVisitor) const
-{
-	renderVisitor.Visit(*this);
 }

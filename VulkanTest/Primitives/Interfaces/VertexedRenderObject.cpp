@@ -6,7 +6,6 @@
 #include "../../RenderVisitor.h"
 #include "../../Vulkan/Data/BufferData.h"
 #include "../../Vulkan/DescriptorSets.h"
-#include "../../Utils/SingletonManager.h"
 #include "../../Utils/GLTFReader.h"
 
 VertexData::VertexData(const DeserializedObjectVertexData& deserializingObjectVertexData)
