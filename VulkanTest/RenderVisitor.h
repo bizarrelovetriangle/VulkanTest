@@ -7,6 +7,7 @@ class VertexedRenderObject;
 class VulkanContext;
 class Pipeline;
 class VertexData;
+class EvenPlaneObject;
 
 class RenderVisitor
 {
@@ -14,6 +15,7 @@ public:
 	RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex);
 
 	void Visit(const RenderObject& renderObject);
+	void Visit(const EvenPlaneObject& renderObject);
 	void Visit(const VertexedRenderObject& renderObject);
 
 private:

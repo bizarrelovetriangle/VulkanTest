@@ -1,7 +1,5 @@
 #include "VertexedRenderObject.h"
 #include "../../Utils/GLTFReader.h"
-#include "../ColoredRenderObject.h"
-#include "../TexturedRenderObject.h"
 #include "../../Vulkan/Data/DeviceMemory/DeviceMemory.h"
 #include "../../RenderVisitor.h"
 #include "../../Vulkan/Data/BufferData.h"
@@ -31,7 +29,7 @@ std::vector<vk::VertexInputAttributeDescription> VertexData::AttributeDescriptio
 
 
 VertexedRenderObject::VertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: RenderObject(vulkanContext, deserializedObject)
+	: DeserializableObject(vulkanContext, deserializedObject)
 {
 }
 

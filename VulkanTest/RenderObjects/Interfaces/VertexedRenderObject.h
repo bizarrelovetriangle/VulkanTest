@@ -1,5 +1,5 @@
 #pragma once
-#include "RenderObject.h"
+#include "DeserializableObject.h"
 
 struct DeserializedObjectVertexData;
 
@@ -15,7 +15,7 @@ public:
 	Vector3f normal;
 };
 
-class VertexedRenderObject : public RenderObject
+class VertexedRenderObject : public DeserializableObject
 {
 public:
 	VertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);

@@ -48,7 +48,7 @@
     <ClCompile Include="RenderVisitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Primitives\Interfaces\RenderObject.cpp">
+    <ClCompile Include="RenderObjects\Interfaces\RenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vulkan\Data\ImageData.cpp">
@@ -66,19 +66,22 @@
     <ClCompile Include="Vulkan\DescriptorSets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\PipelineProvider.cpp">
+    <ClCompile Include="RenderObjects\DeserializableObjects\ColoredRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Primitives\ColoredRenderObject.cpp">
+    <ClCompile Include="RenderObjects\DeserializableObjects\TexturedRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Primitives\TexturedRenderObject.cpp">
+    <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Primitives\Interfaces\VertexedRenderObject.cpp">
+    <ClCompile Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Primitives\PlaneVertexedRenderObject.cpp">
+    <ClCompile Include="RenderObjects\Primitives\EvenPlaneObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderObjects\Interfaces\DeserializableObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,7 +134,7 @@
     <ClInclude Include="Utils\GLTFReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\Interfaces\RenderObject.h">
+    <ClInclude Include="RenderObjects\Interfaces\RenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Math\Matrix4.hpp">
@@ -164,22 +167,22 @@
     <ClInclude Include="Vulkan\DescriptorSets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vulkan\PipelineProvider.h">
+    <ClInclude Include="RenderObjects\DeserializableObjects\ColoredRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\ColoredRenderObject.h">
+    <ClInclude Include="RenderObjects\DeserializableObjects\TexturedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\TexturedRenderObject.h">
+    <ClInclude Include="RenderObjects\Interfaces\VertexedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\Interfaces\VertexedRenderObject.h">
+    <ClInclude Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\SingletonManager.h">
+    <ClInclude Include="RenderObjects\Primitives\EvenPlaneObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Primitives\PlaneVertexedRenderObject.h">
+    <ClInclude Include="RenderObjects\Interfaces\DeserializableObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

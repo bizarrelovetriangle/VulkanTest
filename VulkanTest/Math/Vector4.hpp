@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "Vector3.hpp"
 
 template <class T>
 class Vector4;
@@ -16,6 +17,13 @@ public:
 
 	Vector4()
 	{
+	}
+
+	Vector4(const Vector3<T>& v3)
+	{
+		x = v3.x;
+		y = v3.y;
+		z = v3.z;
 	}
 
 	template <class O>

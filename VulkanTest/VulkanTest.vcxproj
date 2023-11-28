@@ -143,15 +143,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Primitives\ColoredRenderObject.cpp" />
-    <ClCompile Include="Primitives\PlaneVertexedRenderObject.cpp" />
-    <ClCompile Include="Primitives\TexturedRenderObject.cpp" />
-    <ClCompile Include="Primitives\Interfaces\VertexedRenderObject.cpp" />
+    <ClCompile Include="Math\Plane.cpp" />
+    <ClCompile Include="RenderObjects\DeserializableObjects\ColoredRenderObject.cpp" />
+    <ClCompile Include="RenderObjects\Interfaces\DeserializableObject.cpp" />
+    <ClCompile Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.cpp" />
+    <ClCompile Include="RenderObjects\Primitives\EvenPlaneObject.cpp" />
+    <ClCompile Include="RenderObjects\DeserializableObjects\TexturedRenderObject.cpp" />
+    <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp" />
     <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />
     <ClCompile Include="Vulkan\Data\DeviceMemory\DeviceMemory.cpp" />
     <ClCompile Include="Vulkan\Data\ImageData.cpp" />
-    <ClCompile Include="Primitives\Interfaces\RenderObject.cpp" />
+    <ClCompile Include="RenderObjects\Interfaces\RenderObject.cpp" />
     <ClCompile Include="RenderVisitor.cpp" />
     <ClCompile Include="Vulkan\CommandBuffer.cpp" />
     <ClCompile Include="Vulkan\DeviceController.cpp" />
@@ -166,10 +169,13 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Primitives\ColoredRenderObject.h" />
-    <ClInclude Include="Primitives\PlaneVertexedRenderObject.h" />
-    <ClInclude Include="Primitives\TexturedRenderObject.h" />
-    <ClInclude Include="Primitives\Interfaces\VertexedRenderObject.h" />
+    <ClInclude Include="Math\Plane.h" />
+    <ClInclude Include="RenderObjects\DeserializableObjects\ColoredRenderObject.h" />
+    <ClInclude Include="RenderObjects\Interfaces\DeserializableObject.h" />
+    <ClInclude Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.h" />
+    <ClInclude Include="RenderObjects\Primitives\EvenPlaneObject.h" />
+    <ClInclude Include="RenderObjects\DeserializableObjects\TexturedRenderObject.h" />
+    <ClInclude Include="RenderObjects\Interfaces\VertexedRenderObject.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />
@@ -182,7 +188,7 @@
     <ClInclude Include="Math\Vector4.hpp" />
     <ClInclude Include="RenderVisitor.h" />
     <ClInclude Include="VulkanContext.h" />
-    <ClInclude Include="Primitives\Interfaces\RenderObject.h" />
+    <ClInclude Include="RenderObjects\Interfaces\RenderObject.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Utils\GLTFReader.h" />
     <ClInclude Include="Dependencies\tiny_gltf\json.hpp" />
@@ -201,6 +207,8 @@
   <ItemGroup>
     <None Include="Resources\Shaders\colored.frag" />
     <None Include="Resources\Shaders\colored.vert" />
+    <None Include="Resources\Shaders\Primitives\EvenPlane.frag" />
+    <None Include="Resources\Shaders\Primitives\EvenPlane.vert" />
     <None Include="Resources\Shaders\textured.frag" />
     <None Include="Resources\Shaders\textured.vert" />
     <None Include="Resources\Shaders\vertexed.frag" />

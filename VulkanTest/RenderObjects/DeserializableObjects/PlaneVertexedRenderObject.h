@@ -1,7 +1,5 @@
 #pragma once
-#include <optional>
-#include <vulkan/vulkan.hpp>
-#include "Interfaces/VertexedRenderObject.h"
+#include "../Interfaces/VertexedRenderObject.h"
 
 class VulkanContext;
 struct DeserializedObject;

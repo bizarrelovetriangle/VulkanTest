@@ -20,14 +20,6 @@ public:
 	Matrix4 world;
 };
 
-class RenderObjectUniform
-{
-public:
-	alignas(16) Vector4f baseColor;
-	alignas(4) bool hasTexture = false;
-	alignas(4) bool hasColors = false;
-};
-
 class RenderObjectShared
 {
 public:
@@ -60,18 +52,21 @@ private:
 class RenderObject
 {
 public:
-	RenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
-	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
+	RenderObject(VulkanContext& vulkanContext);
 	~RenderObject();
+
+	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	virtual void Accept(RenderVisitor& renderVisitor) const;
 	virtual void Dispose();
 
 public:
 	std::string name;
 	Matrix4 model;
-	RenderObjectUniform uniform;
 	std::unique_ptr<BufferData> uniformBuffer;
 	std::unique_ptr<DescriptorSets> descriptorSets;
 	std::shared_ptr<RenderObjectShared> shared;
+
+private:
+	VulkanContext& vulkanContext;
 };
 

@@ -38,13 +38,20 @@ public:
 		return matrix;
 	}
 
+	static Matrix4 LookAt(const Vector3f& from, const Vector3f& to)
+	{
+		auto z = (to - from).Normalized();
+		auto [x, y] = z.twoPerpendicularsForK();
+		auto rotate = Matrix4(Vector4f(x), Vector4f(y), Vector4f(z), Vector4f(0., 0., 0., 1.)).Transpose();
+		return Translation(from) * rotate;
+	}
+
 	static Matrix4 Rotate(const Vector4f& quaternion)
 	{
 		auto angle = std::acos(quaternion.w);
 
 		auto jA = Vector3f(quaternion.x, quaternion.y, quaternion.z) / std::sin(angle);
-		auto iA = jA.Cross({ 0., 1., 0. }).Normalized();
-		auto kA = jA.Cross(iA);
+		auto [iA, kA] = jA.twoPerpendicularsForJ();
 
 		Matrix4 asixRotate{
 			{iA.x, jA.x, kA.x, 0.},

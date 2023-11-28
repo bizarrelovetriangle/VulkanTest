@@ -1,11 +1,11 @@
 #include "TexturedRenderObject.h"
-#include "../RenderVisitor.h"
-#include "../Vulkan/DescriptorSets.h"
-#include "../Vulkan/DeviceController.h"
-#include "../Utils/GLTFReader.h"
-#include "../Vulkan/Data/ImageData.h"
-#include "../Vulkan/Data/BufferData.h"
-#include "../VulkanContext.h"
+#include "../../RenderVisitor.h"
+#include "../../Vulkan/DescriptorSets.h"
+#include "../../Vulkan/DeviceController.h"
+#include "../../Utils/GLTFReader.h"
+#include "../../Vulkan/Data/ImageData.h"
+#include "../../Vulkan/Data/BufferData.h"
+#include "../../VulkanContext.h"
 #undef LoadImage;
 
 TexturedVertexData::TexturedVertexData(

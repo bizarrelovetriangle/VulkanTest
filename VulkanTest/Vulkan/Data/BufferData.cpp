@@ -1,13 +1,14 @@
 #include "BufferData.h"
 #include "../DeviceController.h"
-#include "../../Primitives/Interfaces/RenderObject.h"
+#include "../../RenderObjects/Interfaces/RenderObject.h"
 #include "../../VulkanContext.h"
 #include "../QueueFamilies.h"
 #include "../CommandBuffer.h"
 #include "../CommandBufferDispatcher.h"
-#include "../../Primitives/TexturedRenderObject.h"
-#include "../../Primitives/ColoredRenderObject.h"
-#include "../../Primitives/PlaneVertexedRenderObject.h"
+#include "../../RenderObjects/DeserializableObjects/TexturedRenderObject.h"
+#include "../../RenderObjects/DeserializableObjects/ColoredRenderObject.h"
+#include "../../RenderObjects/DeserializableObjects/PlaneVertexedRenderObject.h"
+#include "../../RenderObjects/Primitives/EvenPlaneObject.h"
 
 template <class T>
 BufferData BufferData::Create(VulkanContext& vulkanContext,
@@ -73,9 +74,11 @@ template BufferData BufferData::Create<TexturedVertexData>(VulkanContext& vulkan
 	std::span<TexturedVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template BufferData BufferData::Create<ColoredVertexData>(VulkanContext& vulkanContext,
 	std::span<ColoredVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<RenderObjectUniform>(VulkanContext& vulkanContext,
-	std::span<RenderObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template BufferData BufferData::Create<DeserializableObjectUniform>(VulkanContext& vulkanContext,
+	std::span<DeserializableObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template BufferData BufferData::Create<uint16_t>(VulkanContext& vulkanContext,
 	std::span<uint16_t> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template BufferData BufferData::Create<std::byte>(VulkanContext& vulkanContext,
 	std::span<std::byte> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template BufferData BufferData::Create<EvenPlaneObjectUniform>(VulkanContext& vulkanContext,
+	std::span<EvenPlaneObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);

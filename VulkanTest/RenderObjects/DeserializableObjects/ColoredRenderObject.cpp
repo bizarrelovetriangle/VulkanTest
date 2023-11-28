@@ -1,11 +1,11 @@
 #include "ColoredRenderObject.h"
-#include "../RenderVisitor.h"
-#include "../Vulkan/DescriptorSets.h"
-#include "../Utils/GLTFReader.h"
-#include "../Vulkan/Data/ImageData.h"
-#include "../Vulkan/Data/BufferData.h"
-#include "../RenderVisitor.h"
-#include "../VulkanContext.h"
+#include "../../RenderVisitor.h"
+#include "../../Vulkan/DescriptorSets.h"
+#include "../../Utils/GLTFReader.h"
+#include "../../Vulkan/Data/ImageData.h"
+#include "../../Vulkan/Data/BufferData.h"
+#include "../../RenderVisitor.h"
+#include "../../VulkanContext.h"
 
 ColoredVertexData::ColoredVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData)
 	: VertexData(deserializingObjectVertexData)

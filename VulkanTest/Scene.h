@@ -4,14 +4,15 @@
 #include "Vulkan/DescriptorSets.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/SwapChain.h"
-#include "Primitives/ColoredRenderObject.h"
-#include "Primitives/TexturedRenderObject.h"
-#include "Primitives/PlaneVertexedRenderObject.h"
+#include "RenderObjects/DeserializableObjects/ColoredRenderObject.h"
+#include "RenderObjects/DeserializableObjects/TexturedRenderObject.h"
+#include "RenderObjects/DeserializableObjects/PlaneVertexedRenderObject.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include "RenderObjects/Primitives/EvenPlaneObject.h"
 
 class Scene
 {
@@ -37,6 +38,10 @@ public:
 				renderObject = std::make_unique<PlaneVertexedRenderObject>(vulkanContext, deserializedObject);
 			renderObjects.push_back(std::move(renderObject));
 		}
+
+		auto plane = std::make_unique<EvenPlaneObject>(vulkanContext,
+			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		renderObjects.push_back(std::move(plane));
 	}
 
 	void Run()

@@ -6,9 +6,10 @@
 #include "../../VulkanContext.h"
 #include "../../Utils/GLTFReader.h"
 #include "../../Vulkan/Pipeline.h"
-#include "../PlaneVertexedRenderObject.h"
-#include "../ColoredRenderObject.h"
-#include "../TexturedRenderObject.h"
+#include "../DeserializableObjects/PlaneVertexedRenderObject.h"
+#include "../DeserializableObjects/ColoredRenderObject.h"
+#include "../DeserializableObjects/TexturedRenderObject.h"
+#include "../Primitives/EvenPlaneObject.h"
 
 RenderObjectShared::RenderObjectShared(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
@@ -38,8 +39,13 @@ Shared<T>::Shared(VulkanContext& vulkanContext)
 	auto bindings = T::DescriptorSetLayoutBinding();
 	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
 	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
-	vertexDataBinding = T::VertexDataType::BindingDescription();
-	vertexDataAttributes = T::VertexDataType::AttributeDescriptions();
+
+	if constexpr (std::is_base_of_v<VertexedRenderObject, T>)
+	{
+		vertexDataBinding = T::VertexDataType::BindingDescription();
+		vertexDataAttributes = T::VertexDataType::AttributeDescriptions();
+	}
+
 	vertexShader = T::VertexShader;
 	fragmentShader = T::FragmentShader;
 	pipeline = std::make_unique<Pipeline>(vulkanContext, *this);
@@ -49,19 +55,12 @@ template <class T>
 std::weak_ptr<Shared<T>> Shared<T>::instance;
 
 
-RenderObject::RenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
+RenderObject::RenderObject(VulkanContext& vulkanContext)
+	: vulkanContext(vulkanContext)
 {
-	name = deserializedObject.name;
-	model = deserializedObject.model;
-
-	uniform.hasTexture = deserializedObject.textureData.has_value();
-	uniform.hasColors = deserializedObject.hasColors;
-	uniform.baseColor = deserializedObject.baseColor;
-
-	std::span<RenderObjectUniform> uniformSpan(&uniform, &uniform + 1);
-	uniformBuffer = std::make_unique<BufferData>(BufferData::Create<RenderObjectUniform>(
-		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
 }
+
+RenderObject::~RenderObject() = default;
 
 std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBinding()
 {
@@ -69,8 +68,6 @@ std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBin
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll) 
 	};
 }
-
-RenderObject::~RenderObject() = default;
 
 void RenderObject::Accept(RenderVisitor& renderVisitor) const
 {
@@ -87,3 +84,4 @@ void RenderObject::Dispose()
 template Shared<PlaneVertexedRenderObject>;
 template Shared<ColoredRenderObject>;
 template Shared<TexturedRenderObject>;
+template Shared<EvenPlaneObject>;
