@@ -106,8 +106,8 @@ void SwapChain::CreateImageViews()
 vk::Viewport SwapChain::CreateViewport()
 {
 	vk::Viewport viewport(
-		0., 0.,
-		(float)swapChainExtent.width, (float)swapChainExtent.height,
+		0., (float)swapChainExtent.height,
+		(float)swapChainExtent.width, -(float)swapChainExtent.height,
 		0., 1.);
 	return viewport;
 }

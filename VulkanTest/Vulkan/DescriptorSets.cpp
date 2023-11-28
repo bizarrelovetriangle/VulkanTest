@@ -4,7 +4,7 @@
 #include "SwapChain.h"
 #include "Data/BufferData.h"
 #include "Data/ImageData.h"
-#include "../Primitives/Interfaces/RenderObject.h"
+#include "../RenderObjects/Interfaces/RenderObject.h"
 
 DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout)
 	: vulkanContext(vulkanContext), descriptorSetLayout(descriptorSetLayout)
@@ -31,7 +31,7 @@ void DescriptorSets::UpdateUniformDescriptor(BufferData& uniform, uint32_t bindi
 	for (size_t i = 0; i < descriptorSets.size(); ++i)
 	{
 		vk::DescriptorBufferInfo descriptorBufferInfo(
-			uniform.buffer, 0, sizeof(RenderObjectUniform));
+			uniform.buffer, 0, uniform.count);
 		vk::WriteDescriptorSet writeDescriptorSet(
 			descriptorSets[i], binding, 0, vk::DescriptorType::eUniformBuffer, {}, descriptorBufferInfo, {});
 		vulkanContext.deviceController->device.updateDescriptorSets(writeDescriptorSet, {});

@@ -59,7 +59,7 @@ public:
 			{iA.z, jA.z, kA.z, 0.},
 			{  0.,   0.,   0., 1.}};
 
-		auto yRotate = RotateY(angle * 2);
+		auto yRotate = RotateY(-angle * 2);
 		auto matrix = asixRotate * yRotate * asixRotate.Transpose();
 		return matrix;
 	}

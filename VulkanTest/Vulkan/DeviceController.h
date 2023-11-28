@@ -20,7 +20,7 @@ public:
 	vk::Device device;
 
 private:
-	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+	std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_MAINTENANCE1_EXTENSION_NAME };
 	vk::Instance& instance;
 	ValidationLayersInfo validationLayersInfo;
 };

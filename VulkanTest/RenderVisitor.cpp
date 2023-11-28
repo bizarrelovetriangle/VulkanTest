@@ -45,7 +45,7 @@ void RenderVisitor::Visit(const EvenPlaneObject& planeObject)
 	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
 	world = Matrix4::Translation(Vector3f(0, 0, 2)) * world;
 
-	world.j *= -1;
+	//world.j *= -1;
 
 	RenderObjectPushConstantRange pushConstantRange{ planeObject.model.Transpose(), world.Transpose() };
 	commandBuffer.pushConstants(
@@ -79,7 +79,7 @@ void RenderVisitor::Visit(const VertexedRenderObject& renderObject)
 	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
 	world = Matrix4::Translation(Vector3f(0, 0, 2)) * world;
 
-	world.j *= -1;
+	//world.j *= -1;
 
 	RenderObjectPushConstantRange pushConstantRange{ renderObject.model.Transpose(), world.Transpose() };
 	commandBuffer.pushConstants(
