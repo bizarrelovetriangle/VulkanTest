@@ -84,6 +84,12 @@
     <ClCompile Include="RenderObjects\Interfaces\DeserializableObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Math\Plane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Math\Matrix4.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">
@@ -110,10 +116,10 @@
     <ClInclude Include="Vulkan\Data\BufferData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Math\Vector2.hpp">
+    <ClInclude Include="Math\Vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Math\Vector3.hpp">
+    <ClInclude Include="Math\Vector3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VulkanContext.h">
@@ -137,10 +143,10 @@
     <ClInclude Include="RenderObjects\Interfaces\RenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Math\Matrix4.hpp">
+    <ClInclude Include="Math\Matrix4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Math\Vector4.hpp">
+    <ClInclude Include="Math\Vector4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -185,6 +191,9 @@
     <ClInclude Include="RenderObjects\Interfaces\DeserializableObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Math\Plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\textured.frag" />
@@ -193,5 +202,7 @@
     <None Include="Resources\Shaders\vertexed.frag" />
     <None Include="Resources\Shaders\vertexed.vert" />
     <None Include="Resources\Shaders\colored.frag" />
+    <None Include="Resources\Shaders\Primitives\EvenPlane.frag" />
+    <None Include="Resources\Shaders\Primitives\EvenPlane.vert" />
   </ItemGroup>
 </Project>

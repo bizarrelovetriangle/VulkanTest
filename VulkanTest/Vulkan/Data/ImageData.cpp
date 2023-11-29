@@ -3,7 +3,7 @@
 #include "..\DeviceController.h"
 #include <string>
 #include "../../Dependencies/stb_image.h"
-#include "../../Math/Vector2.hpp"
+#include "../../Math/Vector2.h"
 #include "../CommandBufferDispatcher.h"
 #include "../QueueFamilies.h"
 

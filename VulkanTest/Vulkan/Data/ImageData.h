@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
 #include "DeviceMemory/DeviceMemory.h"
-#include "../../Math/Vector2.hpp"
+#include "../../Math/Vector2.h"
 
 class VulkanContext;
 

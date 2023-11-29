@@ -2,9 +2,9 @@
 #undef max
 #define STBI_MSC_SECURE_CRT
 #include "../Dependencies/tiny_gltf/tiny_gltf.h"
-#include "../Math/Vector2.hpp"
-#include "../Math/Vector3.hpp"
-#include "../Math/Matrix4.hpp"
+#include "../Math/Vector2.h"
+#include "../Math/Vector3.h"
+#include "../Math/Matrix4.h"
 #include <string>
 #include <optional>
 
@@ -121,7 +121,7 @@ private:
 
 		Matrix4 matrix;
 		if (scale) matrix = Matrix4::Scale(Vector3f::FromGLTF(*scale)) * matrix;
-		if (rotation) matrix = Matrix4::Rotate(Vector4f::FromGLTF(*rotation)) * matrix;
+		if (rotation) matrix = Matrix4::Rotate(Vector4f::QuaternionFromGLTF(*rotation)) * matrix;
 		if (translation) matrix = Matrix4::Translation(Vector3f::FromGLTF(*translation)) * matrix;
 		return matrix;
 	}

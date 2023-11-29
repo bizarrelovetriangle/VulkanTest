@@ -1,6 +1,6 @@
 #pragma once
 #include "../Interfaces/RenderObject.h"
-#include "../../Math/Vector3.hpp"
+#include "../../Math/Vector3.h"
 #include "../../Math/Plane.h"
 
 class RenderVisitor;

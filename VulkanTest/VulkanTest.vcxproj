@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Math\Matrix4.cpp" />
     <ClCompile Include="Math\Plane.cpp" />
     <ClCompile Include="RenderObjects\DeserializableObjects\ColoredRenderObject.cpp" />
     <ClCompile Include="RenderObjects\Interfaces\DeserializableObject.cpp" />
@@ -182,10 +183,10 @@
     <ClInclude Include="Dependencies\stb_image.h" />
     <ClInclude Include="Vulkan\Data\DeviceMemory\DeviceMemory.h" />
     <ClInclude Include="Vulkan\Data\ImageData.h" />
-    <ClInclude Include="Math\Matrix4.hpp" />
-    <ClInclude Include="Math\Vector2.hpp" />
-    <ClInclude Include="Math\Vector3.hpp" />
-    <ClInclude Include="Math\Vector4.hpp" />
+    <ClInclude Include="Math\Matrix4.h" />
+    <ClInclude Include="Math\Vector2.h" />
+    <ClInclude Include="Math\Vector3.h" />
+    <ClInclude Include="Math\Vector4.h" />
     <ClInclude Include="RenderVisitor.h" />
     <ClInclude Include="VulkanContext.h" />
     <ClInclude Include="RenderObjects\Interfaces\RenderObject.h" />

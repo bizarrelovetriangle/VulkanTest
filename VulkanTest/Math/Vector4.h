@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include "Vector3.hpp"
+#include "Vector3.h"
 
 template <class T>
 class Vector4;
@@ -19,11 +19,12 @@ public:
 	{
 	}
 
-	Vector4(const Vector3<T>& v3)
+	Vector4(const Vector3<T>& v3, const T& w = 0)
 	{
 		x = v3.x;
 		y = v3.y;
 		z = v3.z;
+		this->w = w;
 	}
 
 	template <class O>
@@ -52,8 +53,9 @@ public:
 	}
 
 	template <class T>
-	static Vector4<T> FromGLTF(const Vector4<T>& vec)
+	static Vector4<T> QuaternionFromGLTF(const Vector4<T>& vec)
 	{
-		return Vector4<T>(vec.x, vec.y, -vec.z, vec.w);
+		auto dir = -Vector3<T>::FromGLTF(Vector3<T>(vec.x, vec.y, vec.z));
+		return Vector4<T>(dir, vec.w);
 	}
 };

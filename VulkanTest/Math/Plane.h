@@ -1,6 +1,6 @@
 #pragma once
-#include "Vector3.hpp";
-#include "Matrix4.hpp";
+#include "Vector3.h";
+#include "Matrix4.h";
 
 class Plane
 {
