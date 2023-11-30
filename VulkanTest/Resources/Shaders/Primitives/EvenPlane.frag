@@ -5,7 +5,7 @@ layout(location = 1) in float outFactor;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 0) uniform UniformBufferObject
+layout(binding = 1) uniform UniformBufferObject
 {
 	vec4 color;
 	bool grided;

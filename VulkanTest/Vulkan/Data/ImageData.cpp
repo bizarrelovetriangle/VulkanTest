@@ -46,7 +46,7 @@ void ImageData::FlushData(std::span<std::byte> data)
 {
 	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
 	{
-		DeviceMemory::FlushData(data);
+		FlushMemory(data);
 		return;
 	}
 

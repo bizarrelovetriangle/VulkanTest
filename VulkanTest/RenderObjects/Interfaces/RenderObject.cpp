@@ -58,25 +58,38 @@ std::weak_ptr<Shared<T>> Shared<T>::instance;
 RenderObject::RenderObject(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
 {
+	std::span<TransformUniform> uniformSpan(&transformUniform, &transformUniform + 1);
+	transformUniformBuffer = std::make_unique<BufferData>(BufferData::Create<TransformUniform>(
+		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
 }
 
 RenderObject::~RenderObject() = default;
 
+void RenderObject::UpdateTransformUniformBuffer()
+{
+	TransformUniform temp;
+	temp.model = transformUniform.model.Transpose();
+	temp.world = transformUniform.world.Transpose();
+	temp.view = transformUniform.view.Transpose();
+	std::span<TransformUniform> uniformSpan(&temp, &temp + 1);
+	transformUniformBuffer->FlushData(uniformSpan);
+}
+
 std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBinding()
 {
 	return {
-		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll) 
+		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
 	};
 }
 
-void RenderObject::Accept(RenderVisitor& renderVisitor) const
+void RenderObject::Accept(RenderVisitor& renderVisitor)
 {
 	renderVisitor.Visit(*this);
 }
 
 void RenderObject::Dispose()
 {
-	uniformBuffer->Dispose();
+	transformUniformBuffer->Dispose();
 	descriptorSets->Dispose();
 	shared.reset();
 }

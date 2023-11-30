@@ -3,11 +3,12 @@
 layout(location = 0) out vec3 outPosition;
 layout(location = 1) out float outFactor;
 
-layout (push_constant) uniform constans
+layout(binding = 0) uniform Uniform
 {
 	mat4x4 model;
 	mat4x4 world;
-} Matrixes;
+	mat4x4 view;
+} Transform;
 
 void main()
 {
@@ -22,12 +23,13 @@ void main()
 		vec3(-1., 0.,  1.)
 	);
 
-	vec3 pos = positions[gl_VertexIndex];
-	mat4 matrix = Matrixes.world * Matrixes.model;
+	vec3 pos = positions[gl_VertexIndex] * 3;
+	mat4 matrix = Transform.world * Transform.model;
 
-	vec3 rotatedNormal = vec3(matrix * vec4(normal, 0.));
-	vec3 view = vec3(0., 0., -1.);
-	outFactor = dot(view, rotatedNormal);
+	vec3 rotatedNormal = mat3x3(matrix) * normal;
+	//vec3 view = vec3(0., 0., 1.);
+	//outFactor = dot(view, rotatedNormal);
+	outFactor = 0;
 
 	outPosition = pos;
 	gl_Position = matrix * vec4(pos, 1.0);
@@ -36,5 +38,4 @@ void main()
 	gl_Position.y /= gl_Position.z;
 
 	gl_Position.z /= 10;
-	//gl_Position /= gl_Position.z;
 }

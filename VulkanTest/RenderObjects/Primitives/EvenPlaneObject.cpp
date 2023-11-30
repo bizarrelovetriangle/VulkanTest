@@ -6,20 +6,37 @@
 EvenPlaneObject::EvenPlaneObject(VulkanContext& vulkanContext, const Vector3f& position, const Vector3f& normal)
 	: RenderObject(vulkanContext), plane(position, normal)
 {
-	uniform.color = Vector4f(1.,1.,1.,0.1);
+	transformUniform.model = plane.getMatrix();
+	UpdateTransformUniformBuffer();
 
-	model = plane.getMatrix();
-
-	std::span<EvenPlaneObjectUniform> uniformSpan(&uniform, &uniform + 1);
-	uniformBuffer = std::make_unique<BufferData>(BufferData::Create<EvenPlaneObjectUniform>(
+	evenPlaneObjectUniform.color = Vector4f(1., 1., 1., 0.1);
+	std::span<EvenPlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
+	evenPlaneObjectUniformBuffer = std::make_unique<BufferData>(BufferData::Create<EvenPlaneObjectUniform>(
 		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
 
 	shared = Shared<EvenPlaneObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
-	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*evenPlaneObjectUniformBuffer, 1);
 }
 
-void EvenPlaneObject::Accept(RenderVisitor& renderVisitor) const
+EvenPlaneObject::~EvenPlaneObject() = default;
+
+void EvenPlaneObject::Dispose()
+{
+	RenderObject::Dispose();
+	evenPlaneObjectUniformBuffer->Dispose();
+}
+
+std::vector<vk::DescriptorSetLayoutBinding> EvenPlaneObject::DescriptorSetLayoutBinding()
+{
+	return {
+		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
+	};
+}
+
+void EvenPlaneObject::Accept(RenderVisitor& renderVisitor)
 {
 	renderVisitor.Visit(*this);
 }

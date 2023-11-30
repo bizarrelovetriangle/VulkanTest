@@ -13,11 +13,12 @@ struct DeserializedObjectVertexData;
 class BufferData;
 class Pipeline;
 
-class RenderObjectPushConstantRange
+class TransformUniform
 {
 public:
-	Matrix4 model;
-	Matrix4 world;
+	alignas(16) Matrix4 model;
+	alignas(16) Matrix4 world;
+	alignas(16) Matrix4 view;
 };
 
 class RenderObjectShared
@@ -55,14 +56,14 @@ public:
 	RenderObject(VulkanContext& vulkanContext);
 	~RenderObject();
 
+	void UpdateTransformUniformBuffer();
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
-	virtual void Accept(RenderVisitor& renderVisitor) const;
+	virtual void Accept(RenderVisitor& renderVisitor);
 	virtual void Dispose();
 
 public:
-	std::string name;
-	Matrix4 model;
-	std::unique_ptr<BufferData> uniformBuffer;
+	TransformUniform transformUniform;
+	std::unique_ptr<BufferData> transformUniformBuffer;
 	std::unique_ptr<DescriptorSets> descriptorSets;
 	std::shared_ptr<RenderObjectShared> shared;
 

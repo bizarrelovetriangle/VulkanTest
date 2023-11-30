@@ -4,6 +4,7 @@
 #include "../../Math/Plane.h"
 
 class RenderVisitor;
+class BufferData;
 
 class EvenPlaneObjectUniform
 {
@@ -16,7 +17,10 @@ class EvenPlaneObject : public RenderObject
 {
 public:
 	EvenPlaneObject(VulkanContext& vulkanContext, const Vector3f& position, const Vector3f& normal);
-	virtual void Accept(RenderVisitor& renderVisitor) const override;
+	~EvenPlaneObject();
+	virtual void Dispose() override;
+	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
+	virtual void Accept(RenderVisitor& renderVisitor) override;
 
 public:
 	Plane plane;
@@ -26,5 +30,6 @@ public:
 	inline static std::string FragmentShader =
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Primitives/EvenPlane.frag";
 
-	EvenPlaneObjectUniform uniform;
+	EvenPlaneObjectUniform evenPlaneObjectUniform;
+	std::unique_ptr<BufferData> evenPlaneObjectUniformBuffer;
 };

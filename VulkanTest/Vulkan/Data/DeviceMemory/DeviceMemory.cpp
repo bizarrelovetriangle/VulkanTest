@@ -20,7 +20,7 @@ void DeviceMemory::AllocateMemory(const vk::MemoryRequirements& memoryRequiremen
 	memory = vulkanContext.deviceController->device.allocateMemory(allocInfo);;
 }
 
-void DeviceMemory::FlushData(std::span<std::byte> data)
+void DeviceMemory::FlushMemory(std::span<std::byte> data)
 {
 	auto dataPointer = vulkanContext.deviceController->device.mapMemory(memory, 0, data.size());
 	memcpy(dataPointer, data.data(), data.size());

@@ -14,7 +14,7 @@ DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLa
 
 	std::vector<vk::DescriptorPoolSize> descriptorPoolSizes
 	{
-		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, count),
+		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, count * 3),
 		vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, count)
 	};
 

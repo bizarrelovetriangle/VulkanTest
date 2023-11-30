@@ -15,6 +15,13 @@ class DeserializableObject : public RenderObject
 {
 public:
 	DeserializableObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
+	~DeserializableObject();
+	virtual void Dispose() override;
+	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 
-	DeserializableObjectUniform uniform;
+public:
+	DeserializableObjectUniform deserializableUniform;
+	std::unique_ptr<BufferData> deserializableUniformBuffer;
+
+	std::string gltfName;
 };

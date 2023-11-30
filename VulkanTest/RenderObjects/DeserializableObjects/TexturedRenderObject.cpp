@@ -51,8 +51,9 @@ TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const D
 
 	shared = Shared<TexturedRenderObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
-	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
-	descriptorSets->UpdateImageDescriptor(*textureBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*deserializableUniformBuffer, 1);
+	descriptorSets->UpdateImageDescriptor(*textureBuffer, 2);
 }
 
 TexturedRenderObject::~TexturedRenderObject() = default;
@@ -61,7 +62,8 @@ std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderObject::DescriptorSetL
 {
 	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
-		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment)
+		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment)
 	};
 }
 

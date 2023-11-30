@@ -11,7 +11,7 @@ public:
 	ImageData(VulkanContext& vulkanContext,
 		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlags imageAspect,
 		MemoryType memoryType);
-	void FlushData(std::span<std::byte> data) override;
+	void FlushData(std::span<std::byte> data);
 	void TransitionLayout(const vk::ImageLayout& newImageLayout);
 	void CreateImageViewAndSampler();
 	void Dispose();

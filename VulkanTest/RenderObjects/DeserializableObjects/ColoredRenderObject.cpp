@@ -41,5 +41,6 @@ ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const Des
 
 	shared = Shared<ColoredRenderObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
-	descriptorSets->UpdateUniformDescriptor(*uniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*deserializableUniformBuffer, 1);
 }

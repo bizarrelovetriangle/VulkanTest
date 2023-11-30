@@ -30,8 +30,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjec
 
 	shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
-	vk::PushConstantRange pushConstant(vk::ShaderStageFlagBits::eVertex, 0, sizeof(RenderObjectPushConstantRange));
-	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, renderObjectShared.descriptorSetLayout, pushConstant);
+	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, renderObjectShared.descriptorSetLayout, {});
 	pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo(

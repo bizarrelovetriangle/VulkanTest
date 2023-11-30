@@ -35,14 +35,14 @@ VertexedRenderObject::VertexedRenderObject(VulkanContext& vulkanContext, const D
 
 VertexedRenderObject::~VertexedRenderObject() = default;
 
-void VertexedRenderObject::Accept(RenderVisitor& renderVisitor) const
+void VertexedRenderObject::Accept(RenderVisitor& renderVisitor)
 {
 	renderVisitor.Visit(*this);
 }
 
 void VertexedRenderObject::Dispose()
 {
-	RenderObject::Dispose();
+	DeserializableObject::Dispose();
 	vertexBuffer->Dispose();
 }
 

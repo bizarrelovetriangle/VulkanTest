@@ -1,14 +1,15 @@
 #version 450
 
 layout(location = 0) in float fragFactor;
-layout(binding = 0) uniform Uniform
+
+layout(location = 0) out vec4 outColor;
+
+layout(binding = 1) uniform Uniform
 {
 	vec4 baseColor;
 	bool hasTexture;
 	bool hasColors;
 };
-
-layout(location = 0) out vec4 outColor;
 
 void main()
 {

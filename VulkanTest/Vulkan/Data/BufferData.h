@@ -14,8 +14,9 @@ public:
 
 	BufferData(const BufferData& bufferData);
 	BufferData(VulkanContext& vulkanContext,
-		std::span<std::byte> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-	virtual void FlushData(std::span<std::byte> data) override;
+		size_t size, MemoryType memoryType, vk::BufferUsageFlags usage);
+	template <class T>
+	void FlushData(std::span<T> data);
 	void Dispose();
 
 public:

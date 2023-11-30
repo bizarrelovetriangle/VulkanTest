@@ -17,21 +17,18 @@ RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& comman
 {
 }
 
-void RenderVisitor::Visit(const RenderObject& renderObject)
+void RenderVisitor::Visit(RenderObject& renderObject)
 {
 }
 
-void RenderVisitor::Visit(const EvenPlaneObject& planeObject)
+void RenderVisitor::Visit(EvenPlaneObject& planeObject)
 {
 	auto& pipeline = *planeObject.shared->pipeline;
 	BindPipeline(pipeline);
 
 	commandBuffer.bindDescriptorSets(
-		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0, planeObject.descriptorSets->descriptorSets[imageIndex], {});
-
-	//vk::Buffer vertexBuffers[] = { planeObject.vertexBuffer->buffer };
-	//vk::DeviceSize vertexOffsets[] = { 0 };
-	//commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
+		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0,
+		planeObject.descriptorSets->descriptorSets[imageIndex], {});
 
 	static auto before = std::chrono::high_resolution_clock::now();
 	auto now = std::chrono::high_resolution_clock::now();
@@ -45,17 +42,15 @@ void RenderVisitor::Visit(const EvenPlaneObject& planeObject)
 	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
 	world = Matrix4::Translation(Vector3f(0, 0, 2)) * world;
 
-	//world.j *= -1;
+	Matrix4 view;
 
-	RenderObjectPushConstantRange pushConstantRange{ planeObject.model.Transpose(), world.Transpose() };
-	commandBuffer.pushConstants(
-		pipeline.pipelineLayout, vk::ShaderStageFlagBits::eVertex,
-		0, sizeof(RenderObjectPushConstantRange), &pushConstantRange);
+	planeObject.transformUniform.world = world;
+	planeObject.UpdateTransformUniformBuffer();
 
 	commandBuffer.draw(6, 1, 0, 0);
 }
 
-void RenderVisitor::Visit(const VertexedRenderObject& renderObject)
+void RenderVisitor::Visit(VertexedRenderObject& renderObject)
 {
 	auto& pipeline = *renderObject.shared->pipeline;
 	BindPipeline(pipeline);
@@ -79,12 +74,10 @@ void RenderVisitor::Visit(const VertexedRenderObject& renderObject)
 	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
 	world = Matrix4::Translation(Vector3f(0, 0, 2)) * world;
 
-	//world.j *= -1;
+	Matrix4 view;
 
-	RenderObjectPushConstantRange pushConstantRange{ renderObject.model.Transpose(), world.Transpose() };
-	commandBuffer.pushConstants(
-		pipeline.pipelineLayout, vk::ShaderStageFlagBits::eVertex,
-		0, sizeof(RenderObjectPushConstantRange), &pushConstantRange);
+	renderObject.transformUniform.world = world;
+	renderObject.UpdateTransformUniformBuffer();
 
 	commandBuffer.draw(renderObject.vertexBuffer->count, 1, 0, 0);
 }

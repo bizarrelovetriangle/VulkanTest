@@ -2,14 +2,16 @@
 
 layout(location = 0) in float fragFactor;
 layout(location = 1) in vec4 fragColor;
-layout(binding = 0) uniform Uniform
+
+layout(location = 0) out vec4 outColor;
+
+layout(binding = 1) uniform Uniform
 {
 	vec4 baseColor;
 	bool hasTexture;
 	bool hasColors;
 };
 
-layout(location = 0) out vec4 outColor;
 
 void main()
 {

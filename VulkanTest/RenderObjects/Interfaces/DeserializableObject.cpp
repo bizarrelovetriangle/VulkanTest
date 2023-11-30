@@ -5,14 +5,31 @@
 DeserializableObject::DeserializableObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
 	: RenderObject(vulkanContext)
 {
-	name = deserializedObject.name;
-	model = deserializedObject.model;
+	gltfName = deserializedObject.name;
+	transformUniform.model = deserializedObject.model;
+	UpdateTransformUniformBuffer();
 
-	uniform.hasTexture = deserializedObject.textureData.has_value();
-	uniform.hasColors = deserializedObject.hasColors;
-	uniform.baseColor = deserializedObject.baseColor;
+	deserializableUniform.hasTexture = deserializedObject.textureData.has_value();
+	deserializableUniform.hasColors = deserializedObject.hasColors;
+	deserializableUniform.baseColor = deserializedObject.baseColor;
 
-	std::span<DeserializableObjectUniform> uniformSpan(&uniform, &uniform + 1);
-	uniformBuffer = std::make_unique<BufferData>(BufferData::Create<DeserializableObjectUniform>(
+	std::span<DeserializableObjectUniform> uniformSpan(&deserializableUniform, &deserializableUniform + 1);
+	deserializableUniformBuffer = std::make_unique<BufferData>(BufferData::Create<DeserializableObjectUniform>(
 		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
+}
+
+DeserializableObject::~DeserializableObject() = default;
+
+void DeserializableObject::Dispose()
+{
+	RenderObject::Dispose();
+	deserializableUniformBuffer->Dispose();
+}
+
+std::vector<vk::DescriptorSetLayoutBinding> DeserializableObject::DescriptorSetLayoutBinding()
+{
+	return {
+		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
+	};
 }

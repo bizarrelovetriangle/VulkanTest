@@ -20,7 +20,7 @@ class VertexedRenderObject : public DeserializableObject
 public:
 	VertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
 	~VertexedRenderObject();
-	virtual void Accept(RenderVisitor& renderVisitor) const;
+	virtual void Accept(RenderVisitor& renderVisitor);
 	virtual void Dispose() override;
 
 public:
