@@ -22,5 +22,4 @@ void main()
 	}
 
 	outColor = factor * color;
-	outColor = color;
 }

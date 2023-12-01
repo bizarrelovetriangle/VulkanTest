@@ -17,8 +17,8 @@ class TransformUniform
 {
 public:
 	alignas(16) Matrix4 model;
-	alignas(16) Matrix4 world;
 	alignas(16) Matrix4 view;
+	alignas(16) Matrix4 frustum;
 };
 
 class RenderObjectShared

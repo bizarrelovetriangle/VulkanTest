@@ -40,6 +40,7 @@ public:
 		}
 
 		auto plane = std::make_unique<EvenPlaneObject>(vulkanContext,
+			//Vector3f(0., 0., 1.), Vector3f(0., 0., -1.));
 			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
 		renderObjects.push_back(std::move(plane));
 	}
@@ -62,8 +63,8 @@ public:
 	}
 
 private:
-	const uint32_t width = 1200;
-	const uint32_t height = 1200;
+	const uint32_t width = 2000;
+	const uint32_t height = 2000;
 
 	GLFWwindow* window;
 	VulkanContext vulkanContext;

@@ -19,9 +19,15 @@ Plane Plane::fromTwoPoints(const Vector3f& pos, const Vector3f& dest)
 Matrix4 Plane::getMatrix()
 {
 	auto pos = normal * dist;
-	auto [i, k] = normal.twoPerpendicularsForJ();
-	i = Vector3f(0.,0.,-1.);
-	auto mat = Matrix4::LookAt(pos, pos + i);
-	return Matrix4::LookAt(pos, pos + i);
+	auto j = normal;
+	auto [i, k] = j.twoPerpendicularsForJ();
+
+	Matrix4 asixRotate{
+		{i.x, j.x, k.x, pos.x},
+		{i.y, j.y, k.y, pos.y},
+		{i.z, j.z, k.z, pos.z},
+		{ 0.,  0.,  0.,    1.}};
+
+	return asixRotate;
 }
 

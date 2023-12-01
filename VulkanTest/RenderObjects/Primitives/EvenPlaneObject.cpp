@@ -9,7 +9,7 @@ EvenPlaneObject::EvenPlaneObject(VulkanContext& vulkanContext, const Vector3f& p
 	transformUniform.model = plane.getMatrix();
 	UpdateTransformUniformBuffer();
 
-	evenPlaneObjectUniform.color = Vector4f(1., 1., 1., 0.1);
+	evenPlaneObjectUniform.color = Vector4f(0.5, 0., 0.5, 1.);
 	std::span<EvenPlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
 	evenPlaneObjectUniformBuffer = std::make_unique<BufferData>(BufferData::Create<EvenPlaneObjectUniform>(
 		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));

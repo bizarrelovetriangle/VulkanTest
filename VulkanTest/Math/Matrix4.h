@@ -20,6 +20,8 @@ public:
 
 	static Matrix4 LookAt(const Vector3f& from, const Vector3f& to);
 
+	static Matrix4 Frustum(float minDepth, float maxDepth, float angle);
+
 	static Matrix4 Rotate(const Vector4f& quaternion);
 
 	static Matrix4 Scale(const Vector3f& vec);

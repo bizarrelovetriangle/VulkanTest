@@ -37,14 +37,14 @@ void RenderVisitor::Visit(EvenPlaneObject& planeObject)
 
 	float degen = float(0. + seconds / 2);
 
-	Matrix4 world;
-	world = Matrix4::RotateY(degen) * world;
-	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
-	world = Matrix4::Translation(Vector3f(0, 0, 2)) * world;
-
 	Matrix4 view;
+	view = Matrix4::RotateY(degen) * view;
+	view = Matrix4::Translation(Vector3f(0, 0, 5)) * view;
 
-	planeObject.transformUniform.world = world;
+	Matrix4 frustum = Matrix4::Frustum(0.1, 10, 1);
+
+	planeObject.transformUniform.view = view;
+	planeObject.transformUniform.frustum = frustum;
 	planeObject.UpdateTransformUniformBuffer();
 
 	commandBuffer.draw(6, 1, 0, 0);
@@ -56,7 +56,8 @@ void RenderVisitor::Visit(VertexedRenderObject& renderObject)
 	BindPipeline(pipeline);
 
 	commandBuffer.bindDescriptorSets(
-		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0, renderObject.descriptorSets->descriptorSets[imageIndex], {});
+		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0,
+		renderObject.descriptorSets->descriptorSets[imageIndex], {});
 
 	vk::Buffer vertexBuffers[] = { renderObject.vertexBuffer->buffer };
 	vk::DeviceSize vertexOffsets[] = { 0 };
@@ -69,14 +70,14 @@ void RenderVisitor::Visit(VertexedRenderObject& renderObject)
 
 	float degen = float(0. + seconds / 2);
 
-	Matrix4 world;
-	world = Matrix4::RotateY(degen) * world;
-	world = Matrix4::Scale({ 0.3, 0.3, 0.3 }) * world;
-	world = Matrix4::Translation(Vector3f(0, 0, 2)) * world;
-
 	Matrix4 view;
+	view = Matrix4::RotateY(degen) * view;
+	view = Matrix4::Translation(Vector3f(0, 0, 5)) * view;
 
-	renderObject.transformUniform.world = world;
+	Matrix4 frustum = Matrix4::Frustum(0.1, 10, 1);
+
+	renderObject.transformUniform.view = view;
+	renderObject.transformUniform.frustum = frustum;
 	renderObject.UpdateTransformUniformBuffer();
 
 	commandBuffer.draw(renderObject.vertexBuffer->count, 1, 0, 0);

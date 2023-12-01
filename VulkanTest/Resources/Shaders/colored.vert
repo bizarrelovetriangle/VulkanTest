@@ -10,19 +10,24 @@ layout(location = 1) out vec4 fragColor;
 layout(binding = 0) uniform Uniform
 {
 	mat4x4 model;
-	mat4x4 world;
 	mat4x4 view;
+	mat4x4 frustum;
 } Transform;
 
 void main()
 {
-	mat4 matrix = Transform.world * Transform.model;
-	gl_Position = matrix * vec4(pos, 1.0);
-	gl_Position.z /= 10;
+	mat4 viewSpace = Transform.view * Transform.model;
 
-	vec3 rotatedNormal = vec3(matrix * vec4(normal, 0.));
+	mat3 normalMatrix = transpose(inverse(mat3(viewSpace)));
+	vec3 rotatedNormal = normalMatrix * normal;
+	rotatedNormal = normalize(rotatedNormal);
 
-	vec3 viewDir = vec3(0., 0., -1.);
-	fragFactor = dot(viewDir, rotatedNormal);
+	vec3 viewPos = vec3(viewSpace * vec4(pos, 1.));
+	vec3 lightPos = vec3(0, 0, 0);
+	vec3 negLightDir = normalize(lightPos - viewPos);
+	fragFactor = dot(negLightDir, rotatedNormal);
+
 	fragColor = color;
+
+	gl_Position = Transform.frustum * viewSpace * vec4(pos, 1.0);
 }
