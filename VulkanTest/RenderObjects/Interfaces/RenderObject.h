@@ -28,7 +28,7 @@ public:
 	~RenderObjectShared();
 
 	vk::DescriptorSetLayout descriptorSetLayout;
-	vk::VertexInputBindingDescription vertexDataBinding;
+	std::vector<vk::VertexInputBindingDescription> vertexDataBindings;
 	std::vector<vk::VertexInputAttributeDescription> vertexDataAttributes;
 	std::string vertexShader;
 	std::string fragmentShader;

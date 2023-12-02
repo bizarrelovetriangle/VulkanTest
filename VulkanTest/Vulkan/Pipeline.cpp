@@ -34,7 +34,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjec
 	pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
-		{}, renderObjectShared.vertexDataBinding, renderObjectShared.vertexDataAttributes);;
+		{}, renderObjectShared.vertexDataBindings, renderObjectShared.vertexDataAttributes);;
 	vk::PipelineInputAssemblyStateCreateInfo inputAssembly({}, vk::PrimitiveTopology::eTriangleList, false);
 
 	std::vector<vk::DynamicState> dynamicStates{vk::DynamicState::eViewport, vk::DynamicState::eScissor};

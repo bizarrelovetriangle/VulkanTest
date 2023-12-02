@@ -42,7 +42,7 @@ Shared<T>::Shared(VulkanContext& vulkanContext)
 
 	if constexpr (std::is_base_of_v<VertexedRenderObject, T>)
 	{
-		vertexDataBinding = T::VertexDataType::BindingDescription();
+		vertexDataBindings = { T::VertexDataType::BindingDescription() };
 		vertexDataAttributes = T::VertexDataType::AttributeDescriptions();
 	}
 
