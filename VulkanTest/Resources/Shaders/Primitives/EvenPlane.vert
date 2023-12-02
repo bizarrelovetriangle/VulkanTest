@@ -1,7 +1,8 @@
 #version 450
 
-layout(location = 0) out vec3 outPosition;
-layout(location = 1) out float outFactor;
+layout(location = 0) out vec3 outViewPosition;
+layout(location = 1) out vec3 outViewNormal;
+layout(location = 2) out vec3 outOrgPosition;
 
 layout(binding = 0) uniform Uniform
 {
@@ -11,7 +12,7 @@ layout(binding = 0) uniform Uniform
 } Transform;
 
 vec3 normal = vec3(0., 1., 0.);
-vec3 positions[6] = vec3[](
+vec3 orgPositions[6] = vec3[](
 	vec3(-1., 0.,  1.),
 	vec3( 1., 0.,  1.),
 	vec3( 1., 0., -1.),
@@ -23,22 +24,15 @@ vec3 positions[6] = vec3[](
 
 void main()
 {
-	vec3 pos = positions[gl_VertexIndex] * 3;
+	vec3 orgPos = orgPositions[gl_VertexIndex] * 3;
+	outOrgPosition = orgPos;
+
 	mat4 viewSpace = Transform.view * Transform.model;
+	vec3 viewPos = vec3(viewSpace * vec4(orgPos, 1.));
+	outViewPosition = viewPos;
 
 	mat3 normalMatrix = transpose(inverse(mat3(viewSpace)));
-	vec3 rotatedNormal = normalMatrix * normal;
-	rotatedNormal = normalize(rotatedNormal);
+	outViewNormal = normalize(normalMatrix * normal);
 
-	vec3 viewPos = vec3(viewSpace * vec4(pos, 1.));
-	vec3 lightPos = vec3(0, 0, 0);
-	vec3 negLightDir = normalize(lightPos - viewPos);
-	outFactor = dot(negLightDir, rotatedNormal);
-
-	if (gl_VertexIndex < 3){
-		//outFactor = 1;
-	}
-
-	outPosition = pos;
-	gl_Position = Transform.frustum * viewSpace * vec4(pos, 1.0);
+	gl_Position = Transform.frustum * vec4(viewPos, 1.0);
 }
