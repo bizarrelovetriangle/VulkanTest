@@ -11,6 +11,7 @@
 #include "Vulkan/SwapChain.h"
 #include "VulkanContext.h"
 #include "Vulkan/Data/BufferData.h"
+#include <chrono>
 
 RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex)
 	: vulkanContext(vulkanContext), commandBuffer(commandBuffer.commandBuffer), imageIndex(imageIndex)

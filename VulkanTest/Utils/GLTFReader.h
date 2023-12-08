@@ -120,7 +120,7 @@ private:
 		auto rotation = GetVector<Vector4f>(node.rotation);
 
 		Matrix4 matrix;
-		if (scale) matrix = Matrix4::Scale(Vector3f::FromGLTF(*scale)) * matrix;
+		if (scale) matrix = Matrix4::Scale(*scale) * matrix;
 		if (rotation) matrix = Matrix4::Rotate(Vector4f::QuaternionFromGLTF(*rotation)) * matrix;
 		if (translation) matrix = Matrix4::Translation(Vector3f::FromGLTF(*translation)) * matrix;
 		return matrix;
