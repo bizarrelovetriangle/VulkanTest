@@ -44,6 +44,16 @@ public:
 		return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
 	}
 
+	Vector4<T> operator*(T s) const
+	{
+		return Vector4<T>(x * s, y * s, z * s, w / s);
+	}
+
+	Vector4<T> operator/(T s) const
+	{
+		return Vector4<T>(x / s, y / s, z / s, w / s);
+	}
+
 	void operator*=(T s)
 	{
 		x *= s;

@@ -24,8 +24,8 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
-		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\scene.gltf");
-		//GLTFReader glTFReader("C:\\Users\\Dell\\Downloads\\girl_speedsculpt\\scene.gltf");
+		//GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\scene.gltf");
+		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
 
 		for (auto& deserializedObject : glTFReader.deserializedObjects)
 		{
@@ -39,10 +39,10 @@ public:
 			renderObjects.push_back(std::move(renderObject));
 		}
 
-		//auto plane = std::make_unique<EvenPlaneObject>(vulkanContext,
-		//	//Vector3f(0., 0., 1.), Vector3f(0., 0., -1.));
-		//	Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		//renderObjects.push_back(std::move(plane));
+		auto plane = std::make_unique<EvenPlaneObject>(vulkanContext,
+			//Vector3f(0., 0., 1.), Vector3f(0., 0., -1.));
+			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		renderObjects.push_back(std::move(plane));
 	}
 
 	void Run()

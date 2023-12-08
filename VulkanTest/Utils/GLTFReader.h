@@ -68,17 +68,17 @@ public:
 					if (name == Position)		positions = ReadBuffer<Vector3f>(index);
 					if (name == Normal)			normals = ReadBuffer<Vector3f>(index);
 					if (name == TextureCoord)	textureCoords = ReadBuffer<Vector2f>(index);
-					if (name == Color)			colors = ReadBuffer<Vector4f>(index);
+					if (name == Color) {
+						colors = ReadBuffer<Vector4f>(index);
+						NormalizeIntegerColors(index, colors);
+					}
 				}
 
 				for (auto index : indexes)
 				{
-					DeserializedObjectVertexData vertexData
-					{
-						.position = Vector3f::FromGLTF(positions[index]),
-						.normal = Vector3f::FromGLTF(normals[index])
-					};
-
+					DeserializedObjectVertexData vertexData;
+					vertexData.position = Vector3f::FromGLTF(positions[index]);
+					vertexData.normal = Vector3f::FromGLTF(normals[index]);
 					if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
 					if (!colors.empty())		vertexData.color = colors[index];
 					if (!colors.empty())		deserializedObject.hasColors = true;
@@ -113,6 +113,20 @@ public:
 	std::vector<DeserializedObject> deserializedObjects;
 
 private:
+	void NormalizeIntegerColors(int index, std::vector<Vector4f>& colors)
+	{
+		auto& accessor = glTFModel.accessors[index];
+		bool notFloat =
+			accessor.componentType != TINYGLTF_COMPONENT_TYPE_FLOAT &&
+			accessor.componentType != TINYGLTF_COMPONENT_TYPE_DOUBLE;
+
+		if (notFloat) {
+			size_t componentSize = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+			float factor = 1. / std::pow(255, componentSize);
+			for (auto& color : colors) color *= factor;
+		}
+	}
+
 	Matrix4 ComposeMatrix(const tinygltf::Node& node)
 	{
 		auto translation = GetVector<Vector3f>(node.translation);
