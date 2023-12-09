@@ -32,7 +32,7 @@ std::vector<vk::VertexInputAttributeDescription> ColoredVertexData::AttributeDes
 
 
 ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: VertexedRenderObject(vulkanContext, deserializedObject)
+	: DeserializableObject(vulkanContext, deserializedObject)
 {
 	vertexData = std::vector<ColoredVertexData>(
 		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
@@ -42,5 +42,5 @@ ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const Des
 	shared = Shared<ColoredRenderObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
-	descriptorSets->UpdateUniformDescriptor(*deserializableUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
 }

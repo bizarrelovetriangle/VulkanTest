@@ -10,6 +10,7 @@
 #include "../../RenderObjects/DeserializableObjects/ColoredRenderObject.h"
 #include "../../RenderObjects/DeserializableObjects/PlaneVertexedRenderObject.h"
 #include "../../RenderObjects/Primitives/EvenPlaneObject.h"
+#include "../../RenderObjects/Primitives/BoundingBoxObject.h"
 
 template <class T>
 BufferData BufferData::Create(VulkanContext& vulkanContext,
@@ -78,8 +79,8 @@ template BufferData BufferData::Create<TexturedVertexData>(VulkanContext& vulkan
 	std::span<TexturedVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template BufferData BufferData::Create<ColoredVertexData>(VulkanContext& vulkanContext,
 	std::span<ColoredVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<DeserializableObjectUniform>(VulkanContext& vulkanContext,
-	std::span<DeserializableObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template BufferData BufferData::Create<PropertiesUniform>(VulkanContext& vulkanContext,
+	std::span<PropertiesUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template BufferData BufferData::Create<uint16_t>(VulkanContext& vulkanContext,
 	std::span<uint16_t> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template BufferData BufferData::Create<std::byte>(VulkanContext& vulkanContext,
@@ -88,13 +89,19 @@ template BufferData BufferData::Create<EvenPlaneObjectUniform>(VulkanContext& vu
 	std::span<EvenPlaneObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template BufferData BufferData::Create<TransformUniform>(VulkanContext& vulkanContext,
 	std::span<TransformUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template BufferData BufferData::Create<Vector3f>(VulkanContext& vulkanContext,
+	std::span<Vector3f> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template BufferData BufferData::Create<LineVertexData>(VulkanContext& vulkanContext,
+	std::span<LineVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 
 template void BufferData::FlushData(std::span<VertexData> data);
 template void BufferData::FlushData(std::span<TexturedVertexData> data);
 template void BufferData::FlushData(std::span<ColoredVertexData> data);
-template void BufferData::FlushData(std::span<DeserializableObjectUniform> data);
+template void BufferData::FlushData(std::span<PropertiesUniform> data);
 template void BufferData::FlushData(std::span<uint16_t> data);
 template void BufferData::FlushData(std::span<std::byte> data);
 template void BufferData::FlushData(std::span<EvenPlaneObjectUniform> data);
 template void BufferData::FlushData(std::span<TransformUniform> data);
+template void BufferData::FlushData(std::span<Vector3f> data);
+template void BufferData::FlushData(std::span<LineVertexData> data);
 

@@ -6,6 +6,11 @@
 #include "../../Vulkan/DescriptorSets.h"
 #include "../../Utils/GLTFReader.h"
 
+VertexData::VertexData(const Vector3f& position, const Vector3f& normal)
+	: position(position), normal(normal)
+{
+}
+
 VertexData::VertexData(const DeserializedObjectVertexData& deserializingObjectVertexData)
 {
 	position = deserializingObjectVertexData.position;
@@ -28,8 +33,8 @@ std::vector<vk::VertexInputAttributeDescription> VertexData::AttributeDescriptio
 }
 
 
-VertexedRenderObject::VertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: DeserializableObject(vulkanContext, deserializedObject)
+VertexedRenderObject::VertexedRenderObject(VulkanContext& vulkanContext)
+	: RenderObject(vulkanContext)
 {
 }
 
@@ -42,7 +47,7 @@ void VertexedRenderObject::Accept(RenderVisitor& renderVisitor)
 
 void VertexedRenderObject::Dispose()
 {
-	DeserializableObject::Dispose();
+	RenderObject::Dispose();
 	vertexBuffer->Dispose();
 }
 

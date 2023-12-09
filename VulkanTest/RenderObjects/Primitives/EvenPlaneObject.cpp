@@ -17,7 +17,8 @@ EvenPlaneObject::EvenPlaneObject(VulkanContext& vulkanContext, const Vector3f& p
 	shared = Shared<EvenPlaneObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
-	descriptorSets->UpdateUniformDescriptor(*evenPlaneObjectUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*evenPlaneObjectUniformBuffer, 2);
 }
 
 EvenPlaneObject::~EvenPlaneObject() = default;
@@ -32,7 +33,8 @@ std::vector<vk::DescriptorSetLayoutBinding> EvenPlaneObject::DescriptorSetLayout
 {
 	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
-		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
+		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
 	};
 }
 

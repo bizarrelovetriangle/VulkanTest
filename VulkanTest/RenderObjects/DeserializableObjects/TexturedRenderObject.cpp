@@ -34,7 +34,7 @@ std::vector<vk::VertexInputAttributeDescription> TexturedVertexData::AttributeDe
 
 
 TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: VertexedRenderObject(vulkanContext, deserializedObject)
+	: DeserializableObject(vulkanContext, deserializedObject)
 {
 	vertexData = std::vector<TexturedVertexData>(
 		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
@@ -52,7 +52,7 @@ TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const D
 	shared = Shared<TexturedRenderObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
-	descriptorSets->UpdateUniformDescriptor(*deserializableUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
 	descriptorSets->UpdateImageDescriptor(*textureBuffer, 2);
 }
 
@@ -69,6 +69,6 @@ std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderObject::DescriptorSetL
 
 void TexturedRenderObject::Dispose()
 {
-	VertexedRenderObject::Dispose();
+	DeserializableObject::Dispose();
 	textureBuffer->Dispose();
 }

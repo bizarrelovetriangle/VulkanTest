@@ -8,7 +8,7 @@
 #include "../../VulkanContext.h"
 
 PlaneVertexedRenderObject::PlaneVertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: VertexedRenderObject(vulkanContext, deserializedObject)
+	: DeserializableObject(vulkanContext, deserializedObject)
 {
 	vertexData = std::vector<VertexData>(
 		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
@@ -18,5 +18,5 @@ PlaneVertexedRenderObject::PlaneVertexedRenderObject(VulkanContext& vulkanContex
 	shared = Shared<PlaneVertexedRenderObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
-	descriptorSets->UpdateUniformDescriptor(*deserializableUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
 }

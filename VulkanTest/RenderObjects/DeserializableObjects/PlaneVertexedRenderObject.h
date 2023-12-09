@@ -1,13 +1,12 @@
 #pragma once
-#include "../Interfaces/VertexedRenderObject.h"
+#include "../Interfaces/DeserializableObject.h"
 
 class VulkanContext;
 struct DeserializedObject;
 
-class PlaneVertexedRenderObject : public VertexedRenderObject
+class PlaneVertexedRenderObject : public DeserializableObject
 {
 public:
-	using VertexDataType = VertexData;
 	PlaneVertexedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
 
 public:

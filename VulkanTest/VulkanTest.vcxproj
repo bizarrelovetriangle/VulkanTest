@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="RenderObjects\Primitives\BoundingBoxObject.cpp" />
     <ClCompile Include="Math\Matrix4.cpp" />
     <ClCompile Include="Math\Plane.cpp" />
     <ClCompile Include="RenderObjects\DeserializableObjects\ColoredRenderObject.cpp" />
@@ -151,6 +152,8 @@
     <ClCompile Include="RenderObjects\Primitives\EvenPlaneObject.cpp" />
     <ClCompile Include="RenderObjects\DeserializableObjects\TexturedRenderObject.cpp" />
     <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp" />
+    <ClCompile Include="Utils\Disposable.h" />
+    <ClCompile Include="Utils\GeometryCreator.cpp" />
     <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />
     <ClCompile Include="Vulkan\Data\DeviceMemory\DeviceMemory.cpp" />
@@ -170,6 +173,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="RenderObjects\Primitives\BoundingBoxObject.h" />
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="RenderObjects\DeserializableObjects\ColoredRenderObject.h" />
     <ClInclude Include="RenderObjects\Interfaces\DeserializableObject.h" />
@@ -177,6 +181,7 @@
     <ClInclude Include="RenderObjects\Primitives\EvenPlaneObject.h" />
     <ClInclude Include="RenderObjects\DeserializableObjects\TexturedRenderObject.h" />
     <ClInclude Include="RenderObjects\Interfaces\VertexedRenderObject.h" />
+    <ClInclude Include="Utils\GeometryCreator.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />
@@ -208,6 +213,8 @@
   <ItemGroup>
     <None Include="Resources\Shaders\colored.frag" />
     <None Include="Resources\Shaders\colored.vert" />
+    <None Include="Resources\Shaders\lined.frag" />
+    <None Include="Resources\Shaders\lined.vert" />
     <None Include="Resources\Shaders\Primitives\EvenPlane.frag" />
     <None Include="Resources\Shaders\Primitives\EvenPlane.vert" />
     <None Include="Resources\Shaders\textured.frag" />

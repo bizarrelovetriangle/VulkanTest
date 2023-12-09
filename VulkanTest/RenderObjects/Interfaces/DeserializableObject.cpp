@@ -3,27 +3,23 @@
 #include "../../Vulkan/Data/BufferData.h"
 
 DeserializableObject::DeserializableObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: RenderObject(vulkanContext)
+	: VertexedRenderObject(vulkanContext)
 {
 	gltfName = deserializedObject.name;
 	transformUniform.model = deserializedObject.model;
 	UpdateTransformUniformBuffer();
 
-	deserializableUniform.hasTexture = deserializedObject.textureData.has_value();
-	deserializableUniform.hasColors = deserializedObject.hasColors;
-	deserializableUniform.baseColor = deserializedObject.baseColor;
-
-	std::span<DeserializableObjectUniform> uniformSpan(&deserializableUniform, &deserializableUniform + 1);
-	deserializableUniformBuffer = std::make_unique<BufferData>(BufferData::Create<DeserializableObjectUniform>(
-		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
+	propertiesUniform.hasTexture = deserializedObject.textureData.has_value();
+	propertiesUniform.hasColors = deserializedObject.hasColors;
+	propertiesUniform.baseColor = deserializedObject.baseColor;
+	UpdatePropertiesUniformBuffer();
 }
 
 DeserializableObject::~DeserializableObject() = default;
 
 void DeserializableObject::Dispose()
 {
-	RenderObject::Dispose();
-	deserializableUniformBuffer->Dispose();
+	VertexedRenderObject::Dispose();
 }
 
 std::vector<vk::DescriptorSetLayoutBinding> DeserializableObject::DescriptorSetLayoutBinding()

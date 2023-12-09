@@ -21,6 +21,14 @@ public:
 	alignas(16) Matrix4 frustum;
 };
 
+class PropertiesUniform
+{
+public:
+	alignas(16) Vector4f baseColor;
+	alignas(4) bool hasTexture = false;
+	alignas(4) bool hasColors = false;
+};
+
 class RenderObjectShared
 {
 public:
@@ -42,8 +50,8 @@ template <class T>
 class Shared : public RenderObjectShared
 {
 public:
-	static std::shared_ptr<Shared<T>> getInstance(VulkanContext& vulkanContext);
-	Shared(VulkanContext& vulkanContext);
+	static std::shared_ptr<Shared<T>> getInstance(VulkanContext& vulkanContext, bool lined = false);
+	Shared(VulkanContext& vulkanContext, bool lined);
 
 private:
 	static std::weak_ptr<Shared<T>> instance;
@@ -57,6 +65,7 @@ public:
 	~RenderObject();
 
 	void UpdateTransformUniformBuffer();
+	void UpdatePropertiesUniformBuffer();
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	virtual void Accept(RenderVisitor& renderVisitor);
 	virtual void Dispose();
@@ -64,6 +73,9 @@ public:
 public:
 	TransformUniform transformUniform;
 	std::unique_ptr<BufferData> transformUniformBuffer;
+	PropertiesUniform propertiesUniform;
+	std::unique_ptr<BufferData> propertiesUniformBuffer;
+
 	std::unique_ptr<DescriptorSets> descriptorSets;
 	std::shared_ptr<RenderObjectShared> shared;
 

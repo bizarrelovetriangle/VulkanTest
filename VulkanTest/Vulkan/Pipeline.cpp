@@ -10,7 +10,7 @@
 #include "../VulkanContext.h"
 #include "../Utils/ShaderCompiler.h"
 
-Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjectShared)
+Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjectShared, bool lined)
 	: vulkanContext(vulkanContext)
 {
 	auto& device = vulkanContext.deviceController->device;
@@ -35,7 +35,9 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjec
 
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
 		{}, renderObjectShared.vertexDataBindings, renderObjectShared.vertexDataAttributes);;
-	vk::PipelineInputAssemblyStateCreateInfo inputAssembly({}, vk::PrimitiveTopology::eTriangleList, false);
+	auto inputAssembly = lined
+		? vk::PipelineInputAssemblyStateCreateInfo({}, vk::PrimitiveTopology::eLineList, false)
+		: vk::PipelineInputAssemblyStateCreateInfo({}, vk::PrimitiveTopology::eTriangleList, false);
 
 	std::vector<vk::DynamicState> dynamicStates{vk::DynamicState::eViewport, vk::DynamicState::eScissor};
 	vk::PipelineViewportStateCreateInfo viewportState({}, 1, nullptr, 1, nullptr);
@@ -46,6 +48,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjec
 		vk::PolygonMode::eFill, vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise,
 		false, 0.0f, 0.0f, 0.0f,
 		1.);
+	rasterizer.setLineWidth(4.);
 
 	vk::PipelineMultisampleStateCreateInfo multisampling(
 		{}, vk::SampleCountFlagBits::e1,

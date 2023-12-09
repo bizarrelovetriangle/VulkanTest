@@ -10,7 +10,7 @@ class RenderObjectShared;
 class Pipeline
 {
 public:
-	Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjectShared);
+	Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjectShared, bool lined);
 	void Dispose();
 
 public:

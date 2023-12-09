@@ -2,7 +2,7 @@
 #include "../../Math/Vector3.h"
 #include "../../Math/Vector2.h"
 #include "../../Math/Matrix4.h"
-#include "../Interfaces/VertexedRenderObject.h"
+#include "../Interfaces/DeserializableObject.h"
 
 class VulcanContext;
 struct DeserializedObject;
@@ -19,7 +19,7 @@ public:
 	Vector4f color;
 };
 
-class ColoredRenderObject : public VertexedRenderObject
+class ColoredRenderObject : public DeserializableObject
 {
 public:
 	using VertexDataType = ColoredVertexData;

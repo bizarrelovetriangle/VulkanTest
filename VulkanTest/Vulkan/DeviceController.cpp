@@ -25,6 +25,7 @@ void DeviceController::createDevice(QueueFamilies& queueFamilies, std::vector<ui
 	vk::PhysicalDeviceFeatures deviceFeatures;
 	deviceFeatures.fillModeNonSolid = true;
 	deviceFeatures.samplerAnisotropy = true;
+	deviceFeatures.wideLines = true;
 
 	vk::DeviceCreateInfo createInfo({}, queueCreateInfos, {}, {}, &deviceFeatures);
 

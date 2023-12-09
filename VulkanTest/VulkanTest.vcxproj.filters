@@ -90,6 +90,15 @@
     <ClCompile Include="Math\Matrix4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderObjects\Primitives\BoundingBoxObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Disposable.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\GeometryCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">
@@ -194,6 +203,12 @@
     <ClInclude Include="Math\Plane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderObjects\Primitives\BoundingBoxObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\GeometryCreator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\textured.frag" />
@@ -204,5 +219,7 @@
     <None Include="Resources\Shaders\colored.frag" />
     <None Include="Resources\Shaders\Primitives\EvenPlane.frag" />
     <None Include="Resources\Shaders\Primitives\EvenPlane.vert" />
+    <None Include="Resources\Shaders\lined.vert" />
+    <None Include="Resources\Shaders\lined.frag" />
   </ItemGroup>
 </Project>

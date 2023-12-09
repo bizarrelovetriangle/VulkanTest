@@ -1,5 +1,5 @@
 #pragma once
-#include "../Interfaces/VertexedRenderObject.h"
+#include "../Interfaces/DeserializableObject.h"
 
 class VulcanContext;
 struct DeserializedObject;
@@ -17,7 +17,7 @@ public:
 	Vector2f textureCoord;
 };
 
-class TexturedRenderObject : public VertexedRenderObject
+class TexturedRenderObject : public DeserializableObject
 {
 public:
 	using VertexDataType = TexturedVertexData;

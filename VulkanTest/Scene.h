@@ -7,12 +7,13 @@
 #include "RenderObjects/DeserializableObjects/ColoredRenderObject.h"
 #include "RenderObjects/DeserializableObjects/TexturedRenderObject.h"
 #include "RenderObjects/DeserializableObjects/PlaneVertexedRenderObject.h"
+#include "RenderObjects/Primitives/EvenPlaneObject.h"
+#include "RenderObjects/Primitives/BoundingBoxObject.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#include "RenderObjects/Primitives/EvenPlaneObject.h"
 
 class Scene
 {
@@ -24,8 +25,8 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
-		//GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\scene.gltf");
-		GLTFReader glTFReader("C:\\Users\\Dell\\Desktop\\untitled\\hard_monkey.gltf");
+		//GLTFReader glTFReader("D:\\folder\\untitled\\scene.gltf");
+		GLTFReader glTFReader("D:\\folder\\untitled\\hard_monkey.gltf");
 
 		for (auto& deserializedObject : glTFReader.deserializedObjects)
 		{
@@ -43,6 +44,10 @@ public:
 			//Vector3f(0., 0., 1.), Vector3f(0., 0., -1.));
 			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
 		renderObjects.push_back(std::move(plane));
+
+		auto boundingBox = std::make_unique<BoundingBoxObject>(vulkanContext,
+			Vector3f(0., 0., 0.), Vector3f(1., 1., 1.));
+		renderObjects.push_back(std::move(boundingBox));
 	}
 
 	void Run()
