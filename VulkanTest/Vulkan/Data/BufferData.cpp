@@ -13,21 +13,19 @@
 #include "../../RenderObjects/Primitives/BoundingBoxObject.h"
 
 template <class T>
-BufferData BufferData::Create(VulkanContext& vulkanContext,
+std::unique_ptr<BufferData> BufferData::Create(VulkanContext& vulkanContext,
 	std::span<T> data, MemoryType memoryType, vk::BufferUsageFlags usage)
 {
 	auto span = std::span<std::byte>((std::byte*)data.data(), (std::byte*)(data.data() + data.size()));
-	BufferData bufferData(vulkanContext, span.size(), memoryType, usage);
-	bufferData.count = data.size();
-	bufferData.FlushData(span);
-	return bufferData;
+	auto bufferData = std::make_unique<BufferData>(vulkanContext, span.size(), memoryType, usage);
+	bufferData->count = data.size();
+	bufferData->FlushData(span);
+	return std::move(bufferData);
 }
-
-BufferData::BufferData(const BufferData& bufferData) = default;
 
 BufferData::BufferData(VulkanContext& vulkanContext,
 	size_t size, MemoryType memoryType, vk::BufferUsageFlags usage)
-	: DeviceMemory(vulkanContext, memoryType)
+	: vulkanContext(vulkanContext), deviceMemory(vulkanContext, memoryType)
 {
 	auto& device = vulkanContext.deviceController->device;
 
@@ -37,8 +35,8 @@ BufferData::BufferData(VulkanContext& vulkanContext,
 	buffer = device.createBuffer(bufferInfo);
 
 	auto memoryRequirements = device.getBufferMemoryRequirements(buffer);
-	AllocateMemory(memoryRequirements);
-	device.bindBufferMemory(buffer, memory, 0);
+	deviceMemory.AllocateMemory(memoryRequirements);
+	device.bindBufferMemory(buffer, deviceMemory.memory, 0);
 }
 
 template <class T>
@@ -46,52 +44,52 @@ void BufferData::FlushData(std::span<T> data)
 {
 	auto span = std::span<std::byte>((std::byte*)data.data(), (std::byte*)(data.data() + data.size()));
 
-	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
+	if (deviceMemory.memoryType == MemoryType::Universal || deviceMemory.memoryType == MemoryType::HostLocal)
 	{
-		FlushMemory(span);
+		deviceMemory.FlushMemory(span);
 		return;
 	}
 
-	BufferData stagingBuffer = BufferData::Create<std::byte>(
+	auto stagingBuffer = BufferData::Create<std::byte>(
 		vulkanContext, span, MemoryType::HostLocal, vk::BufferUsageFlagBits::eTransferSrc);
 
 	uint32_t transferQueueFamily = vulkanContext.queueFamilies->transferQueueFamily;
 	vulkanContext.commandBufferDispatcher->Invoke(transferQueueFamily,
 		[this, &stagingBuffer](auto& cb)
 		{
-			vk::BufferCopy copyRegion(0, 0, stagingBuffer.count);
-			cb.copyBuffer(stagingBuffer.buffer, buffer, copyRegion);
+			vk::BufferCopy copyRegion(0, 0, stagingBuffer->count);
+			cb.copyBuffer(stagingBuffer->buffer, buffer, copyRegion);
 		});
 
-	stagingBuffer.Dispose();
+	stagingBuffer->Dispose();
 }
 
-void BufferData::Dispose()
+void BufferData::DisposeAction()
 {
 	vulkanContext.deviceController->device.destroyBuffer(buffer);
-	DeviceMemory::Dispose();
+	deviceMemory.Dispose();
 }
 
 
-template BufferData BufferData::Create<VertexData>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<VertexData>(VulkanContext& vulkanContext,
 	std::span<VertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<TexturedVertexData>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<TexturedVertexData>(VulkanContext& vulkanContext,
 	std::span<TexturedVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<ColoredVertexData>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<ColoredVertexData>(VulkanContext& vulkanContext,
 	std::span<ColoredVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<PropertiesUniform>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<PropertiesUniform>(VulkanContext& vulkanContext,
 	std::span<PropertiesUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<uint16_t>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<uint16_t>(VulkanContext& vulkanContext,
 	std::span<uint16_t> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<std::byte>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<std::byte>(VulkanContext& vulkanContext,
 	std::span<std::byte> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<EvenPlaneObjectUniform>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<EvenPlaneObjectUniform>(VulkanContext& vulkanContext,
 	std::span<EvenPlaneObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<TransformUniform>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<TransformUniform>(VulkanContext& vulkanContext,
 	std::span<TransformUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<Vector3f>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<Vector3f>(VulkanContext& vulkanContext,
 	std::span<Vector3f> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template BufferData BufferData::Create<LineVertexData>(VulkanContext& vulkanContext,
+template std::unique_ptr<BufferData> BufferData::Create<LineVertexData>(VulkanContext& vulkanContext,
 	std::span<LineVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 
 template void BufferData::FlushData(std::span<VertexData> data);

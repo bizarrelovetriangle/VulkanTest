@@ -10,7 +10,8 @@
 ImageData::ImageData(VulkanContext& vulkanContext,
 		const Vector2u& resolution, vk::Format format, vk::ImageUsageFlags usage, vk::ImageAspectFlags imageAspect,
 		MemoryType memoryType)
-	: DeviceMemory(vulkanContext, memoryType), resolution(resolution), format(format), usage(usage), imageAspect(imageAspect)
+	: vulkanContext(vulkanContext), deviceMemory(vulkanContext, memoryType),
+	resolution(resolution), format(format), usage(usage), imageAspect(imageAspect)
 {
 	auto& device = vulkanContext.deviceController->device;
 	vk::ImageTiling tiling{};
@@ -36,17 +37,17 @@ ImageData::ImageData(VulkanContext& vulkanContext,
 	image = device.createImage(createImageInfo);
 
 	auto memoryRequirements = device.getImageMemoryRequirements(image);
-	AllocateMemory(memoryRequirements);
-	device.bindImageMemory(image, memory, 0);
+	deviceMemory.AllocateMemory(memoryRequirements);
+	device.bindImageMemory(image, deviceMemory.memory, 0);
 
 	CreateImageViewAndSampler();
 }
 
 void ImageData::FlushData(std::span<std::byte> data)
 {
-	if (memoryType == MemoryType::Universal || memoryType == MemoryType::HostLocal)
+	if (deviceMemory.memoryType == MemoryType::Universal || deviceMemory.memoryType == MemoryType::HostLocal)
 	{
-		FlushMemory(data);
+		deviceMemory.FlushMemory(data);
 		return;
 	}
 
@@ -144,12 +145,12 @@ void ImageData::CreateImageViewAndSampler()
 	sampler = vulkanContext.deviceController->device.createSampler(samplerInfo);
 }
 
-void ImageData::Dispose()
+void ImageData::DisposeAction()
 {
 	vulkanContext.deviceController->device.destroySampler(sampler);
 	vulkanContext.deviceController->device.destroyImageView(imageView);
 	vulkanContext.deviceController->device.destroyImage(image);
-	DeviceMemory::Dispose();
+	deviceMemory.Dispose();
 }
 
 std::pair<Vector2u, std::vector<std::byte>> ImageData::LoadImage(const std::string& path)

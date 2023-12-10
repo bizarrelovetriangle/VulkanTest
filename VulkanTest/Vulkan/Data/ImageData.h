@@ -2,10 +2,11 @@
 #include <vulkan/vulkan.hpp>
 #include "DeviceMemory/DeviceMemory.h"
 #include "../../Math/Vector2.h"
+#include "../../Utils/Disposable.h"
 
 class VulkanContext;
 
-class ImageData : public DeviceMemory
+class ImageData : public Disposable<ImageData>
 {
 public:
 	ImageData(VulkanContext& vulkanContext,
@@ -14,7 +15,7 @@ public:
 	void FlushData(std::span<std::byte> data);
 	void TransitionLayout(const vk::ImageLayout& newImageLayout);
 	void CreateImageViewAndSampler();
-	void Dispose();
+	void DisposeAction();
 
 	static std::pair<Vector2u, std::vector<std::byte>> LoadImage(const std::string& path);
 
@@ -24,6 +25,9 @@ public:
 	vk::Sampler sampler;
 
 private:
+	VulkanContext& vulkanContext;
+	DeviceMemory deviceMemory;
+
 	Vector2u resolution;
 	vk::Format format;
 	vk::ImageUsageFlags usage;

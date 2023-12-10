@@ -12,8 +12,8 @@ PlaneVertexedRenderObject::PlaneVertexedRenderObject(VulkanContext& vulkanContex
 {
 	vertexData = std::vector<VertexData>(
 		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
-	vertexBuffer = std::make_unique<BufferData>(BufferData::Create<VertexData>(
-		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer));
+	vertexBuffer = BufferData::Create<VertexData>(
+		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 
 	shared = Shared<PlaneVertexedRenderObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);

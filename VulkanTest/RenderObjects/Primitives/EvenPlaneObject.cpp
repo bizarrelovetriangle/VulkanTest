@@ -11,8 +11,8 @@ EvenPlaneObject::EvenPlaneObject(VulkanContext& vulkanContext, const Vector3f& p
 
 	evenPlaneObjectUniform.color = Vector4f(0.5, 0., 0.5, 1.);
 	std::span<EvenPlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
-	evenPlaneObjectUniformBuffer = std::make_unique<BufferData>(BufferData::Create<EvenPlaneObjectUniform>(
-		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
+	evenPlaneObjectUniformBuffer = BufferData::Create<EvenPlaneObjectUniform>(
+		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 
 	shared = Shared<EvenPlaneObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);

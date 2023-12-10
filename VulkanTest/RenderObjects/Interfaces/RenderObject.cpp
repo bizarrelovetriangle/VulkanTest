@@ -61,12 +61,12 @@ RenderObject::RenderObject(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
 {
 	std::span<TransformUniform> transformUniformSpan(&transformUniform, &transformUniform + 1);
-	transformUniformBuffer = std::make_unique<BufferData>(BufferData::Create<TransformUniform>(
-		vulkanContext, transformUniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
+	transformUniformBuffer = BufferData::Create<TransformUniform>(
+		vulkanContext, transformUniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 
 	std::span<PropertiesUniform> propertiesUniformSpan(&propertiesUniform, &propertiesUniform + 1);
-	propertiesUniformBuffer = std::make_unique<BufferData>(BufferData::Create<PropertiesUniform>(
-		vulkanContext, propertiesUniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer));
+	propertiesUniformBuffer = BufferData::Create<PropertiesUniform>(
+		vulkanContext, propertiesUniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 }
 
 RenderObject::~RenderObject() = default;

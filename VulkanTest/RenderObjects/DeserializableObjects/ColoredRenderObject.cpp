@@ -36,8 +36,8 @@ ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const Des
 {
 	vertexData = std::vector<ColoredVertexData>(
 		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
-	vertexBuffer = std::make_unique<BufferData>(BufferData::Create<ColoredVertexData>(
-		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer));
+	vertexBuffer = BufferData::Create<ColoredVertexData>(
+		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 
 	shared = Shared<ColoredRenderObject>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);

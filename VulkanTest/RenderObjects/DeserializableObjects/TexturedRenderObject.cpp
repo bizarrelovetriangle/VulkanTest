@@ -38,8 +38,8 @@ TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const D
 {
 	vertexData = std::vector<TexturedVertexData>(
 		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
-	vertexBuffer = std::make_unique<BufferData>(BufferData::Create<TexturedVertexData>(
-		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer));
+	vertexBuffer = BufferData::Create<TexturedVertexData>(
+		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 
 	textureData = *deserializedObject.textureData;
 	auto& [resolution, imageData] = textureData;

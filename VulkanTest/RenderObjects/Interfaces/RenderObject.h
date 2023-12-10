@@ -62,7 +62,7 @@ class RenderObject
 {
 public:
 	RenderObject(VulkanContext& vulkanContext);
-	~RenderObject();
+	virtual ~RenderObject();
 
 	void UpdateTransformUniformBuffer();
 	void UpdatePropertiesUniformBuffer();

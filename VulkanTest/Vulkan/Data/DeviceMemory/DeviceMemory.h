@@ -14,11 +14,10 @@ public:
 	void FlushMemory(std::span<std::byte> data);
 	void Dispose();
 
-protected:
+public:
 	uint32_t FindMemoryTypeIndex(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	MemoryType memoryType;
 
-protected:
 	VulkanContext& vulkanContext;
 	vk::DeviceMemory memory;
 };

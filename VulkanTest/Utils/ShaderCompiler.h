@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <shaderc/shaderc.hpp>
-#include <vulkan/vulkan.hpp>
 #include <unordered_map>
 #include <filesystem>
 

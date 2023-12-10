@@ -33,8 +33,8 @@ BoundingBoxObject::BoundingBoxObject(VulkanContext& vulkanContext, const Vector3
 	UpdatePropertiesUniformBuffer();
 
 	vertexData = GeometryCreator::createLinedBoxByTwoPoints(aa - center, bb - center);
-	vertexBuffer = std::make_unique<BufferData>(BufferData::Create<LineVertexData>(
-		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer));
+	vertexBuffer = BufferData::Create<LineVertexData>(
+		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 
 	shared = Shared<BoundingBoxObject>::getInstance(vulkanContext, true);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
