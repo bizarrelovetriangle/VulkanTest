@@ -25,8 +25,8 @@ public:
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
 		vulkanContext.Init(window);
 
-		//GLTFReader glTFReader("D:\\folder\\untitled\\scene.gltf");
-		GLTFReader glTFReader("D:\\folder\\untitled\\hard_monkey.gltf");
+		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\scene.gltf");
+		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\hard_monkey.gltf");
 
 		for (auto& deserializedObject : glTFReader.deserializedObjects)
 		{
