@@ -1,4 +1,6 @@
 #pragma once
+#include "../pch/pch.h"
+#include <E:\Projects\VulkanTest\VulkanTest\pch\pch.h>
 #include <vector>
 
 class ValidationLayersInfo {

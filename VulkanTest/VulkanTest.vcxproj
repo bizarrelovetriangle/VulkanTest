@@ -114,6 +114,9 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>E:\Programs\glfw2\include;C:\VulkanSDK\1.3.243.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <ForcedIncludeFiles>$(ProjectDir)\pch\pch.h</ForcedIncludeFiles>
+      <PrecompiledHeaderFile>$(ProjectDir)\pch\pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,6 +135,9 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>E:\Programs\glfw2\include;C:\VulkanSDK\1.3.243.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <ForcedIncludeFiles>$(ProjectDir)\pch\pch.h</ForcedIncludeFiles>
+      <PrecompiledHeaderFile>$(ProjectDir)\pch\pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,6 +149,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="pch\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <UseStandardPreprocessor Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</UseStandardPreprocessor>
+      <UseStandardPreprocessor Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</UseStandardPreprocessor>
+    </ClCompile>
     <ClCompile Include="RenderObjects\Primitives\BoundingBoxObject.cpp" />
     <ClCompile Include="Math\Matrix4.cpp" />
     <ClCompile Include="Math\Plane.cpp" />
@@ -173,6 +185,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="pch\pch.h" />
     <ClInclude Include="RenderObjects\Primitives\BoundingBoxObject.h" />
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="RenderObjects\DeserializableObjects\ColoredRenderObject.h" />
