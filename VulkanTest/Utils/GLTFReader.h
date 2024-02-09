@@ -5,6 +5,7 @@
 #include "../Math/Vector2.h"
 #include "../Math/Vector3.h"
 #include "../Math/Matrix4.h"
+#include "../CAD/MeshModel.h"
 #include <string>
 #include <optional>
 
@@ -74,16 +75,23 @@ public:
 					}
 				}
 
-				for (auto index : indexes)
-				{
-					DeserializedObjectVertexData vertexData;
-					vertexData.position = Vector3f::FromGLTF(positions[index]);
-					vertexData.normal = Vector3f::FromGLTF(normals[index]);
-					if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
-					if (!colors.empty())		vertexData.color = colors[index];
-					if (!colors.empty())		deserializedObject.hasColors = true;
+				std::transform(positions.begin(), positions.end(), positions.begin(),
+					[](auto& p) { return Vector3f::FromGLTF(p); });
+				std::transform(normals.begin(), normals.end(), normals.begin(),
+					[](auto& p) { return Vector3f::FromGLTF(p); });
 
-					deserializedObject.vertexData.push_back(vertexData);
+				MeshModel mesh(indexes, positions);
+				if (!colors.empty()) deserializedObject.hasColors = true;
+
+				for (auto& triangle : mesh.triangles) {
+					for (int index : triangle.vertices) {
+						DeserializedObjectVertexData vertexData;
+						vertexData.position = mesh.points[index];
+						vertexData.normal = mesh.TriangleNormal(triangle);
+						if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
+						if (!colors.empty())		vertexData.color = colors[index];
+						deserializedObject.vertexData.push_back(vertexData);
+					}
 				}
 
 				if (primitive.material != -1)

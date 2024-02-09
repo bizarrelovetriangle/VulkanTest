@@ -155,6 +155,7 @@
       <UseStandardPreprocessor Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</UseStandardPreprocessor>
       <UseStandardPreprocessor Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</UseStandardPreprocessor>
     </ClCompile>
+    <ClCompile Include="CAD\MeshModel.cpp" />
     <ClCompile Include="RenderObjects\Primitives\BoundingBoxObject.cpp" />
     <ClCompile Include="Math\Matrix4.cpp" />
     <ClCompile Include="Math\Plane.cpp" />
@@ -185,6 +186,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.h" />
+    <ClInclude Include="CAD\MeshModel.h" />
     <ClInclude Include="RenderObjects\Primitives\BoundingBoxObject.h" />
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="RenderObjects\DeserializableObjects\ColoredRenderObject.h" />
