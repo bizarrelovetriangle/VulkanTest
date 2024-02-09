@@ -64,7 +64,7 @@ void BufferData::FlushData(std::span<T> data)
 	stagingBuffer->Dispose();
 }
 
-void BufferData::DisposeAction()
+void BufferData::Dispose()
 {
 	vulkanContext.deviceController->device.destroyBuffer(buffer);
 	deviceMemory.Dispose();

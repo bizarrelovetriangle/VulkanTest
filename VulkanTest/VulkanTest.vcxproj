@@ -164,7 +164,6 @@
     <ClCompile Include="RenderObjects\Primitives\EvenPlaneObject.cpp" />
     <ClCompile Include="RenderObjects\DeserializableObjects\TexturedRenderObject.cpp" />
     <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp" />
-    <ClCompile Include="Utils\Disposable.h" />
     <ClCompile Include="Utils\GeometryCreator.cpp" />
     <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />

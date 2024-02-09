@@ -145,7 +145,7 @@ void ImageData::CreateImageViewAndSampler()
 	sampler = vulkanContext.deviceController->device.createSampler(samplerInfo);
 }
 
-void ImageData::DisposeAction()
+void ImageData::Dispose()
 {
 	vulkanContext.deviceController->device.destroySampler(sampler);
 	vulkanContext.deviceController->device.destroyImageView(imageView);

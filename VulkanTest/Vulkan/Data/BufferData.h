@@ -2,11 +2,10 @@
 #include <memory>
 #include <vulkan/vulkan.hpp>
 #include "DeviceMemory/DeviceMemory.h"
-#include "../../Utils/Disposable.h"
 
 class VulkanContext;
 
-class BufferData : public Disposable<BufferData>
+class BufferData
 {
 public:
 	template <class T>
@@ -17,7 +16,7 @@ public:
 		size_t size, MemoryType memoryType, vk::BufferUsageFlags usage);
 	template <class T>
 	void FlushData(std::span<T> data);
-	void DisposeAction();
+	void Dispose();
 
 public:
 	size_t count = 0;
