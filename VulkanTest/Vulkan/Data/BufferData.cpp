@@ -19,7 +19,7 @@ std::unique_ptr<BufferData> BufferData::Create(VulkanContext& vulkanContext,
 	auto span = std::span<std::byte>((std::byte*)data.data(), (std::byte*)(data.data() + data.size()));
 	auto bufferData = std::make_unique<BufferData>(vulkanContext, span.size(), memoryType, usage);
 	bufferData->count = data.size();
-	bufferData->FlushData(span);
+	bufferData->FlushData<T>(data);
 	return std::move(bufferData);
 }
 
@@ -42,22 +42,21 @@ BufferData::BufferData(VulkanContext& vulkanContext,
 template <class T>
 void BufferData::FlushData(std::span<T> data)
 {
-	auto span = std::span<std::byte>((std::byte*)data.data(), (std::byte*)(data.data() + data.size()));
-
 	if (deviceMemory.memoryType == MemoryType::Universal || deviceMemory.memoryType == MemoryType::HostLocal)
 	{
+		auto span = std::span<std::byte>((std::byte*)data.data(), (std::byte*)(data.data() + data.size()));
 		deviceMemory.FlushMemory(span);
 		return;
 	}
 
-	auto stagingBuffer = BufferData::Create<std::byte>(
-		vulkanContext, span, MemoryType::HostLocal, vk::BufferUsageFlagBits::eTransferSrc);
+	auto stagingBuffer = BufferData::Create<T>(
+		vulkanContext, data, MemoryType::HostLocal, vk::BufferUsageFlagBits::eTransferSrc);
 
 	uint32_t transferQueueFamily = vulkanContext.queueFamilies->transferQueueFamily;
 	vulkanContext.commandBufferDispatcher->Invoke(transferQueueFamily,
 		[this, &stagingBuffer](auto& cb)
 		{
-			vk::BufferCopy copyRegion(0, 0, stagingBuffer->count);
+			vk::BufferCopy copyRegion(0, 0, stagingBuffer->count * sizeof(T));
 			cb.copyBuffer(stagingBuffer->buffer, buffer, copyRegion);
 		});
 
