@@ -17,22 +17,21 @@ namespace
 	const std::string Color = "COLOR_0";
 }
 
-struct DeserializedObjectVertexData
-{
-	Vector3f position;
-	Vector3f normal;
-	Vector2f textureCoord;
-	Vector4f color;
-};
-
-struct DeserializedObject
+struct SerializedObject
 {
 	std::string name;
-	Matrix4 model;
-	std::vector<DeserializedObjectVertexData> vertexData;
+
+	Vector3f scale;
+	Vector3f translation;
+	Vector4f rotation;
+
+	std::vector<uint32_t> indexes;
+	std::vector<Vector3f> positions;
+	std::vector<Vector3f> normals;
+	std::vector<Vector2f> textureCoords;
+	std::vector<Vector4f> colors;
 	std::optional<std::pair<Vector2u, std::vector<std::byte>>> textureData;
 	Vector4f baseColor;
-	bool hasColors = false;
 };
 
 class GLTFReader
@@ -52,53 +51,41 @@ public:
 			if (node.mesh < 0) continue;
 			auto& mesh = glTFModel.meshes[node.mesh];
 
-			DeserializedObject deserializedObject;
-			deserializedObject.name = node.name;
-			deserializedObject.model = ComposeMatrix(node);
+			SerializedObject serializedObject;
+			serializedObject.name = node.name;
+
+			serializedObject.translation = GetVector<Vector3f>(node.translation)
+				.value_or(Vector3f());
+			serializedObject.scale = GetVector<Vector3f>(node.scale)
+				.value_or(Vector3f(1., 1., 1.));
+			serializedObject.rotation = GetVector<Vector4f>(node.rotation)
+				.value_or(Vector4f(0., 0., 0., 1.));;
 
 			for (auto& primitive : mesh.primitives)
 			{
-				std::vector<uint32_t> indexes = ReadBuffer<uint32_t>(primitive.indices);
-				std::vector<Vector3f> positions;
-				std::vector<Vector3f> normals;
-				std::vector<Vector2f> textureCoords;
-				std::vector<Vector4f> colors;
+				serializedObject.indexes = ReadBuffer<uint32_t>(primitive.indices);
 
 				for (auto& [name, index] : primitive.attributes)
 				{
-					if (name == Position)		positions = ReadBuffer<Vector3f>(index);
-					if (name == Normal)			normals = ReadBuffer<Vector3f>(index);
-					if (name == TextureCoord)	textureCoords = ReadBuffer<Vector2f>(index);
+					if (name == Position)		serializedObject.positions = ReadBuffer<Vector3f>(index);
+					if (name == Normal)			serializedObject.normals = ReadBuffer<Vector3f>(index);
+					if (name == TextureCoord)	serializedObject.textureCoords = ReadBuffer<Vector2f>(index);
 					if (name == Color) {
-						colors = ReadBuffer<Vector4f>(index);
-						NormalizeIntegerColors(index, colors);
+						serializedObject.colors = ReadBuffer<Vector4f>(index);
+						NormalizeIntegerColors(index, serializedObject.colors);
 					}
 				}
 
-				std::transform(positions.begin(), positions.end(), positions.begin(),
+				std::transform(serializedObject.positions.begin(), serializedObject.positions.end(), serializedObject.positions.begin(),
 					[](auto& p) { return Vector3f::FromGLTF(p); });
-				std::transform(normals.begin(), normals.end(), normals.begin(),
+				std::transform(serializedObject.normals.begin(), serializedObject.normals.end(), serializedObject.normals.begin(),
 					[](auto& p) { return Vector3f::FromGLTF(p); });
-
-				MeshModel mesh(indexes, positions);
-				if (!colors.empty()) deserializedObject.hasColors = true;
-
-				for (auto& triangle : mesh.triangles) {
-					for (int index : triangle.vertices) {
-						DeserializedObjectVertexData vertexData;
-						vertexData.position = mesh.points[index];
-						vertexData.normal = mesh.TriangleNormal(triangle);
-						if (!textureCoords.empty()) vertexData.textureCoord = textureCoords[index];
-						if (!colors.empty())		vertexData.color = colors[index];
-						deserializedObject.vertexData.push_back(vertexData);
-					}
-				}
 
 				if (primitive.material != -1)
 				{
 					auto& material = glTFModel.materials[primitive.material];
 					auto& roughness = material.pbrMetallicRoughness;
-					deserializedObject.baseColor = *GetVector<Vector4f>(roughness.baseColorFactor);
+					serializedObject.baseColor = *GetVector<Vector4f>(roughness.baseColorFactor);
 
 					if (roughness.baseColorTexture.index != -1)
 					{
@@ -106,19 +93,16 @@ public:
 						auto& image = glTFModel.images[texture.source];
 						std::vector<std::byte> data(image.image.size());
 						std::memcpy(data.data(), image.image.data(), image.image.size());
-						deserializedObject.textureData = std::make_pair(Vector2u(image.width, image.height), data);
+						serializedObject.textureData = std::make_pair(Vector2u(image.width, image.height), data);
 					}
 				}
-			}
 
-			if (deserializedObject.vertexData.size() > 0)
-			{
-				deserializedObjects.emplace_back(std::move(deserializedObject));
+				serializedObjects.push_back(serializedObject);
 			}
 		}
 	}
 
-	std::vector<DeserializedObject> deserializedObjects;
+	std::vector<SerializedObject> serializedObjects;
 
 private:
 	void NormalizeIntegerColors(int index, std::vector<Vector4f>& colors)
@@ -133,19 +117,6 @@ private:
 			float factor = 1. / std::pow(255, componentSize);
 			for (auto& color : colors) color *= factor;
 		}
-	}
-
-	Matrix4 ComposeMatrix(const tinygltf::Node& node)
-	{
-		auto translation = GetVector<Vector3f>(node.translation);
-		auto scale = GetVector<Vector3f>(node.scale);
-		auto rotation = GetVector<Vector4f>(node.rotation);
-
-		Matrix4 matrix;
-		if (scale) matrix = Matrix4::Scale(*scale) * matrix;
-		if (rotation) matrix = Matrix4::Rotate(Vector4f::QuaternionFromGLTF(*rotation)) * matrix;
-		if (translation) matrix = Matrix4::Translation(Vector3f::FromGLTF(*translation)) * matrix;
-		return matrix;
 	}
 
 	template <class T>

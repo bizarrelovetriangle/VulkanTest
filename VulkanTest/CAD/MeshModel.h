@@ -84,7 +84,7 @@ public:
 		return combinedEdges.at(edge);
 	}
 
-	std::array<Vector3f, 3> TrianglePoints(const Triangle& triangle)
+	std::array<Vector3f, 3> TrianglePoints(const Triangle& triangle) const
 	{
 		uint32_t a = triangle.vertices[0];
 		uint32_t b = triangle.vertices[1];
@@ -92,7 +92,7 @@ public:
 		return { points[a], points[b], points[c] };
 	}
 
-	Vector3f TriangleNormal(const Triangle& triangle)
+	Vector3f TriangleNormal(const Triangle& triangle) const
 	{
 		auto trianglePoints = TrianglePoints(triangle);
 		return (trianglePoints[1] - trianglePoints[0]).Cross(trianglePoints[2] - trianglePoints[0]);

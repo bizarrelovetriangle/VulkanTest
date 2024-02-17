@@ -79,7 +79,7 @@ public:
 	std::unique_ptr<DescriptorSets> descriptorSets;
 	std::shared_ptr<RenderObjectShared> shared;
 
-private:
+protected:
 	VulkanContext& vulkanContext;
 };
 

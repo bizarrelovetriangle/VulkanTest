@@ -9,6 +9,7 @@
 #include "../RenderObjects/Interfaces/RenderObject.h"
 #include "../RenderVisitor.h";
 #include "../VulkanContext.h";
+#include "../Objects/Object.h"
 
 CommandBuffer::CommandBuffer(VulkanContext& vulkanContext,
 	const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,
@@ -26,7 +27,7 @@ void CommandBuffer::Dispose()
 }
 
 void CommandBuffer::RecordCommandBuffer(size_t imageIndex,
-	const std::vector<std::unique_ptr<RenderObject>>& renderObjects)
+	const std::vector<std::unique_ptr<Object>>& objects)
 {
 	vk::CommandBufferBeginInfo beginInfo;
 	commandBuffer.begin(beginInfo);
@@ -46,9 +47,9 @@ void CommandBuffer::RecordCommandBuffer(size_t imageIndex,
 
 		RenderVisitor renderVisitor(vulkanContext, *this, imageIndex);
 
-		for (auto& renderObject : renderObjects)
+		for (auto& object : objects)
 		{
-			renderObject->Accept(renderVisitor);
+			object->renderer->Accept(renderVisitor);
 		}
 
 		commandBuffer.endRenderPass();

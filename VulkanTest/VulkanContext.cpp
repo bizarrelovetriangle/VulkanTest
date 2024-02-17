@@ -65,7 +65,7 @@ void VulkanContext::Init(GLFWwindow* window)
 
 VulkanContext::~VulkanContext() = default;
 
-void VulkanContext::DrawFrame(std::vector<std::unique_ptr<RenderObject>>& renderObjects)
+void VulkanContext::DrawFrame(std::vector<std::unique_ptr<Object>>& objects)
 {
     deviceController->device.waitForFences({ inFlightFence }, VK_TRUE, UINT64_MAX);
     deviceController->device.resetFences({ inFlightFence });
@@ -73,7 +73,7 @@ void VulkanContext::DrawFrame(std::vector<std::unique_ptr<RenderObject>>& render
     uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
     commandBuffer->Reset();
-    commandBuffer->RecordCommandBuffer(imageIndex, renderObjects);
+    commandBuffer->RecordCommandBuffer(imageIndex, objects);
 
     vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore };
     vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };

@@ -2,12 +2,11 @@
 #include "RenderObject.h"
 
 struct DeserializedObjectVertexData;
+class MeshModel;
 
 class VertexData
 {
 public:
-	VertexData(const Vector3f& position, const Vector3f& normal);
-	VertexData(const DeserializedObjectVertexData& deserializingObjectVertexData);
 	static vk::VertexInputBindingDescription BindingDescription();
 	static std::vector<vk::VertexInputAttributeDescription> AttributeDescriptions();
 
@@ -22,6 +21,7 @@ public:
 	using VertexDataType = VertexData;
 	VertexedRenderObject(VulkanContext& vulkanContext);
 	~VertexedRenderObject();
+	virtual void UpdateVertexBuffer(const MeshModel& mesh);
 	virtual void Accept(RenderVisitor& renderVisitor);
 	virtual void Dispose() override;
 

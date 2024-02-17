@@ -6,17 +6,6 @@
 #include "../../Vulkan/DescriptorSets.h"
 #include "../../Utils/GLTFReader.h"
 
-VertexData::VertexData(const Vector3f& position, const Vector3f& normal)
-	: position(position), normal(normal)
-{
-}
-
-VertexData::VertexData(const DeserializedObjectVertexData& deserializingObjectVertexData)
-{
-	position = deserializingObjectVertexData.position;
-	normal = deserializingObjectVertexData.normal;
-}
-
 vk::VertexInputBindingDescription VertexData::BindingDescription()
 {
 	return vk::VertexInputBindingDescription(0, sizeof(VertexData), vk::VertexInputRate::eVertex);
@@ -39,6 +28,23 @@ VertexedRenderObject::VertexedRenderObject(VulkanContext& vulkanContext)
 }
 
 VertexedRenderObject::~VertexedRenderObject() = default;
+
+void VertexedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
+{
+	std::vector<VertexData> vertexDatas;
+
+	for (auto& triangle : mesh.triangles) {
+		for (int index : triangle.vertices) {
+			VertexData vertexData;
+			vertexData.position = mesh.points[index];
+			vertexData.normal = mesh.TriangleNormal(triangle);
+			vertexDatas.push_back(vertexData);
+		}
+	}
+
+	vertexBuffer = BufferData::Create<VertexData>(
+		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+}
 
 void VertexedRenderObject::Accept(RenderVisitor& renderVisitor)
 {

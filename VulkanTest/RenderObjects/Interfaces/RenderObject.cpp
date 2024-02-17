@@ -6,7 +6,7 @@
 #include "../../VulkanContext.h"
 #include "../../Utils/GLTFReader.h"
 #include "../../Vulkan/Pipeline.h"
-#include "../DeserializableObjects/PlaneVertexedRenderObject.h"
+#include "../DeserializableObjects/SimpleVertexedRenderObject.h"
 #include "../DeserializableObjects/ColoredRenderObject.h"
 #include "../DeserializableObjects/TexturedRenderObject.h"
 #include "../Primitives/EvenPlaneObject.h"
@@ -108,7 +108,7 @@ void RenderObject::Dispose()
 	shared.reset();
 }
 
-template Shared<PlaneVertexedRenderObject>;
+template Shared<SimpleVertexedRenderObject>;
 template Shared<ColoredRenderObject>;
 template Shared<TexturedRenderObject>;
 template Shared<EvenPlaneObject>;

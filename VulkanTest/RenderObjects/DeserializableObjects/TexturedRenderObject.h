@@ -1,15 +1,15 @@
 #pragma once
-#include "../Interfaces/DeserializableObject.h"
+#include "../Interfaces/VertexedRenderObject.h"
 
 class VulcanContext;
 struct DeserializedObject;
 struct DeserializedObjectVertexData;
 class ImageData;
+class MeshModel;
 
 class TexturedVertexData : public VertexData
 {
 public:
-	TexturedVertexData(const DeserializedObjectVertexData& deserializingObjectVertexData);
 	static vk::VertexInputBindingDescription BindingDescription();
 	static std::vector<vk::VertexInputAttributeDescription> AttributeDescriptions();
 
@@ -17,13 +17,15 @@ public:
 	Vector2f textureCoord;
 };
 
-class TexturedRenderObject : public DeserializableObject
+class TexturedRenderObject : public VertexedRenderObject
 {
 public:
 	using VertexDataType = TexturedVertexData;
 
-	TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject);
+	TexturedRenderObject(VulkanContext& vulkanContext,
+		std::pair<Vector2u, std::vector<std::byte>> textureData, const std::vector<Vector2f>& textureCoords);
 	~TexturedRenderObject();
+	virtual void UpdateVertexBuffer(const MeshModel& mesh) override;
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	void Dispose();
 
@@ -37,6 +39,6 @@ public:
 	std::unique_ptr<ImageData> textureBuffer;
 
 private:
-	std::vector<TexturedVertexData> vertexData;
+	std::vector<Vector2f> textureCoords;
 };
 

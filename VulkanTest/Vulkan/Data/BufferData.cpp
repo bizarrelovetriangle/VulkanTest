@@ -8,7 +8,7 @@
 #include "../../RenderObjects/Interfaces/RenderObject.h"
 #include "../../RenderObjects/DeserializableObjects/TexturedRenderObject.h"
 #include "../../RenderObjects/DeserializableObjects/ColoredRenderObject.h"
-#include "../../RenderObjects/DeserializableObjects/PlaneVertexedRenderObject.h"
+#include "../../RenderObjects/DeserializableObjects/SimpleVertexedRenderObject.h"
 #include "../../RenderObjects/Primitives/EvenPlaneObject.h"
 #include "../../RenderObjects/Primitives/BoundingBoxObject.h"
 

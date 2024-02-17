@@ -9,7 +9,7 @@ class SwapChain;
 class RenderPass;
 class Pipeline;
 class VertexData;
-class RenderObject;
+class Object;
 struct GLFWwindow;
 template <class T>
 class BufferMemory;
@@ -20,7 +20,7 @@ class VulkanContext
 public:
     void Init(GLFWwindow* window);
     ~VulkanContext();
-    void DrawFrame(std::vector<std::unique_ptr<RenderObject>>& renderObjects);
+    void DrawFrame(std::vector<std::unique_ptr<Object>>& objects);
     void Await();
     void Dispose();
 

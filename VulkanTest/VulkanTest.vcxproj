@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Objects\Object.cpp" />
     <ClCompile Include="pch\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -160,8 +161,7 @@
     <ClCompile Include="Math\Matrix4.cpp" />
     <ClCompile Include="Math\Plane.cpp" />
     <ClCompile Include="RenderObjects\DeserializableObjects\ColoredRenderObject.cpp" />
-    <ClCompile Include="RenderObjects\Interfaces\DeserializableObject.cpp" />
-    <ClCompile Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.cpp" />
+    <ClCompile Include="RenderObjects\DeserializableObjects\SimpleVertexedRenderObject.cpp" />
     <ClCompile Include="RenderObjects\Primitives\EvenPlaneObject.cpp" />
     <ClCompile Include="RenderObjects\DeserializableObjects\TexturedRenderObject.cpp" />
     <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp" />
@@ -185,16 +185,17 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Objects\Object.h" />
     <ClInclude Include="pch\pch.h" />
     <ClInclude Include="CAD\MeshModel.h" />
     <ClInclude Include="RenderObjects\Primitives\BoundingBoxObject.h" />
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="RenderObjects\DeserializableObjects\ColoredRenderObject.h" />
-    <ClInclude Include="RenderObjects\Interfaces\DeserializableObject.h" />
-    <ClInclude Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.h" />
+    <ClInclude Include="RenderObjects\DeserializableObjects\SimpleVertexedRenderObject.h" />
     <ClInclude Include="RenderObjects\Primitives\EvenPlaneObject.h" />
     <ClInclude Include="RenderObjects\DeserializableObjects\TexturedRenderObject.h" />
     <ClInclude Include="RenderObjects\Interfaces\VertexedRenderObject.h" />
+    <ClInclude Include="Utils\Deserializer.h" />
     <ClInclude Include="Utils\GeometryCreator.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />

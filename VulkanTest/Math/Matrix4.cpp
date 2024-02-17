@@ -79,6 +79,8 @@ Matrix4 Matrix4::Rotate(const Vector4f& quaternion)
 {
 	auto angle = std::acos(quaternion.w);
 
+	if (angle == 0) return Matrix4();
+
 	auto jA = Vector3f(quaternion.x, quaternion.y, quaternion.z) / std::sin(angle);
 	auto [iA, kA] = jA.twoPerpendicularsForJ(); // Why is it matter?
 

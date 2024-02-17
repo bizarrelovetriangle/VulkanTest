@@ -5,15 +5,9 @@
 #include "../../Utils/GLTFReader.h"
 #include "../../Vulkan/Data/ImageData.h"
 #include "../../Vulkan/Data/BufferData.h"
+#include "../../CAD/MeshModel.h"
 #include "../../VulkanContext.h"
 #undef LoadImage;
-
-TexturedVertexData::TexturedVertexData(
-	const DeserializedObjectVertexData& deserializingObjectVertexData)
-	: VertexData(deserializingObjectVertexData)
-{
-	textureCoord = deserializingObjectVertexData.textureCoord;
-}
 
 vk::VertexInputBindingDescription TexturedVertexData::BindingDescription()
 {
@@ -33,15 +27,10 @@ std::vector<vk::VertexInputAttributeDescription> TexturedVertexData::AttributeDe
 }
 
 
-TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const DeserializedObject& deserializedObject)
-	: DeserializableObject(vulkanContext, deserializedObject)
+TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext,
+	std::pair<Vector2u, std::vector<std::byte>> textureData, const std::vector<Vector2f>& textureCoords)
+	: VertexedRenderObject(vulkanContext), textureData(textureData), textureCoords(textureCoords)
 {
-	vertexData = std::vector<TexturedVertexData>(
-		std::begin(deserializedObject.vertexData), std::end(deserializedObject.vertexData));
-	vertexBuffer = BufferData::Create<TexturedVertexData>(
-		vulkanContext, vertexData, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
-
-	textureData = *deserializedObject.textureData;
 	auto& [resolution, imageData] = textureData;
 	textureBuffer = std::make_unique<ImageData>(
 		vulkanContext, resolution, vk::Format::eR8G8B8A8Srgb, vk::ImageUsageFlagBits::eSampled, vk::ImageAspectFlagBits::eColor,
@@ -58,6 +47,24 @@ TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext, const D
 
 TexturedRenderObject::~TexturedRenderObject() = default;
 
+void TexturedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
+{
+	std::vector<TexturedVertexData> vertexDatas;
+
+	for (auto& triangle : mesh.triangles) {
+		for (int index : triangle.vertices) {
+			TexturedVertexData vertexData;
+			vertexData.position = mesh.points[index];
+			vertexData.normal = mesh.TriangleNormal(triangle);
+			vertexData.textureCoord = textureCoords[index];
+			vertexDatas.push_back(vertexData);
+		}
+	}
+
+	vertexBuffer = BufferData::Create<TexturedVertexData>(
+		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+}
+
 std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderObject::DescriptorSetLayoutBinding()
 {
 	return {
@@ -69,6 +76,6 @@ std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderObject::DescriptorSetL
 
 void TexturedRenderObject::Dispose()
 {
-	DeserializableObject::Dispose();
+	VertexedRenderObject::Dispose();
 	textureBuffer->Dispose();
 }

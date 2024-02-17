@@ -6,7 +6,7 @@ class QueueFamilies;
 class Pipeline;
 class SwapChain;
 class RenderPass;
-class RenderObject;
+class Object;
 class VulkanContext;
 
 class CommandBuffer
@@ -17,7 +17,7 @@ public:
 		std::shared_ptr<RenderPass> renderPass);
 	void Dispose();
 	void RecordCommandBuffer(size_t imageIndex,
-		const std::vector<std::unique_ptr<RenderObject>>& renderObjects);
+		const std::vector<std::unique_ptr<Object>>& objects);
 	void Reset();
 
 private:

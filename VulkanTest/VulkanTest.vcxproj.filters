@@ -75,13 +75,7 @@
     <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RenderObjects\Primitives\EvenPlaneObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderObjects\Interfaces\DeserializableObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Math\Plane.cpp">
@@ -93,13 +87,19 @@
     <ClCompile Include="RenderObjects\Primitives\BoundingBoxObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\Disposable.h">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\GeometryCreator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CAD\MeshModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderObjects\DeserializableObjects\SimpleVertexedRenderObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -194,13 +194,7 @@
     <ClInclude Include="RenderObjects\Interfaces\VertexedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderObjects\DeserializableObjects\PlaneVertexedRenderObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RenderObjects\Primitives\EvenPlaneObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderObjects\Interfaces\DeserializableObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Math\Plane.h">
@@ -213,6 +207,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CAD\MeshModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObjects\DeserializableObjects\SimpleVertexedRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Deserializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
