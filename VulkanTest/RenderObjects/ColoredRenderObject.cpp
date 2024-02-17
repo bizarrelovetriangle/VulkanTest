@@ -1,12 +1,12 @@
 #include "ColoredRenderObject.h"
-#include "../../RenderVisitor.h"
-#include "../../Vulkan/DescriptorSets.h"
-#include "../../Utils/GLTFReader.h"
-#include "../../Vulkan/Data/ImageData.h"
-#include "../../Vulkan/Data/BufferData.h"
-#include "../../RenderVisitor.h"
-#include "../../VulkanContext.h"
-#include "../../CAD/MeshModel.h"
+#include "../RenderVisitor.h"
+#include "../Vulkan/DescriptorSets.h"
+#include "../Utils/GLTFReader.h"
+#include "../Vulkan/Data/ImageData.h"
+#include "../Vulkan/Data/BufferData.h"
+#include "../RenderVisitor.h"
+#include "../VulkanContext.h"
+#include "../CAD/MeshModel.h"
 
 vk::VertexInputBindingDescription ColoredVertexData::BindingDescription()
 {

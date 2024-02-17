@@ -1,30 +1,44 @@
 #include "GeometryCreator.h"
+#include "../CAD/MeshModel.h"
 
-std::vector<VertexData> GeometryCreator::createBoxByTwoPoints(const Vector3f& aa, const Vector3f& bb)
+std::unique_ptr<MeshModel> GeometryCreator::createBoxByTwoPoints(const Vector3f& aa, const Vector3f& bb)
 {
-	Vector3f frontBottomLeft = { aa.x, aa.y, aa.z };
-	Vector3f frontBottomRight = { bb.x, aa.y, aa.z };
-	Vector3f frontTopRight = { bb.x, bb.y, aa.z };
-	Vector3f frontTopLeft = { aa.x, bb.y, aa.z };
+	std::vector<Vector3f> positions{
+		{ aa.x, aa.y, aa.z },
+		{ bb.x, aa.y, aa.z },
+		{ bb.x, bb.y, aa.z },
+		{ aa.x, bb.y, aa.z },
+		{ aa.x, aa.y, bb.z },
+		{ bb.x, aa.y, bb.z },
+		{ bb.x, bb.y, bb.z },
+		{ aa.x, bb.y, bb.z } };
 
-	Vector3f backBottomLeft = { aa.x, aa.y, bb.z };
-	Vector3f backBottomRight = { bb.x, aa.y, bb.z };
-	Vector3f backTopRight = { bb.x, bb.y, bb.z };
-	Vector3f backTopLeft = { aa.x, bb.y, bb.z };
+	std::vector<uint32_t> indexes{
+		//front
+		0, 1, 2,
+		2, 3, 0,
+		//back
+		6, 5, 4,
+		4, 7, 6,
+		//top
+		3, 2, 6,
+		6, 7, 3,
+		//bottom
+		5, 1, 0,
+		0, 4, 5,
+		//left
+		4, 7, 3,
+		3, 0, 4,
+		//right
+		2, 1, 5,
+		5, 6, 2
+	};
 
-	Vector3f top = { 0., 1., 0. };
-	Vector3f bottom = { 0.,-1., 0. };
-	Vector3f left = { -1., 0., 0. };
-	Vector3f right = { 1., 0., 1. };
-	Vector3f front = { 0., 0.,-1. };
-	Vector3f back = { 0., 0., 1. };
-
-	std::vector<VertexData> vertexData;
-
-	return vertexData;
+	auto&& mesh = std::make_unique<MeshModel>(indexes, positions);
+	return mesh;
 }
 
-std::vector<LineVertexData> GeometryCreator::createLinedBoxByTwoPoints(const Vector3f& aa, const Vector3f& bb)
+std::vector<Vector3f> GeometryCreator::createLinedBoxByTwoPoints(const Vector3f& aa, const Vector3f& bb)
 {
 	Vector3f frontBottomLeft = { aa.x, aa.y, aa.z };
 	Vector3f frontBottomRight = { bb.x, aa.y, aa.z };
@@ -36,7 +50,7 @@ std::vector<LineVertexData> GeometryCreator::createLinedBoxByTwoPoints(const Vec
 	Vector3f backTopRight = { bb.x, bb.y, bb.z };
 	Vector3f backTopLeft = { aa.x, bb.y, bb.z };
 
-	std::vector<LineVertexData> vertexData
+	std::vector<Vector3f> vertexData
 	{
 		//front
 		frontBottomLeft, frontBottomRight,

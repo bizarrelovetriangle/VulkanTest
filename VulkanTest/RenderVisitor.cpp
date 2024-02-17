@@ -1,16 +1,17 @@
 #include <vulkan/vulkan.hpp>
 #include "RenderVisitor.h"
 #include "RenderObjects/Interfaces/RenderObject.h"
-#include "RenderObjects/DeserializableObjects/ColoredRenderObject.h"
+#include "RenderObjects/ColoredRenderObject.h"
 #include "RenderObjects/Interfaces/VertexedRenderObject.h"
-#include "RenderObjects/DeserializableObjects/TexturedRenderObject.h"
-#include "RenderObjects/Primitives/EvenPlaneObject.h"
+#include "RenderObjects/TexturedRenderObject.h"
+#include "Objects/Primitives/PlaneObject.h"
 #include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/DescriptorSets.h"
 #include "Vulkan/SwapChain.h"
 #include "VulkanContext.h"
 #include "Vulkan/Data/BufferData.h"
+#include "RenderObjects/PlaneRenderObject.h"
 #include <chrono>
 
 RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex)
@@ -22,7 +23,7 @@ void RenderVisitor::Visit(RenderObject& renderObject)
 {
 }
 
-void RenderVisitor::Visit(EvenPlaneObject& planeObject)
+void RenderVisitor::Visit(PlaneRenderObject& planeObject)
 {
 	auto& pipeline = *planeObject.shared->pipeline;
 	BindPipeline(pipeline);

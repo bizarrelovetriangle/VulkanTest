@@ -1,5 +1,9 @@
 #include "Plane.h"
 
+Plane::Plane() : normal(Vector3f(0., 0., 1.)), dist(0.)
+{
+}
+
 Plane::Plane(const Vector3f& normal, float dist)
 	: normal(normal), dist(dist)
 {

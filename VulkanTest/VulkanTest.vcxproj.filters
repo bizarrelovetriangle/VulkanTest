@@ -66,25 +66,13 @@
     <ClCompile Include="Vulkan\DescriptorSets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RenderObjects\DeserializableObjects\ColoredRenderObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderObjects\DeserializableObjects\TexturedRenderObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderObjects\Primitives\EvenPlaneObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Math\Plane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Math\Matrix4.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderObjects\Primitives\BoundingBoxObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utils\GeometryCreator.cpp">
@@ -96,10 +84,25 @@
     <ClCompile Include="pch\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RenderObjects\DeserializableObjects\SimpleVertexedRenderObject.cpp">
+    <ClCompile Include="Objects\Primitives\BoundingBoxObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\Object.cpp">
+    <ClCompile Include="RenderObjects\ColoredRenderObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderObjects\LinedRenderObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderObjects\SimpleVertexedRenderObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Primitives\PlaneObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderObjects\TexturedRenderObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderObjects\PlaneRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -185,22 +188,10 @@
     <ClInclude Include="Vulkan\DescriptorSets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderObjects\DeserializableObjects\ColoredRenderObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderObjects\DeserializableObjects\TexturedRenderObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RenderObjects\Interfaces\VertexedRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderObjects\Primitives\EvenPlaneObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Math\Plane.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderObjects\Primitives\BoundingBoxObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\GeometryCreator.h">
@@ -209,16 +200,37 @@
     <ClInclude Include="CAD\MeshModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\Object.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderObjects\DeserializableObjects\SimpleVertexedRenderObject.h">
+    <ClInclude Include="Utils\Deserializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\Deserializer.h">
+    <ClInclude Include="Objects\Interfaces\MeshObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Primitives\BoundingBoxObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObjects\ColoredRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObjects\LinedRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObjects\SimpleVertexedRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Primitives\PlaneObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObjects\TexturedRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderObjects\PlaneRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Interfaces\Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,11 +6,11 @@
 #include "../CommandBuffer.h"
 #include "../CommandBufferDispatcher.h"
 #include "../../RenderObjects/Interfaces/RenderObject.h"
-#include "../../RenderObjects/DeserializableObjects/TexturedRenderObject.h"
-#include "../../RenderObjects/DeserializableObjects/ColoredRenderObject.h"
-#include "../../RenderObjects/DeserializableObjects/SimpleVertexedRenderObject.h"
-#include "../../RenderObjects/Primitives/EvenPlaneObject.h"
-#include "../../RenderObjects/Primitives/BoundingBoxObject.h"
+#include "../../RenderObjects/TexturedRenderObject.h"
+#include "../../RenderObjects/ColoredRenderObject.h"
+#include "../../RenderObjects/SimpleVertexedRenderObject.h"
+#include "../../RenderObjects/PlaneRenderObject.h"
+#include "../../RenderObjects/LinedRenderObject.h"
 
 template <class T>
 std::unique_ptr<BufferData> BufferData::Create(VulkanContext& vulkanContext,
@@ -83,14 +83,14 @@ template std::unique_ptr<BufferData> BufferData::Create<uint16_t>(VulkanContext&
 	std::span<uint16_t> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template std::unique_ptr<BufferData> BufferData::Create<std::byte>(VulkanContext& vulkanContext,
 	std::span<std::byte> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template std::unique_ptr<BufferData> BufferData::Create<EvenPlaneObjectUniform>(VulkanContext& vulkanContext,
-	std::span<EvenPlaneObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template std::unique_ptr<BufferData> BufferData::Create<PlaneObjectUniform>(VulkanContext& vulkanContext,
+	std::span<PlaneObjectUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template std::unique_ptr<BufferData> BufferData::Create<TransformUniform>(VulkanContext& vulkanContext,
 	std::span<TransformUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template std::unique_ptr<BufferData> BufferData::Create<Vector3f>(VulkanContext& vulkanContext,
 	std::span<Vector3f> data, MemoryType memoryType, vk::BufferUsageFlags usage);
-template std::unique_ptr<BufferData> BufferData::Create<LineVertexData>(VulkanContext& vulkanContext,
-	std::span<LineVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template std::unique_ptr<BufferData> BufferData::Create<LinedVertexData>(VulkanContext& vulkanContext,
+	std::span<LinedVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 
 template void BufferData::FlushData(std::span<VertexData> data);
 template void BufferData::FlushData(std::span<TexturedVertexData> data);
@@ -98,8 +98,8 @@ template void BufferData::FlushData(std::span<ColoredVertexData> data);
 template void BufferData::FlushData(std::span<PropertiesUniform> data);
 template void BufferData::FlushData(std::span<uint16_t> data);
 template void BufferData::FlushData(std::span<std::byte> data);
-template void BufferData::FlushData(std::span<EvenPlaneObjectUniform> data);
+template void BufferData::FlushData(std::span<PlaneObjectUniform> data);
 template void BufferData::FlushData(std::span<TransformUniform> data);
 template void BufferData::FlushData(std::span<Vector3f> data);
-template void BufferData::FlushData(std::span<LineVertexData> data);
+template void BufferData::FlushData(std::span<LinedVertexData> data);
 

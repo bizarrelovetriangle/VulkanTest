@@ -1,5 +1,5 @@
 #pragma once
-#include "../Objects/Object.h"
+#include "../Objects/Interfaces/Object.h"
 
 class Deserializer
 {
@@ -8,7 +8,7 @@ public:
 	{
 	}
 
-	std::unique_ptr<Object> Deserialize(SerializedObject& serializedObject)
+	std::unique_ptr<MeshObject> Deserialize(SerializedObject& serializedObject)
 	{
 		std::unique_ptr<VertexedRenderObject> renderer;
 
@@ -31,7 +31,7 @@ public:
 
 		auto mesh = std::make_unique<MeshModel>(serializedObject.indexes, serializedObject.positions);
 
-		auto object = std::make_unique<Object>(std::move(mesh), std::move(renderer));
+		auto object = std::make_unique<MeshObject>(std::move(mesh), std::move(renderer));
 		object->name = serializedObject.name;
 		object->position = serializedObject.translation;
 		object->rotation = serializedObject.rotation;
@@ -39,7 +39,7 @@ public:
 
 		object->renderer->transformUniform.model = object->ComposeMatrix();
 		object->renderer->UpdateTransformUniformBuffer();
-		object->renderer->UpdateVertexBuffer(*object->mesh);
+		object->UpdateVertexBuffer();
 
 		return std::move(object);
 	}

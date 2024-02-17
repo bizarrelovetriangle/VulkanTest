@@ -1,8 +1,8 @@
 #pragma once
-#include "../../Math/Vector3.h"
-#include "../../Math/Vector2.h"
-#include "../../Math/Matrix4.h"
-#include "../Interfaces/VertexedRenderObject.h"
+#include "../Math/Vector3.h"
+#include "../Math/Vector2.h"
+#include "../Math/Matrix4.h"
+#include "Interfaces/VertexedRenderObject.h"
 
 class VulcanContext;
 struct DeserializedObject;

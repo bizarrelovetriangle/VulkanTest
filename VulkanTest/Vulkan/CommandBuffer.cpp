@@ -9,7 +9,7 @@
 #include "../RenderObjects/Interfaces/RenderObject.h"
 #include "../RenderVisitor.h";
 #include "../VulkanContext.h";
-#include "../Objects/Object.h"
+#include "../Objects/Interfaces/Object.h"
 
 CommandBuffer::CommandBuffer(VulkanContext& vulkanContext,
 	const vk::Device& device, std::shared_ptr<QueueFamilies> queueFamilies,

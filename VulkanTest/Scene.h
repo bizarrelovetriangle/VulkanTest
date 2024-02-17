@@ -4,24 +4,24 @@
 #include "Vulkan/DescriptorSets.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/SwapChain.h"
-#include "RenderObjects/DeserializableObjects/ColoredRenderObject.h"
-#include "RenderObjects/DeserializableObjects/TexturedRenderObject.h"
-#include "RenderObjects/DeserializableObjects/SimpleVertexedRenderObject.h"
-#include "RenderObjects/Primitives/EvenPlaneObject.h"
-#include "RenderObjects/Primitives/BoundingBoxObject.h"
+#include "RenderObjects/ColoredRenderObject.h"
+#include "RenderObjects/TexturedRenderObject.h"
+#include "RenderObjects/SimpleVertexedRenderObject.h"
+#include "Objects/Primitives/PlaneObject.h"
+#include "Objects/Primitives/BoundingBoxObject.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#include "Objects/Object.h"
+#include "Objects/Interfaces/Object.h"
 #include "Utils/Deserializer.h"
 
 class Scene
 {
 public:
 	Scene()
-	{
+	{ 
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
@@ -37,13 +37,13 @@ public:
 			objects.push_back(std::move(object));
 		}
 
-		//auto plane = std::make_unique<EvenPlaneObject>(vulkanContext,
-		//	Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		//objects.push_back(std::move(plane));
+		auto plane = std::make_unique<PlaneObject>(vulkanContext,
+			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		objects.push_back(std::move(plane));
 
-		//auto boundingBox = std::make_unique<BoundingBoxObject>(vulkanContext,
-//			Vector3f(0., 0., 0.), Vector3f(1., 1., 1.));
-		//objects.push_back(std::move(boundingBox));
+		auto boundingBox = std::make_unique<BoundingBoxObject>(vulkanContext,
+			Vector3f(0., 0., 0.), Vector3f(1., 1., 1.));
+		objects.push_back(std::move(boundingBox));
 	}
 
 	void Run()

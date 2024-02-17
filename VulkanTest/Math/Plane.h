@@ -5,6 +5,7 @@
 class Plane
 {
 public:
+	Plane();
 	Plane(const Vector3f& normal, float dist);
 	Plane(const Vector3f& pos, const Vector3f& normal);
 	static Plane fromTwoPoints(const Vector3f& pos, const Vector3f& dest);
