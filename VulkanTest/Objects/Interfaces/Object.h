@@ -2,6 +2,7 @@
 #pragma once
 #include "../../RenderObjects/Interfaces/RenderObject.h"
 #include "../../CAD/MeshModel.h"
+#include "../../RenderVisitor.h"
 
 class Object
 {
@@ -15,9 +16,25 @@ public:
 	{
 	}
 
-	void Dispose()
+	virtual ~Object() = default;
+
+	virtual void Render(RenderVisitor& renderVisitor)
 	{
-		renderer->Dispose();
+		renderer->Accept(renderVisitor);
+	}
+
+	virtual void Dispose()
+	{
+		if (renderer) renderer->Dispose();
+	}
+
+	Matrix4 ComposeMatrix() const
+	{
+		Matrix4 matrix;
+		matrix = Matrix4::Scale(scale) * matrix;
+		matrix = Matrix4::Rotate(Vector4f::QuaternionFromGLTF(rotation)) * matrix;
+		matrix = Matrix4::Translation(Vector3f::FromGLTF(position)) * matrix;
+		return matrix;
 	}
 
 	std::string name;

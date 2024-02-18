@@ -105,6 +105,15 @@
     <ClCompile Include="RenderObjects\PlaneRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BoundingBoxTree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAD\BoundingBox.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAD\BoundingBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">

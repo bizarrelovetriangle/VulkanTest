@@ -16,15 +16,6 @@ public:
 
 	}
 
-	Matrix4 ComposeMatrix() const
-	{
-		Matrix4 matrix;
-		matrix = Matrix4::Scale(scale) * matrix;
-		matrix = Matrix4::Rotate(Vector4f::QuaternionFromGLTF(rotation)) * matrix;
-		matrix = Matrix4::Translation(Vector3f::FromGLTF(position)) * matrix;
-		return matrix;
-	}
-
 	void UpdateVertexBuffer()
 	{
 		auto& vertexedRendered = *((VertexedRenderObject*)renderer.get());

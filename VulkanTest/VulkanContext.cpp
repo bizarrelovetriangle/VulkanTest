@@ -24,11 +24,14 @@
 #include "Vulkan/CommandBuffer.h"
 #include "Utils/GLTFReader.h"
 #include "Vulkan/CommandBufferDispatcher.h"
+#include "Objects/Interfaces/Object.h"
+#include "RenderObjects/Interfaces/RenderObject.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include "RenderVisitor.h"
 
 void VulkanContext::Init(GLFWwindow* window)
 {
@@ -65,15 +68,14 @@ void VulkanContext::Init(GLFWwindow* window)
 
 VulkanContext::~VulkanContext() = default;
 
-void VulkanContext::DrawFrame(std::vector<std::unique_ptr<Object>>& objects)
+void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects)
 {
     deviceController->device.waitForFences({ inFlightFence }, VK_TRUE, UINT64_MAX);
     deviceController->device.resetFences({ inFlightFence });
 
     uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
-    commandBuffer->Reset();
-    commandBuffer->RecordCommandBuffer(imageIndex, objects);
+    RecordCommandBuffer(imageIndex, objects);
 
     vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore };
     vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
@@ -85,6 +87,36 @@ void VulkanContext::DrawFrame(std::vector<std::unique_ptr<Object>>& objects)
 
     vk::PresentInfoKHR presentInfo(signalSemaphores, swapChain->swapChain, imageIndex);
     queueFamilies->queueMap.at(queueFamilies->presentQueueFamily).presentKHR(presentInfo);
+}
+
+void VulkanContext::RecordCommandBuffer(size_t imageIndex,
+    const std::vector<std::shared_ptr<Object>>& objects)
+{
+    commandBuffer->commandBuffer.reset();
+    vk::CommandBufferBeginInfo beginInfo;
+    commandBuffer->commandBuffer.begin(beginInfo);
+        
+    vk::Rect2D renderArea({ 0, 0 }, swapChain->swapChainExtent);
+
+    vk::ClearColorValue clearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
+    vk::ClearDepthStencilValue clearDepthStencilValue(1., 0.);
+    std::vector<vk::ClearValue> clearColor{ clearColorValue, clearDepthStencilValue };
+
+    vk::RenderPassBeginInfo renderPassInfo(
+        renderPass->renderPass, swapChain->swapChainFramebuffers[imageIndex],
+        renderArea, clearColor);
+
+    commandBuffer->commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+
+    RenderVisitor renderVisitor(*this, *commandBuffer, imageIndex);
+
+    for (auto& object : objects)
+    {
+        object->Render(renderVisitor);
+    }
+
+    commandBuffer->commandBuffer.endRenderPass();
+    commandBuffer->commandBuffer.end();
 }
 
 void VulkanContext::Await()

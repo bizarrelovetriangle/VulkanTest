@@ -5,18 +5,20 @@
 #include "../../Utils/GeometryCreator.h"
 #include "../../RenderObjects/LinedRenderObject.h"
 
-BoundingBoxObject::BoundingBoxObject(VulkanContext& vulkanContext, const Vector3f& aa, const Vector3f& bb)
+BoundingBoxObject::BoundingBoxObject(VulkanContext& vulkanContext, const BoundingBox& boundingBox)
+	: boundingBox(boundingBox)
 {
 	renderer = std::make_unique<LinedRenderObject>(vulkanContext);
+	auto center = (boundingBox.aa + boundingBox.bb) / 2;
+	mesh = GeometryCreator::createBoxByTwoPoints(boundingBox.aa - center, boundingBox.bb - center);
 
-	auto center = (aa + bb) / 2;
 	renderer->transformUniform.model = Matrix4::Translation(center);
 	renderer->UpdateTransformUniformBuffer();
 
 	renderer->propertiesUniform.baseColor = {0.1, 0.2, 0.1, 1.};
 	renderer->UpdatePropertiesUniformBuffer();
 
-	mesh = GeometryCreator::createBoxByTwoPoints(aa - center, bb - center);
+	mesh = GeometryCreator::createBoxByTwoPoints(boundingBox.aa - center, boundingBox.bb - center);
 	UpdateVertexBuffer();
 }
 

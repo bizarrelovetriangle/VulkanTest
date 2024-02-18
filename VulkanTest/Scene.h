@@ -16,6 +16,7 @@
 #include <GLFW/glfw3native.h>
 #include "Objects/Interfaces/Object.h"
 #include "Utils/Deserializer.h"
+#include "BoundingBoxTree.cpp"
 
 class Scene
 {
@@ -37,13 +38,13 @@ public:
 			objects.push_back(std::move(object));
 		}
 
-		auto plane = std::make_unique<PlaneObject>(vulkanContext,
+		auto plane = std::make_shared<PlaneObject>(vulkanContext,
 			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		objects.push_back(std::move(plane));
+		objects.push_back(plane);
 
-		auto boundingBox = std::make_unique<BoundingBoxObject>(vulkanContext,
-			Vector3f(0., 0., 0.), Vector3f(1., 1., 1.));
-		objects.push_back(std::move(boundingBox));
+		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
+		boundingBoxTree->CreateBoundingBoxes(objects);
+		objects.push_back(std::dynamic_pointer_cast<Object>(boundingBoxTree));
 	}
 
 	void Run()
@@ -64,11 +65,12 @@ public:
 	}
 
 private:
-	const uint32_t width = 2000;
-	const uint32_t height = 2000;
+	const uint32_t width = 1900;
+	const uint32_t height = 1900;
 
 	GLFWwindow* window;
 	VulkanContext vulkanContext;
 
-	std::vector<std::unique_ptr<Object>> objects;
+	std::vector<std::shared_ptr<Object>> objects;
+	std::shared_ptr<BoundingBoxTree> boundingBoxTree;
 };

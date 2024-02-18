@@ -3,6 +3,7 @@
 #include <array>
 #include <unordered_map>
 #include "../Math/Vector3.h"
+#include "BoundingBox.h"
 
 struct Edge
 {
@@ -65,6 +66,8 @@ public:
 				}
 			}
 		}
+
+		localBoundingBox = BoundingBox(*this);
 	}
 
 	uint32_t Origin(const Edge& edge)
@@ -102,4 +105,6 @@ public:
 	std::vector<Triangle> triangles;
 	std::vector<Vector3f> points;
 	std::unordered_map<Edge, Edge, KeyHasher> combinedEdges;
+
+	BoundingBox localBoundingBox;
 };

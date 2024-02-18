@@ -2,6 +2,7 @@
 #include "../Interfaces/MeshObject.h"
 #include "../../Math/Vector3.h"
 #include "../../Math/Plane.h"
+#include "../../CAD/BoundingBox.h"
 
 
 class BoundingBoxObject : public MeshObject
@@ -9,9 +10,8 @@ class BoundingBoxObject : public MeshObject
 public:
 	// aa - front bottom left
 	// bb - back top right
-	BoundingBoxObject(VulkanContext& vulkanContext, const Vector3f& aa, const Vector3f& bb);
+	BoundingBoxObject(VulkanContext& vulkanContext, const BoundingBox& boundingBox);
 
 private:
-	std::array<Vector3f, 8> boundingPoints;
-	std::array<Vector3f, 8> expandedBoundingPoints;
+	BoundingBox boundingBox;
 };

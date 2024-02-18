@@ -16,9 +16,6 @@ public:
 		std::shared_ptr<SwapChain> swapChain,
 		std::shared_ptr<RenderPass> renderPass);
 	void Dispose();
-	void RecordCommandBuffer(size_t imageIndex,
-		const std::vector<std::unique_ptr<Object>>& objects);
-	void Reset();
 
 private:
 	void CreateCommandPool();

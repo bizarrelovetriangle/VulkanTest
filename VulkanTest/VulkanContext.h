@@ -20,7 +20,8 @@ class VulkanContext
 public:
     void Init(GLFWwindow* window);
     ~VulkanContext();
-    void DrawFrame(std::vector<std::unique_ptr<Object>>& objects);
+    void DrawFrame(std::vector<std::shared_ptr<Object>>& objects);
+    void RecordCommandBuffer(size_t imageIndex, const std::vector<std::shared_ptr<Object>>& objects);
     void Await();
     void Dispose();
 
