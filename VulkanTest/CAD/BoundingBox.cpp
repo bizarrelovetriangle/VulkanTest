@@ -82,6 +82,9 @@ BoundingBox BoundingBox::Union(const BoundingBox& boundingBoxA, const BoundingBo
 
 void BoundingBox::Reset(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB)
 {
+	aa = Vector3f(max, max, max);
+	bb = Vector3f(-max, -max, -max);
+
 	aa.x = (std::min)(boundingBoxA.aa.x, boundingBoxB.aa.x);
 	aa.y = (std::min)(boundingBoxA.aa.y, boundingBoxB.aa.y);
 	aa.z = (std::min)(boundingBoxA.aa.z, boundingBoxB.aa.z);
