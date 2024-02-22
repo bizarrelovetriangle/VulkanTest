@@ -14,15 +14,17 @@ public:
 	BoundingBox(const MeshModel& mesh);
 	BoundingBox(const BoundingBox& boundingBox, const Matrix4& model);
 
+	float GetVolume() const;
 	std::array<Vector3f, 8> GetPoints() const;
 
 	static BoundingBox Union(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB);
+	void Reset(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB);
 
 	Vector3f aa;
 	Vector3f bb;
 
-	size_t parent;
-	std::array<size_t, 2> children;
+	int64_t parent = -1;
+	std::pair<int64_t, int64_t> children = std::make_pair(-1, -1);
 	std::shared_ptr<MeshObject> sceneObject;
 
 	std::shared_ptr<BoundingBoxObject> renderBoundingBoxObject;

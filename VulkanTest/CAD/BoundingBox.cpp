@@ -51,6 +51,12 @@ BoundingBox::BoundingBox(const BoundingBox& boundingBox, const Matrix4& model)
 	}
 }
 
+float BoundingBox::GetVolume() const
+{
+	auto dimentions = bb - aa;
+	return dimentions.x * dimentions.y * dimentions.z;
+}
+
 std::array<Vector3f, 8> BoundingBox::GetPoints() const
 {
 	std::array<Vector3f, 8> result;
@@ -72,4 +78,15 @@ BoundingBox BoundingBox::Union(const BoundingBox& boundingBoxA, const BoundingBo
 	result.bb.y = (std::max)(boundingBoxA.bb.y, boundingBoxB.bb.y);
 	result.bb.z = (std::max)(boundingBoxA.bb.z, boundingBoxB.bb.z);
 	return result;
+}
+
+void BoundingBox::Reset(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB)
+{
+	aa.x = (std::min)(boundingBoxA.aa.x, boundingBoxB.aa.x);
+	aa.y = (std::min)(boundingBoxA.aa.y, boundingBoxB.aa.y);
+	aa.z = (std::min)(boundingBoxA.aa.z, boundingBoxB.aa.z);
+
+	bb.x = (std::max)(boundingBoxA.bb.x, boundingBoxB.bb.x);
+	bb.y = (std::max)(boundingBoxA.bb.y, boundingBoxB.bb.y);
+	bb.z = (std::max)(boundingBoxA.bb.z, boundingBoxB.bb.z);
 }
