@@ -3,7 +3,6 @@
 
 namespace
 {
-	constexpr float min = (std::numeric_limits<float>::min)();
 	constexpr float max = (std::numeric_limits<float>::max)();
 }
 
@@ -62,3 +61,15 @@ std::array<Vector3f, 8> BoundingBox::GetPoints() const
 	return result;
 }
 
+BoundingBox BoundingBox::Union(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB)
+{
+	BoundingBox result;
+	result.aa.x = (std::min)(boundingBoxA.aa.x, boundingBoxB.aa.x);
+	result.aa.y = (std::min)(boundingBoxA.aa.y, boundingBoxB.aa.y);
+	result.aa.z = (std::min)(boundingBoxA.aa.z, boundingBoxB.aa.z);
+
+	result.bb.x = (std::max)(boundingBoxA.bb.x, boundingBoxB.bb.x);
+	result.bb.y = (std::max)(boundingBoxA.bb.y, boundingBoxB.bb.y);
+	result.bb.z = (std::max)(boundingBoxA.bb.z, boundingBoxB.bb.z);
+	return result;
+}

@@ -5,7 +5,7 @@
 
 class BoundingBoxObject;
 class MeshModel;
-class Object;
+class MeshObject;
 
 class BoundingBox
 {
@@ -16,12 +16,14 @@ public:
 
 	std::array<Vector3f, 8> GetPoints() const;
 
+	static BoundingBox Union(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB);
+
 	Vector3f aa;
 	Vector3f bb;
 
 	std::shared_ptr<BoundingBox> parent;
 	std::array<std::shared_ptr<BoundingBox>, 2> children;
-	std::shared_ptr<Object> sceneObject;
+	std::shared_ptr<MeshObject> sceneObject;
 
 	std::shared_ptr<BoundingBoxObject> renderBoundingBoxObject;
 };

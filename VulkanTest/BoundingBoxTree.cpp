@@ -2,6 +2,7 @@
 #include "Objects/Primitives/BoundingBoxObject.h"
 #include "RenderVisitor.h"
 #include "CAD/BoundingBox.h"
+#include <queue>
 
 class BoundingBoxTree : public Object
 {
@@ -11,7 +12,9 @@ public:
 	{
 
 	}
-
+	//local boxes for all convex parts of mesh
+	//boxes for local boxes
+	//Global unlocal tree is created here
 	void CreateBoundingBoxes(std::vector<std::shared_ptr<Object>>& objects)
 	{
 		for (auto& object : objects)
@@ -25,33 +28,74 @@ public:
 					renderBoundingBoxObject = std::make_shared<BoundingBoxObject>(vulkanContext, mesh.localBoundingBox);
 					auto& model = renderBoundingBoxObject->renderer->transformUniform.model;
 					model = meshObject->ComposeMatrix() * model;
-					boundingBoxes.push_back(mesh.localBoundingBox);
 				}
 
-				BoundingBox boundingBox(mesh.localBoundingBox, meshObject->ComposeMatrix());
-				boundingBox.renderBoundingBoxObject = std::make_shared<BoundingBoxObject>(vulkanContext, boundingBox);
-				boundingBoxes.push_back(boundingBox);
+				AddToTree(meshObject);
 			}
 		}
 	}
 
+	void AddToTree(std::shared_ptr<MeshObject> meshObject)
+	{
+		auto& mesh = *meshObject->mesh;
+		auto boundingBox = std::make_shared<BoundingBox>(mesh.localBoundingBox, meshObject->ComposeMatrix());
+		boundingBox->renderBoundingBoxObject = std::make_shared<BoundingBoxObject>(vulkanContext, *boundingBox);
+		boundingBox->sceneObject = meshObject;
+
+		if (!rootBoundingBox) {
+			rootBoundingBox = boundingBox;
+			return;
+		}
+
+		auto temp = std::make_shared<BoundingBox>(BoundingBox::Union(*rootBoundingBox, *boundingBox));
+		temp->renderBoundingBoxObject = std::make_shared<BoundingBoxObject>(vulkanContext, *temp);
+		temp->children[0] = boundingBox;
+		temp->children[1] = rootBoundingBox;
+
+		rootBoundingBox = temp;
+	}
+
 	virtual void Render(RenderVisitor& renderVisitor) override
 	{
-		for (auto& object : boundingBoxes)
+		std::queue<std::shared_ptr<BoundingBox>> q;
+		q.push(rootBoundingBox);
+
+		while (!q.empty())
 		{
-			if (object.renderBoundingBoxObject)
-				object.renderBoundingBoxObject->Render(renderVisitor);
+			auto& box = q.front();
+			if (box->renderBoundingBoxObject)
+				box->renderBoundingBoxObject->Render(renderVisitor);
+
+			if (box->sceneObject)
+				box->sceneObject->mesh->localBoundingBox.renderBoundingBoxObject->Render(renderVisitor);
+
+			if (box->children[0]) q.push(box->children[0]);
+			if (box->children[1]) q.push(box->children[1]);
+			q.pop();
 		}
 	}
 
 	virtual void Dispose() override
 	{
-		for (auto& object : boundingBoxes)
-			if (object.renderBoundingBoxObject)
-				object.renderBoundingBoxObject->Dispose();
+		std::queue<std::shared_ptr<BoundingBox>> q;
+		q.push(rootBoundingBox);
+
+		while (!q.empty())
+		{
+			auto& box = q.front();
+			if (box->renderBoundingBoxObject)
+				box->renderBoundingBoxObject->Dispose();
+
+			if (box->sceneObject)
+				box->sceneObject->mesh->localBoundingBox.renderBoundingBoxObject->Dispose();
+
+			if (box->children[0]) q.push(box->children[0]);
+			if (box->children[1]) q.push(box->children[1]);
+			q.pop();
+		}
 	}
 
-	std::vector<BoundingBox> boundingBoxes;
+	std::shared_ptr<BoundingBox> rootBoundingBox;
 
 private:
 	VulkanContext& vulkanContext;
