@@ -16,7 +16,7 @@
 #include <GLFW/glfw3native.h>
 #include "Objects/Interfaces/Object.h"
 #include "Utils/Deserializer.h"
-#include "BoundingBoxTree.cpp"
+#include "BoundingBoxTree.h"
 
 class Scene
 {

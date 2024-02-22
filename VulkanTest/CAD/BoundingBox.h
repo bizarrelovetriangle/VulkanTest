@@ -21,8 +21,8 @@ public:
 	Vector3f aa;
 	Vector3f bb;
 
-	std::shared_ptr<BoundingBox> parent;
-	std::array<std::shared_ptr<BoundingBox>, 2> children;
+	size_t parent;
+	std::array<size_t, 2> children;
 	std::shared_ptr<MeshObject> sceneObject;
 
 	std::shared_ptr<BoundingBoxObject> renderBoundingBoxObject;

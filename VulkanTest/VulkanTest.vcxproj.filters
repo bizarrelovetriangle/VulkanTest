@@ -105,7 +105,7 @@
     <ClCompile Include="RenderObjects\PlaneRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundingBoxTree.cpp">
+    <ClCompile Include="BoundingBoxTree.h">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CAD\BoundingBox.h">

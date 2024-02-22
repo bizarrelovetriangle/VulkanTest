@@ -149,7 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BoundingBoxTree.cpp" />
+    <ClCompile Include="BoundingBoxTree.h" />
     <ClCompile Include="CAD\BoundingBox.cpp" />
     <ClCompile Include="CAD\BoundingBox.h" />
     <ClCompile Include="pch\pch.cpp">
