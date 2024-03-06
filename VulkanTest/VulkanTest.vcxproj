@@ -149,7 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BoundingBoxTree.h" />
+    <ClCompile Include="CAD\BoundingBoxTree.h" />
     <ClCompile Include="CAD\BoundingBox.cpp" />
     <ClCompile Include="CAD\BoundingBox.h" />
     <ClCompile Include="pch\pch.cpp">
@@ -169,7 +169,7 @@
     <ClCompile Include="Objects\Primitives\PlaneObject.cpp" />
     <ClCompile Include="RenderObjects\TexturedRenderObject.cpp" />
     <ClCompile Include="RenderObjects\Interfaces\VertexedRenderObject.cpp" />
-    <ClCompile Include="Utils\GeometryCreator.cpp" />
+    <ClCompile Include="CAD\GeometryCreator.cpp" />
     <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />
     <ClCompile Include="Vulkan\Data\DeviceMemory\DeviceMemory.cpp" />
@@ -189,6 +189,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CAD\MeshContactAlgorithms.h" />
     <ClInclude Include="Objects\Interfaces\MeshObject.h" />
     <ClInclude Include="Objects\Interfaces\Object.h" />
     <ClInclude Include="pch\pch.h" />
@@ -203,7 +204,7 @@
     <ClInclude Include="RenderObjects\TexturedRenderObject.h" />
     <ClInclude Include="RenderObjects\Interfaces\VertexedRenderObject.h" />
     <ClInclude Include="Utils\Deserializer.h" />
-    <ClInclude Include="Utils\GeometryCreator.h" />
+    <ClInclude Include="CAD\GeometryCreator.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />

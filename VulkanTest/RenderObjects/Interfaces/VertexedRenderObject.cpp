@@ -31,6 +31,8 @@ VertexedRenderObject::~VertexedRenderObject() = default;
 
 void VertexedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 {
+	if (vertexBuffer) vertexBuffer->Dispose();
+
 	std::vector<VertexData> vertexDatas;
 
 	for (auto& triangle : mesh.triangles) {

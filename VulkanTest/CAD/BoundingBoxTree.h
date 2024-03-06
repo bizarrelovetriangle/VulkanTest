@@ -1,7 +1,8 @@
 #pragma once
-#include "Objects/Primitives/BoundingBoxObject.h"
-#include "RenderVisitor.h"
-#include "CAD/BoundingBox.h"
+#include "../Objects/Primitives/BoundingBoxObject.h"
+#include "../RenderVisitor.h"
+#include "BoundingBox.h"
+#include "MeshContactAlgorithms.h"
 #include <queue>
 #include <set>
 #include <unordered_set>
@@ -10,7 +11,7 @@ class BoundingBoxTree : public Object
 {
 public:
 	BoundingBoxTree(VulkanContext& vulkanContext)
-		: vulkanContext(vulkanContext)
+		: vulkanContext(vulkanContext), meshContactAlgorithms(vulkanContext)
 	{
 
 	}
@@ -28,7 +29,23 @@ public:
 		}
 	}
 
-	//GJK algorithm not required points rotation..
+	std::vector<ContactInfo> ComposePairs()
+	{
+		auto pair = std::make_pair(boundingBoxes[0].sceneObject, boundingBoxes[1].sceneObject);
+
+		auto contact = meshContactAlgorithms.GJK(*pair.first, *pair.second);
+
+		return { contact };
+	}
+
+	// Make Plane object meshefied
+	// Rename BoundingBoxObject to BoxObject
+	// Rename RenderObject to Render
+	// Update: GJK required to proceed through all points anyway
+	// GJK algorithm not required points rotation.. Or not
+	// Shall we do what now. GJP for two convex bodies, look that out, test that out
+	// Create scene in blender with objects. Sphere objects
+	// Create camera
 	void AddToTree(std::shared_ptr<MeshObject> meshObject)
 	{
 		auto& mesh = *meshObject->mesh;
@@ -125,7 +142,7 @@ public:
 			{
 				float creationVolume = BoundingBox::Union(boundingBox, newBoundingBox).GetVolume();
 				type potentialNeighbour = std::make_pair(creationVolume + prevExpantionVolume, index);
-				bestNeighbour = (std::min<type>)(bestNeighbour, potentialNeighbour);
+				bestNeighbour = (std::min)(bestNeighbour, potentialNeighbour);
 				continue;
 			}
 
@@ -185,14 +202,16 @@ public:
 
 	virtual void Render(RenderVisitor& renderVisitor) override
 	{
-		for (auto& boundingBoxObject : boundingBoxObjects)
-			boundingBoxObject->Render(renderVisitor);
+		//for (auto& boundingBoxObject : boundingBoxObjects)
+		//	boundingBoxObject->Render(renderVisitor);
+		meshContactAlgorithms.Render(renderVisitor);
 	}
 
 	virtual void Dispose() override
 	{
 		for (auto& boundingBoxObject : boundingBoxObjects)
 			boundingBoxObject->Dispose();
+		meshContactAlgorithms.Dispose();
 	}
 
 	int64_t rootBoundingBoxIndex = 0;
@@ -202,4 +221,5 @@ public:
 
 private:
 	VulkanContext& vulkanContext;
+	MeshContactAlgorithms meshContactAlgorithms;
 };

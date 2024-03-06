@@ -16,11 +16,13 @@ std::vector<vk::VertexInputAttributeDescription> LinedVertexData::AttributeDescr
 {
 	vk::VertexInputAttributeDescription positionDescription(
 		0, 0, vk::Format::eR32G32B32Sfloat, offsetof(LinedVertexData, position));
-	return { positionDescription };
+	vk::VertexInputAttributeDescription colorDescription(
+		1, 0, vk::Format::eR32G32B32A32Sfloat, offsetof(LinedVertexData, color));
+	return { positionDescription, colorDescription };
 }
 
-LinedRenderObject::LinedRenderObject(VulkanContext& vulkanContext)
-	: VertexedRenderObject(vulkanContext)
+LinedRenderObject::LinedRenderObject(VulkanContext& vulkanContext, std::vector<Vector4f> colors)
+	: VertexedRenderObject(vulkanContext), colors(colors)
 {
 	shared = Shared<LinedRenderObject>::getInstance(vulkanContext, true);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
@@ -30,12 +32,15 @@ LinedRenderObject::LinedRenderObject(VulkanContext& vulkanContext)
 
 void LinedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 {
+	if (vertexBuffer) vertexBuffer->Dispose();
+
 	std::vector<LinedVertexData> vertexDatas;
 
 	for (auto& triangle : mesh.triangles) {
 		for (int index : triangle.vertices) {
 			LinedVertexData vertexData;
 			vertexData.position = mesh.points[index];
+			vertexData.color = !colors.empty() ? colors[index] : propertiesUniform.baseColor;
 			vertexDatas.push_back(vertexData);
 		}
 	}

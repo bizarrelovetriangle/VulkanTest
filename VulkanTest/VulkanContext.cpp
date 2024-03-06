@@ -70,8 +70,8 @@ VulkanContext::~VulkanContext() = default;
 
 void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects)
 {
-    deviceController->device.waitForFences({ inFlightFence }, VK_TRUE, UINT64_MAX);
-    deviceController->device.resetFences({ inFlightFence });
+    deviceController->device.waitForFences(inFlightFence, VK_TRUE, UINT64_MAX);
+    deviceController->device.resetFences(inFlightFence);
 
     uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
@@ -82,7 +82,7 @@ void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects)
     vk::Semaphore signalSemaphores[] = { renderFinishedSemaphore };
 
     auto commandBuffers = { commandBuffer->commandBuffer };
-    vk::SubmitInfo submitInfo(imageAvailableSemaphore, waitStages, commandBuffer->commandBuffer, signalSemaphores);
+    vk::SubmitInfo submitInfo(waitSemaphores, waitStages, commandBuffer->commandBuffer, signalSemaphores);
     queueFamilies->queueMap.at(queueFamilies->graphicQueueFamily).submit(submitInfo, inFlightFence);
 
     vk::PresentInfoKHR presentInfo(signalSemaphores, swapChain->swapChain, imageIndex);

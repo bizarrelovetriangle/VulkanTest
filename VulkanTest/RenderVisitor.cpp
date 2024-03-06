@@ -40,7 +40,7 @@ void RenderVisitor::Visit(PlaneRenderObject& planeObject)
 	float degen = float(0. + seconds / 2);
 
 	Matrix4 view;
-	view = Matrix4::RotateY(degen) * view;
+	//view = Matrix4::RotateY(degen) * view;
 	view = Matrix4::Translation(Vector3f(0, 0, 5)) * view;
 
 	Matrix4 frustum = Matrix4::Frustum(0.1, 10, 1);
@@ -73,7 +73,7 @@ void RenderVisitor::Visit(VertexedRenderObject& renderObject)
 	float degen = float(0. + seconds / 2);
 
 	Matrix4 view;
-	view = Matrix4::RotateY(degen) * view;
+	//view = Matrix4::RotateY(degen) * view;
 	view = Matrix4::Translation(Vector3f(0, 0, 5)) * view;
 
 	Matrix4 frustum = Matrix4::Frustum(0.1, 10, 1);

@@ -45,7 +45,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjec
 
 	vk::PipelineRasterizationStateCreateInfo rasterizer(
 		{}, false, false,
-		vk::PolygonMode::eFill, vk::CullModeFlagBits::eNone, vk::FrontFace::eCounterClockwise,
+		vk::PolygonMode::eFill, vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise,
 		false, 0.0f, 0.0f, 0.0f,
 		1.);
 	rasterizer.setLineWidth(4.);

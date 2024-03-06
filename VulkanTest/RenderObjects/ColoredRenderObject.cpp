@@ -37,6 +37,8 @@ ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const std
 
 void ColoredRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 {
+	if (vertexBuffer) vertexBuffer->Dispose();
+
 	std::vector<ColoredVertexData> vertexDatas;
 
 	for (auto& triangle : mesh.triangles) {

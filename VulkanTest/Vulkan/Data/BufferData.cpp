@@ -65,6 +65,10 @@ void BufferData::FlushData(std::span<T> data)
 
 void BufferData::Dispose()
 {
+	uint32_t transferQueueFamily = vulkanContext.queueFamilies->transferQueueFamily;
+	auto& queue = vulkanContext.queueFamilies->queueMap.at(transferQueueFamily);
+	queue.waitIdle();
+
 	vulkanContext.deviceController->device.destroyBuffer(buffer);
 	deviceMemory.Dispose();
 }

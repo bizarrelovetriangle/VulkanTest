@@ -49,6 +49,8 @@ TexturedRenderObject::~TexturedRenderObject() = default;
 
 void TexturedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 {
+	if (vertexBuffer) vertexBuffer->Dispose();
+
 	std::vector<TexturedVertexData> vertexDatas;
 
 	for (auto& triangle : mesh.triangles) {

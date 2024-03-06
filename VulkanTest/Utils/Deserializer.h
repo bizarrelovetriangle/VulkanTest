@@ -1,5 +1,6 @@
 #pragma once
 #include "../Objects/Interfaces/Object.h"
+#include "../RenderObjects/LinedRenderObject.h"
 
 class Deserializer
 {
@@ -23,7 +24,7 @@ public:
 		}
 		else if (!serializedObject.indexes.empty())
 		{
-			renderer = std::make_unique<SimpleVertexedRenderObject>(vulkanContext_);
+			renderer = std::make_unique<LinedRenderObject>(vulkanContext_);
 		}
 
 		renderer->propertiesUniform.baseColor = serializedObject.baseColor;

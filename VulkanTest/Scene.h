@@ -16,7 +16,7 @@
 #include <GLFW/glfw3native.h>
 #include "Objects/Interfaces/Object.h"
 #include "Utils/Deserializer.h"
-#include "BoundingBoxTree.h"
+#include "CAD/BoundingBoxTree.h"
 
 class Scene
 {
@@ -30,7 +30,8 @@ public:
 
 		Deserializer deserializer(vulkanContext);
 		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\scene.gltf");
-		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\hard_monkey.gltf");
+		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\hard_monkey.gltf");
+		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\FirstContact.gltf");
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
@@ -38,18 +39,41 @@ public:
 			objects.push_back(std::move(object));
 		}
 
-		auto plane = std::make_shared<PlaneObject>(vulkanContext,
-			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		objects.push_back(plane);
+		//auto plane = std::make_shared<PlaneObject>(vulkanContext,
+		//	Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		//objects.push_back(plane);
 
 		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
 		boundingBoxTree->CreateBoundingBoxes(objects);
 		objects.push_back(std::dynamic_pointer_cast<Object>(boundingBoxTree));
+
+		auto& icosphere = objects[0];
+		icosphere->position -= Vector3f(1, 0., 0.);
+
+		// Center point
+		auto object = deserializer.Deserialize(glTFReader.serializedObjects.front());
+		object->position = Vector3f();
+		object->scale = Vector3f(0.1, 0.1, 0.1);
+		object->renderer->transformUniform.model = object->ComposeMatrix();
+		object->renderer->UpdateTransformUniformBuffer();
+		object->renderer->propertiesUniform.baseColor = Vector4f(1., 0., 1., 1.);
+		object->renderer->UpdatePropertiesUniformBuffer();
+		object->UpdateVertexBuffer();
+		objects.push_back(std::move(object));
 	}
 
 	void Run()
 	{
 		while (!glfwWindowShouldClose(window)) {
+			auto contactInfos = boundingBoxTree->ComposePairs();
+
+			if (!contactInfos.front().contact) {
+				auto& icosphere = objects[0];
+				icosphere->position += Vector3f(0.001, 0., 0.);
+				icosphere->renderer->transformUniform.model = icosphere->ComposeMatrix();
+				icosphere->renderer->UpdateTransformUniformBuffer();
+			}
+
 			glfwPollEvents();
 			vulkanContext.DrawFrame(objects);
 		}

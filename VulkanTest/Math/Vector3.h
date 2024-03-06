@@ -60,6 +60,20 @@ public:
 		return Vector3<T>(x + v.x, y + v.y, z + v.z);
 	}
 
+	void operator-=(const Vector3<T>& v)
+	{
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
+	}
+
+	void operator+=(const Vector3<T>& v)
+	{
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+
 	Vector3<T> operator*(T s) const
 	{
 		return Vector3<T>(x * s, y * s, z * s);

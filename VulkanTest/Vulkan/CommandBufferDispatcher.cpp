@@ -34,7 +34,7 @@ void CommandBufferDispatcher::Invoke(uint32_t queueFamily, std::function<void(vk
 	vk::SubmitInfo submitInfo({}, {}, commandBuffer, {});
 	auto& queue = vulkanContext.queueFamilies->queueMap.at(queueFamily);
 	queue.submit(submitInfo);
-	queue.waitIdle();
+	queue.waitIdle(); // todo: can be removed
 
 	vulkanContext.deviceController->device.freeCommandBuffers(commandPool, commandBuffer);
 }

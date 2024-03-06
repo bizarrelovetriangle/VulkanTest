@@ -12,6 +12,7 @@ public:
 
 public:
 	Vector3f position;
+	Vector4f color;
 };
 
 
@@ -19,9 +20,10 @@ class LinedRenderObject : public VertexedRenderObject
 {
 public:
 	using VertexDataType = LinedVertexData;
-	LinedRenderObject(VulkanContext& vulkanContext);
+	LinedRenderObject(VulkanContext& vulkanContext, std::vector<Vector4f> colors = {});
 	virtual void UpdateVertexBuffer(const MeshModel& mesh) override;
 
+	std::vector<Vector4f> colors;
 public:
 	inline static std::string VertexShader =
 		"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/lined.vert";

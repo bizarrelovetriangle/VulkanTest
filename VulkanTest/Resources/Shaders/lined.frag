@@ -2,6 +2,8 @@
 
 layout(location = 0) out vec4 outColor;
 
+layout(location = 0) in vec4 inColor;
+
 layout(binding = 1) uniform Uniform
 {
 	vec4 baseColor;
@@ -12,5 +14,5 @@ layout(binding = 1) uniform Uniform
 void main()
 {
 	vec4 color = baseColor;
-	outColor = color;
+	outColor = inColor;
 }

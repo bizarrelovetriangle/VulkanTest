@@ -2,8 +2,10 @@
 #include <vector>
 #include <array>
 #include <unordered_map>
+#include <unordered_set>
 #include "../Math/Vector3.h"
 #include "BoundingBox.h"
+#include <optional>
 
 struct Edge
 {
@@ -11,7 +13,7 @@ struct Edge
 	size_t side = 0;
 
 	friend bool operator==(const Edge& a, const Edge& b) {
-		return a.triangleIndex == b.triangleIndex;
+		return a.triangleIndex == b.triangleIndex && a.side == b.side;
 	}
 };
 
@@ -37,6 +39,9 @@ struct KeyHasher
 class MeshModel
 {
 public:
+	MeshModel()
+	{}
+
 	MeshModel(const std::vector<uint32_t>& indexes, const std::vector<Vector3f>& points)
 	{
 		triangles.resize(indexes.size() / 3);
@@ -46,28 +51,39 @@ public:
 			auto& triangle = triangles.at(i);
 
 			for (int j = 0; j < 3; ++j) {
-				triangle.vertices[j] = indexes.at(i * 3 + j);
+				size_t org = indexes.at(i * 3 + j);
+				size_t dest = indexes.at(i * 3 + (j + 1) % 3);
+				triangle.vertices[j] = org;
 				triangle.edges[j].triangleIndex = i;
 				triangle.edges[j].side = j;
-			}
-		}
-
-		std::unordered_map<std::pair<uint32_t, uint32_t>, Edge, KeyHasher> map;
-		for (auto& triangle : triangles) {
-			for (size_t i = 0; i < 3; ++i) {
-				auto& edge = triangle.edges.at(i);
-				uint32_t org = Origin(edge);
-				uint32_t dest = Destination(edge);
-				if (org > dest) std::swap(org, dest);
-
-				if (auto it = map.emplace(std::make_pair(org, dest), edge); !it.second) {
-					combinedEdges.emplace(edge, it.first->second);
-					combinedEdges.emplace(it.first->second, edge);
-				}
+				edges.emplace(std::make_pair(org, dest), triangle.edges[j]);
 			}
 		}
 
 		localBoundingBox = BoundingBox(*this);
+	}
+
+	void AddTriangle(std::array<uint32_t, 3> indexes)
+	{
+		uint32_t triIndex = triangles.size();
+		Triangle triangle;
+
+		for (int j = 0; j < 3; ++j) {
+			size_t org = indexes.at(j);
+			size_t dest = indexes.at((j + 1) % 3);
+			triangle.vertices[j] = org;
+			triangle.edges[j].triangleIndex = triIndex;
+			triangle.edges[j].side = j;
+			edges.emplace(std::make_pair(org, dest), triangle.edges[j]);
+		}
+
+		triangles.push_back(triangle);
+	}
+
+	void DeleteTriangle(uint32_t triangle)
+	{
+		// todo: using of bitvector?
+		triangles.erase(triangles.begin() + triangle);
 	}
 
 	uint32_t Origin(const Edge& edge)
@@ -82,9 +98,14 @@ public:
 		return triangle.vertices.at((edge.side + 1) % 3);
 	}
 
-	Edge combinedTriangle(const Edge& edge)
+	std::optional<Edge> CombinedEdge(const Edge& edge)
 	{
-		return combinedEdges.at(edge);
+		size_t org = Origin(edge);
+		size_t dest = Destination(edge);
+		if (auto it = edges.find(std::make_pair(org, dest)); it != edges.end()) {
+			return it->second;
+		}
+		return std::nullopt;
 	}
 
 	std::array<Vector3f, 3> TrianglePoints(const Triangle& triangle) const
@@ -104,7 +125,8 @@ public:
 //private:
 	std::vector<Triangle> triangles;
 	std::vector<Vector3f> points;
-	std::unordered_map<Edge, Edge, KeyHasher> combinedEdges;
+
+	std::unordered_map<std::pair<uint32_t, uint32_t>, Edge, KeyHasher> edges;
 
 	BoundingBox localBoundingBox;
 };

@@ -2,7 +2,7 @@
 #include "../../RenderVisitor.h"
 #include "../../Vulkan/DescriptorSets.h"
 #include "../../Vulkan/Data/BufferData.h"
-#include "../../Utils/GeometryCreator.h"
+#include "../../CAD/GeometryCreator.h"
 #include "../../RenderObjects/LinedRenderObject.h"
 
 BoundingBoxObject::BoundingBoxObject(VulkanContext& vulkanContext, const BoundingBox& boundingBox)

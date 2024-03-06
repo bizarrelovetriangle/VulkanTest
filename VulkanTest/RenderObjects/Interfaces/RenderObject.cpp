@@ -30,8 +30,11 @@ template <class T>
 std::shared_ptr<Shared<T>> Shared<T>::getInstance(VulkanContext& vulkanContext, bool lined)
 {
 	auto ptr = instance.lock();
-	if (!ptr) ptr = std::make_shared<Shared<T>>(vulkanContext, lined);
-	return ptr;
+	if (!ptr) {
+		ptr = std::make_shared<Shared<T>>(vulkanContext, lined);
+		instance = ptr;
+	}
+	return std::move(ptr);
 }
 
 template <class T>

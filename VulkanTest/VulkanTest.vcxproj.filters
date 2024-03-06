@@ -75,7 +75,7 @@
     <ClCompile Include="Math\Matrix4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\GeometryCreator.cpp">
+    <ClCompile Include="CAD\GeometryCreator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CAD\MeshModel.cpp">
@@ -105,7 +105,7 @@
     <ClCompile Include="RenderObjects\PlaneRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundingBoxTree.h">
+    <ClCompile Include="CAD\BoundingBoxTree.h">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CAD\BoundingBox.h">
@@ -203,7 +203,7 @@
     <ClInclude Include="Math\Plane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\GeometryCreator.h">
+    <ClInclude Include="CAD\GeometryCreator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CAD\MeshModel.h">
@@ -240,6 +240,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Objects\Interfaces\Object.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CAD\MeshContactAlgorithms.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
