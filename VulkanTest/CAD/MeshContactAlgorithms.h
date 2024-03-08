@@ -18,7 +18,6 @@ public:
 	MeshContactAlgorithms(VulkanContext& vulkanContext)
 		: vulkanContext(vulkanContext)
 	{
-
 	}
 
 	ContactInfo GJK(const MeshObject& objectA, const MeshObject& objectB)
@@ -41,6 +40,10 @@ public:
 			point = Vector3f(vec4.x, vec4.y, vec4.z);
 		}
 
+		using type = std::pair<float, uint32_t>;
+		auto less = [](type& a, type& b) { return a.first > b.first; };
+		std::priority_queue<type, std::vector<type>, decltype(less)> triangleDistPQ(less);
+
 		MeshModel minkowskiMesh;
 
 		// maybe from a to b?
@@ -56,36 +59,62 @@ public:
 		direction = Vector3f(0., 0., 1.);
 		auto minkowskiDiffC = MinkowskiDiff(direction, meshA, meshB);
 		minkowskiMesh.points.push_back(minkowskiDiffC);
+		
 
-		if (TranglePlanePointDist(minkowskiMesh.points[0], minkowskiMesh.points[1], minkowskiMesh.points[2], Vector3f(0., 0., 0.)) > 0.)
-		{
-			std::swap(minkowskiMesh.points[0], minkowskiMesh.points[2]);
+		uint32_t tri = minkowskiMesh.AddTriangle({ 0, 1, 2 });
+		auto triPoints = minkowskiMesh.TrianglePoints(tri);
+
+		// the first triangle will face the opposide direction of zero point
+		if (TranglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) > 0.) {
+			std::swap(minkowskiMesh.triangles[tri].vertices[0], minkowskiMesh.triangles[tri].vertices[2]);
 		}
 
-		minkowskiMesh.AddTriangle({ 0, 1, 2 });
+		float dist = TranglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
+		triangleDistPQ.emplace(dist, tri);
 
+		float nearest = (std::numeric_limits<float>::max)();
+
+		for (int i = 0; i < 2; ++i)
 		{
-			direction = -TranglePointDir(minkowskiMesh.points[0], minkowskiMesh.points[1], minkowskiMesh.points[2], Vector3f(0., 0., 0.));
+			auto [dist, nearestTri] = triangleDistPQ.top();
+			if (i != 0) triangleDistPQ.pop();
+			if (dist >= nearest)
+				break;
+			nearest = (std::min)(nearest, dist);
+
+			auto triPoints = minkowskiMesh.TrianglePoints(nearestTri);
+			direction = TranglePointDir(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
 			auto minkowskiDiff = MinkowskiDiff(direction, meshA, meshB);
+
+			uint32_t newPoint = minkowskiMesh.points.size();
 			minkowskiMesh.points.push_back(minkowskiDiff);
 
-			minkowskiMesh.AddTriangle({ 0, 3, 1 });
-			minkowskiMesh.AddTriangle({ 1, 3, 2 });
-			minkowskiMesh.AddTriangle({ 2, 3, 0 });
+			auto nearestTriVerts = minkowskiMesh.triangles[nearestTri].vertices;
+			// we consider the nearest triangle as it was faced toward the zero point. this is not the case for the first triangle
+			if (i == 0)
+				std::swap(nearestTriVerts[0], nearestTriVerts[2]);
 
-			using type = std::pair<float, int64_t>;
-			auto less = [](type& a, type& b) { return a.first < b.first; };
-			std::priority_queue<type, std::vector<type>, decltype(less)> triangleDistPQ(less);
+			uint32_t triA = minkowskiMesh.AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
+			uint32_t triB = minkowskiMesh.AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
+			uint32_t triC = minkowskiMesh.AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
+
+			for (uint32_t tri : { triA, triB, triC })
+			{
+				auto triPoints = minkowskiMesh.TrianglePoints(tri);
+				float dist = TranglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
+				triangleDistPQ.emplace(dist, tri);
+			}
 
 			// check only the newly created triangular pyramid
-			bool checkSuccess = PointInsideTriangularPyramid(Vector3f(0., 0., 0.), minkowskiMesh, {0, 1, 2, 3});
+			bool checkSuccess = PointInsideTriangularPyramid(Vector3f::Zero(), minkowskiMesh, { nearestTri, triA, triB, triC });
 			if (checkSuccess)
 			{
 				CreateObject(minkowskiMesh);
 				return ContactInfo{ .contact = true };
 			}
 
-			// remove unnecessary triangles from the mesh
+			//remove inner triangle
+			//if (i != 0) minkowskiMesh.DeleteTriangle(nearestTri);
 		}
 
 		CreateObject(minkowskiMesh);
@@ -97,12 +126,12 @@ public:
 	{
 		size_t antagonistA = FarthestPoint(direction, meshA.points);
 		size_t antagonistB = FarthestPoint(-direction, meshB.points);
-		return meshB.points[antagonistB] - meshA.points[antagonistA];
+		return meshA.points[antagonistA] - meshB.points[antagonistB];
 	}
 
 	size_t FarthestPoint(const Vector3f& direction, const std::vector<Vector3f>& points)
 	{
-		auto farthest = std::make_pair((std::numeric_limits<float>::min)(), size_t(0));
+		auto farthest = std::make_pair(-(std::numeric_limits<float>::max)(), size_t(0));
 		for (size_t i = 0; i < points.size(); ++i) {
 			auto pair = std::make_pair(direction.Dot(points[i]), i);
 			farthest = (std::max)(farthest, pair);
@@ -130,6 +159,12 @@ public:
 	}
 
 	float TranglePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
+	{
+		auto normal = (b - a).Cross(c - a).Normalized();
+		return std::abs(normal.Dot(point - a));
+	}
+
+	float TranglePointDist2(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
 	{
 		float minPointDist = std::sqrt((std::min)({ (a - point).Length2(), (b - point).Length2(), (c - point).Length2() }));
 		auto normal = (b - a).Cross(c - a).Normalized();

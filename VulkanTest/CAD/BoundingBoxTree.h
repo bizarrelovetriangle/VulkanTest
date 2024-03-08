@@ -126,7 +126,7 @@ public:
 	int64_t FindBestNeighbour(BoundingBox& newBoundingBox)
 	{
 		using type = std::pair<float, int64_t>;
-		auto less = [](type& a, type& b) { return a.first < b.first; };
+		auto less = [](type& a, type& b) { return a.first < b.first; }; // ??? lool todo, should be great
 		std::priority_queue<type, std::vector<type>, decltype(less)> pq(less);
 		pq.push(std::make_pair(0., rootBoundingBoxIndex));
 		type bestNeighbour = std::make_pair((std::numeric_limits<float>::max)(), -1);

@@ -63,7 +63,7 @@ public:
 		localBoundingBox = BoundingBox(*this);
 	}
 
-	void AddTriangle(std::array<uint32_t, 3> indexes)
+	uint32_t AddTriangle(std::array<uint32_t, 3> indexes)
 	{
 		uint32_t triIndex = triangles.size();
 		Triangle triangle;
@@ -78,6 +78,7 @@ public:
 		}
 
 		triangles.push_back(triangle);
+		return triIndex;
 	}
 
 	void DeleteTriangle(uint32_t triangle)
@@ -102,14 +103,15 @@ public:
 	{
 		size_t org = Origin(edge);
 		size_t dest = Destination(edge);
-		if (auto it = edges.find(std::make_pair(org, dest)); it != edges.end()) {
+		if (auto it = edges.find(std::make_pair(dest, org)); it != edges.end()) {
 			return it->second;
 		}
 		return std::nullopt;
 	}
 
-	std::array<Vector3f, 3> TrianglePoints(const Triangle& triangle) const
+	std::array<Vector3f, 3> TrianglePoints(uint32_t tri) const
 	{
+		const Triangle& triangle = triangles[tri];
 		uint32_t a = triangle.vertices[0];
 		uint32_t b = triangle.vertices[1];
 		uint32_t c = triangle.vertices[2];
@@ -118,8 +120,8 @@ public:
 
 	Vector3f TriangleNormal(const Triangle& triangle) const
 	{
-		auto trianglePoints = TrianglePoints(triangle);
-		return (trianglePoints[1] - trianglePoints[0]).Cross(trianglePoints[2] - trianglePoints[0]);
+		return (points[triangle.vertices[1]] - points[triangle.vertices[0]])
+			.Cross(points[triangle.vertices[2]] - points[triangle.vertices[0]]);
 	}
 
 //private:

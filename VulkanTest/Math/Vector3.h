@@ -11,6 +11,8 @@ template <class T>
 class Vector3
 {
 public:
+	inline static Vector3 Zero() { return Vector3(0., 0., 0.); }
+
 	T x = 0;
 	T y = 0;
 	T z = 0;
