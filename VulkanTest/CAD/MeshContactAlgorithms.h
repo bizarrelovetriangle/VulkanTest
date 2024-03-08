@@ -9,6 +9,7 @@
 struct ContactInfo
 {
 	bool contact = false;
+	std::shared_ptr<MeshModel> gjkTriangular;
 	std::pair<std::shared_ptr<MeshObject>, std::shared_ptr<MeshObject>> objects;
 };
 
@@ -40,9 +41,7 @@ public:
 			point = Vector3f(vec4.x, vec4.y, vec4.z);
 		}
 
-		using type = std::pair<float, uint32_t>;
-		auto less = [](type& a, type& b) { return a.first > b.first; };
-		std::priority_queue<type, std::vector<type>, decltype(less)> triangleDistPQ(less);
+		ContactInfo result;
 
 		MeshModel minkowskiMesh;
 
@@ -59,67 +58,61 @@ public:
 		direction = Vector3f(0., 0., 1.);
 		auto minkowskiDiffC = MinkowskiDiff(direction, meshA, meshB);
 		minkowskiMesh.points.push_back(minkowskiDiffC);
-		
 
 		uint32_t tri = minkowskiMesh.AddTriangle({ 0, 1, 2 });
 		auto triPoints = minkowskiMesh.TrianglePoints(tri);
 
-		// the first triangle will face the opposide direction of zero point
-		if (TranglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) > 0.) {
+		// face the triangle to the zero point
+		if (TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) < 0.)
 			std::swap(minkowskiMesh.triangles[tri].vertices[0], minkowskiMesh.triangles[tri].vertices[2]);
-		}
 
-		float dist = TranglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
-		triangleDistPQ.emplace(dist, tri);
+		uint32_t nearestTri = tri;
 
-		float nearest = (std::numeric_limits<float>::max)();
-
-		for (int i = 0; i < 2; ++i)
+		for (int i = 0; i < 10; ++i)
 		{
-			auto [dist, nearestTri] = triangleDistPQ.top();
-			if (i != 0) triangleDistPQ.pop();
-			if (dist >= nearest)
-				break;
-			nearest = (std::min)(nearest, dist);
-
-			auto triPoints = minkowskiMesh.TrianglePoints(nearestTri);
-			direction = TranglePointDir(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
+			auto nearestTriPoints = minkowskiMesh.TrianglePoints(nearestTri);
+			direction = TrianglePointDir(nearestTriPoints[0], nearestTriPoints[1], nearestTriPoints[2], Vector3f::Zero());
 			auto minkowskiDiff = MinkowskiDiff(direction, meshA, meshB);
+
+			if (minkowskiDiff == nearestTriPoints[0] || minkowskiDiff == nearestTriPoints[1] || minkowskiDiff == nearestTriPoints[2])
+				break;
 
 			uint32_t newPoint = minkowskiMesh.points.size();
 			minkowskiMesh.points.push_back(minkowskiDiff);
-
 			auto nearestTriVerts = minkowskiMesh.triangles[nearestTri].vertices;
-			// we consider the nearest triangle as it was faced toward the zero point. this is not the case for the first triangle
-			if (i == 0)
-				std::swap(nearestTriVerts[0], nearestTriVerts[2]);
 
 			uint32_t triA = minkowskiMesh.AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
 			uint32_t triB = minkowskiMesh.AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
 			uint32_t triC = minkowskiMesh.AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
 
+			float nearest = (std::numeric_limits<float>::max)();
 			for (uint32_t tri : { triA, triB, triC })
 			{
 				auto triPoints = minkowskiMesh.TrianglePoints(tri);
-				float dist = TranglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
-				triangleDistPQ.emplace(dist, tri);
+				float dist = TrianglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
+
+				if (dist < nearest)
+				{
+					nearestTri = tri;
+					nearest = dist;
+				}
 			}
 
 			// check only the newly created triangular pyramid
-			bool checkSuccess = PointInsideTriangularPyramid(Vector3f::Zero(), minkowskiMesh, { nearestTri, triA, triB, triC });
-			if (checkSuccess)
+			if (PointInsideTriangularPyramid(Vector3f::Zero(), minkowskiMesh, { triA, triB, triC }))
 			{
-				CreateObject(minkowskiMesh);
-				return ContactInfo{ .contact = true };
+				result.contact = true;
+				break;
 			}
 
 			//remove inner triangle
 			//if (i != 0) minkowskiMesh.DeleteTriangle(nearestTri);
 		}
 
+		result.gjkTriangular = std::make_shared<MeshModel>(minkowskiMesh);
+		std::swap(minkowskiMesh.triangles[0].vertices[0], minkowskiMesh.triangles[0].vertices[2]);
 		CreateObject(minkowskiMesh);
-
-		return {};
+		return result;
 	}
 
 	Vector3f MinkowskiDiff(const Vector3f& direction, const MeshModel& meshA, const MeshModel& meshB)
@@ -145,38 +138,56 @@ public:
 		for (uint32_t triIndex : triIndexes)
 		{
 			auto& triVerts = mesh.triangles[triIndex].vertices;
-			float dist = TranglePlanePointDist(
+			float dist = TrianglePlanePointDist(
 				meshPoints[triVerts[0]], meshPoints[triVerts[1]], meshPoints[triVerts[2]], point);
 			if (dist > 0) return false;
 		}
 		return true;
 	}
 
-	float TranglePlanePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
+	float TrianglePlanePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
 	{
 		auto normal = (b - a).Cross(c - a).Normalized();
 		return normal.Dot(point - a);
 	}
 
-	float TranglePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
+	float TrianglePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
 	{
-		auto normal = (b - a).Cross(c - a).Normalized();
-		return std::abs(normal.Dot(point - a));
-	}
+		// here we check if the point is inside a prism that created with sides and normal of the triangle
+		// if the point is outside two sides simultaniously, calculating the distance to only one of them will be sufficient
+		auto triNormal = (b - a).Cross(c - a);
+		Vector3f a_b_point_vector = (b - a).Cross(point - a);
+		Vector3f b_c_point_vector = (c - b).Cross(point - b);
+		Vector3f c_a_point_vector = (a - c).Cross(point - c);
 
-	float TranglePointDist2(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
-	{
-		float minPointDist = std::sqrt((std::min)({ (a - point).Length2(), (b - point).Length2(), (c - point).Length2() }));
+		auto test1 = triNormal.Dot(a_b_point_vector) > 0;
+		auto test2 = triNormal.Dot(b_c_point_vector) > 0;
+		auto test3 = triNormal.Dot(c_a_point_vector) > 0;
+
+		if (!test1) return LinePointDist(a, b, point);
+		if (!test2) return LinePointDist(b, c, point);
+		if (!test3) return LinePointDist(c, a, point);
+
 		auto normal = (b - a).Cross(c - a).Normalized();
 		float planeDist = std::abs(normal.Dot(point - a));
-		return (std::max)(minPointDist, planeDist);
+		return planeDist;
 	}
 
-	Vector3f TranglePointDir(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
+	float LinePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& point)
+	{
+		auto a_b = b - a;
+		auto a_b_normalized = a_b.Normalized();
+		auto proj_length = a_b_normalized.Dot(point);
+		if (proj_length < 0.) return (point - a).Length();
+		if (proj_length < a_b_normalized.Length()) return (point - b).Length();
+		return (a_b_normalized * proj_length + a - point).Length();
+	}
+
+	Vector3f TrianglePointDir(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
 	{
 		auto normal = (b - a).Cross(c - a).Normalized();
 		float planeDist = normal.Dot(point - a);
-		return normal * planeDist;
+		return (normal * planeDist).Normalized();
 	}
 
 	void CreateObject(const MeshModel& mesh)
@@ -187,13 +198,27 @@ public:
 			Vector4f(0., 0., 1., 1.), //B
 			Vector4f(1., 1., 1., 1.), //W
 			Vector4f(1., 1., 0., 1.), //Y
+			Vector4f(0., 1., 1., 1.), //T
+			// repeat
+			Vector4f(1., 0., 0., 1.), //R
+			Vector4f(0., 1., 0., 1.), //G
+			Vector4f(0., 0., 1., 1.), //B
+			Vector4f(1., 1., 1., 1.), //W
+			Vector4f(1., 1., 0., 1.), //Y
+			Vector4f(0., 1., 1., 1.), //T
+			// repeat
+			Vector4f(1., 0., 0., 1.), //R
+			Vector4f(0., 1., 0., 1.), //G
+			Vector4f(0., 0., 1., 1.), //B
+			Vector4f(1., 1., 1., 1.), //W
+			Vector4f(1., 1., 0., 1.), //Y
 			Vector4f(0., 1., 1., 1.) };//T
 
 		auto renderer = std::make_unique<ColoredRenderObject>(vulkanContext, colors);
 
 		auto minkowskiObj = std::make_unique<MeshObject>(std::make_unique<MeshModel>(mesh), std::move(renderer));
-		minkowskiObj->UpdateVertexBuffer();
 		minkowskiObj->renderer->propertiesUniform.baseColor = Vector4(0.3, 0.1, 0.1, 1.);
+		minkowskiObj->UpdateVertexBuffer();
 		minkowskiObj->renderer->UpdatePropertiesUniformBuffer();
 		renderObjects.insert(std::move(minkowskiObj));
 	}

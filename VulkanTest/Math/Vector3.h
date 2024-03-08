@@ -103,6 +103,11 @@ public:
 		return std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2);
 	}
 
+	friend bool operator==(const Vector3<T>& vecA, const Vector3<T>& vecB)
+	{
+		return vecA.x == vecB.x && vecA.y == vecB.y && vecA.z == vecB.z;
+	}
+
 	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
 	std::pair<Vector3<T>, Vector3<T>> twoPerpendicularsForJ()
 	{
