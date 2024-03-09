@@ -6,6 +6,7 @@
 #include "../Math/Vector3.h"
 #include "BoundingBox.h"
 #include <optional>
+#include <bitset>
 
 struct Edge
 {
@@ -45,6 +46,7 @@ public:
 	MeshModel(const std::vector<uint32_t>& indexes, const std::vector<Vector3f>& points)
 	{
 		triangles.resize(indexes.size() / 3);
+		triangleBitVector.resize(indexes.size() / 3, true);
 		this->points = points;
 
 		for (size_t i = 0; i < indexes.size() / 3; ++i) {
@@ -78,13 +80,15 @@ public:
 		}
 
 		triangles.push_back(triangle);
+		triangleBitVector.push_back(true);
 		return triIndex;
 	}
 
-	void DeleteTriangle(uint32_t triangle)
+	void DeleteTriangle(uint32_t tri)
 	{
+		triangleBitVector[tri] = true;
 		// todo: using of bitvector?
-		triangles.erase(triangles.begin() + triangle);
+		//triangles.erase(triangles.begin() + triangle);
 	}
 
 	uint32_t Origin(const Edge& edge)
@@ -121,10 +125,12 @@ public:
 	Vector3f TriangleNormal(const Triangle& triangle) const
 	{
 		return (points[triangle.vertices[1]] - points[triangle.vertices[0]])
-			.Cross(points[triangle.vertices[2]] - points[triangle.vertices[0]]);
+			.Cross(points[triangle.vertices[2]] - points[triangle.vertices[0]])
+			.Normalized();
 	}
 
 //private:
+	std::vector<bool> triangleBitVector;
 	std::vector<Triangle> triangles;
 	std::vector<Vector3f> points;
 

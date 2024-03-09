@@ -2,6 +2,7 @@
 #include "../Objects/Interfaces/MeshObject.h"
 #include "../RenderObjects/ColoredRenderObject.h"
 #include "../RenderObjects/LinedRenderObject.h"
+#include "../RenderObjects/SimpleVertexedRenderObject.h"
 #include <unordered_set>
 #include <optional>
 #include <queue>
@@ -27,6 +28,7 @@ public:
 
 		//objectA - icosphere, objectB - sphere
 
+		// todo: get rid of it. I need reversed matrix for this
 		auto modelA = objectA.ComposeMatrix();
 		auto meshA = MeshModel(*objectA.mesh);
 		for (auto& point : meshA.points) {
@@ -71,7 +73,12 @@ public:
 		for (int i = 0; i < 10; ++i)
 		{
 			auto nearestTriPoints = minkowskiMesh.TrianglePoints(nearestTri);
+			
 			direction = TrianglePointDir(nearestTriPoints[0], nearestTriPoints[1], nearestTriPoints[2], Vector3f::Zero());
+			auto normal = minkowskiMesh.TriangleNormal(nearestTri);
+			if (normal.Dot(direction) < 0.)
+				break;
+
 			auto minkowskiDiff = MinkowskiDiff(direction, meshA, meshB);
 
 			if (minkowskiDiff == nearestTriPoints[0] || minkowskiDiff == nearestTriPoints[1] || minkowskiDiff == nearestTriPoints[2])
@@ -81,22 +88,12 @@ public:
 			minkowskiMesh.points.push_back(minkowskiDiff);
 			auto nearestTriVerts = minkowskiMesh.triangles[nearestTri].vertices;
 
+			//for (uint32_t tri = 0; tri < minkowskiMesh.triangleBitVector.size(); ++tri)
+			//	minkowskiMesh.triangleBitVector[tri] = false;
+
 			uint32_t triA = minkowskiMesh.AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
 			uint32_t triB = minkowskiMesh.AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
 			uint32_t triC = minkowskiMesh.AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
-
-			float nearest = (std::numeric_limits<float>::max)();
-			for (uint32_t tri : { triA, triB, triC })
-			{
-				auto triPoints = minkowskiMesh.TrianglePoints(tri);
-				float dist = TrianglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
-
-				if (dist < nearest)
-				{
-					nearestTri = tri;
-					nearest = dist;
-				}
-			}
 
 			// check only the newly created triangular pyramid
 			if (PointInsideTriangularPyramid(Vector3f::Zero(), minkowskiMesh, { triA, triB, triC }))
@@ -105,8 +102,17 @@ public:
 				break;
 			}
 
-			//remove inner triangle
-			//if (i != 0) minkowskiMesh.DeleteTriangle(nearestTri);
+			float nearest = (std::numeric_limits<float>::max)();
+			for (uint32_t tri : { triA, triB, triC })
+			{
+				auto triPoints = minkowskiMesh.TrianglePoints(tri);
+				float dist = TrianglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
+				if (dist < nearest)
+				{
+					nearestTri = tri;
+					nearest = dist;
+				}
+			}
 		}
 
 		result.gjkTriangular = std::make_shared<MeshModel>(minkowskiMesh);
@@ -154,7 +160,7 @@ public:
 	float TrianglePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
 	{
 		// here we check if the point is inside a prism that created with sides and normal of the triangle
-		// if the point is outside two sides simultaniously, calculating the distance to only one of them will be sufficient
+		// if the point is outside two sides simultaniously, calculating the distance for only one of them will be sufficient
 		auto triNormal = (b - a).Cross(c - a);
 		Vector3f a_b_point_vector = (b - a).Cross(point - a);
 		Vector3f b_c_point_vector = (c - b).Cross(point - b);
@@ -177,9 +183,9 @@ public:
 	{
 		auto a_b = b - a;
 		auto a_b_normalized = a_b.Normalized();
-		auto proj_length = a_b_normalized.Dot(point);
+		auto proj_length = a_b_normalized.Dot(point - a);
 		if (proj_length < 0.) return (point - a).Length();
-		if (proj_length < a_b_normalized.Length()) return (point - b).Length();
+		if (proj_length > a_b.Length()) return (point - b).Length();
 		return (a_b_normalized * proj_length + a - point).Length();
 	}
 
@@ -192,34 +198,12 @@ public:
 
 	void CreateObject(const MeshModel& mesh)
 	{
-		std::vector<Vector4f> colors{
-			Vector4f(1., 0., 0., 1.), //R
-			Vector4f(0., 1., 0., 1.), //G
-			Vector4f(0., 0., 1., 1.), //B
-			Vector4f(1., 1., 1., 1.), //W
-			Vector4f(1., 1., 0., 1.), //Y
-			Vector4f(0., 1., 1., 1.), //T
-			// repeat
-			Vector4f(1., 0., 0., 1.), //R
-			Vector4f(0., 1., 0., 1.), //G
-			Vector4f(0., 0., 1., 1.), //B
-			Vector4f(1., 1., 1., 1.), //W
-			Vector4f(1., 1., 0., 1.), //Y
-			Vector4f(0., 1., 1., 1.), //T
-			// repeat
-			Vector4f(1., 0., 0., 1.), //R
-			Vector4f(0., 1., 0., 1.), //G
-			Vector4f(0., 0., 1., 1.), //B
-			Vector4f(1., 1., 1., 1.), //W
-			Vector4f(1., 1., 0., 1.), //Y
-			Vector4f(0., 1., 1., 1.) };//T
-
-		auto renderer = std::make_unique<ColoredRenderObject>(vulkanContext, colors);
-
+		auto renderer = std::make_unique<SimpleVertexedRenderObject>(vulkanContext);
 		auto minkowskiObj = std::make_unique<MeshObject>(std::make_unique<MeshModel>(mesh), std::move(renderer));
+
 		minkowskiObj->renderer->propertiesUniform.baseColor = Vector4(0.3, 0.1, 0.1, 1.);
-		minkowskiObj->UpdateVertexBuffer();
 		minkowskiObj->renderer->UpdatePropertiesUniformBuffer();
+		minkowskiObj->UpdateVertexBuffer();
 		renderObjects.insert(std::move(minkowskiObj));
 	}
 

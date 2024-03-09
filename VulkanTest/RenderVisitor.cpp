@@ -70,7 +70,7 @@ void RenderVisitor::Visit(VertexedRenderObject& renderObject)
 	auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - before);
 	float seconds = float(diff.count()) / 1000;
 
-	float degen = float(0. + seconds / 2);
+	float degen = -float(0. + seconds / 8);
 
 	Matrix4 view;
 	//view = Matrix4::RotateY(degen) * view;

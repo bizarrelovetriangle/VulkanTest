@@ -54,12 +54,12 @@ public:
 			SerializedObject serializedObject;
 			serializedObject.name = node.name;
 
-			serializedObject.translation = GetVector<Vector3f>(node.translation)
-				.value_or(Vector3f());
+			serializedObject.translation = Vector3f::FromGLTF(
+				GetVector<Vector3f>(node.translation).value_or(Vector3f()));
 			serializedObject.scale = GetVector<Vector3f>(node.scale)
 				.value_or(Vector3f(1., 1., 1.));
-			serializedObject.rotation = GetVector<Vector4f>(node.rotation)
-				.value_or(Vector4f(0., 0., 0., 1.));;
+			serializedObject.rotation = Vector4f::QuaternionFromGLTF(
+				GetVector<Vector4f>(node.rotation).value_or(Vector4f(0., 0., 0., 1.)));
 
 			for (auto& primitive : mesh.primitives)
 			{

@@ -41,7 +41,11 @@ void ColoredRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 
 	std::vector<ColoredVertexData> vertexDatas;
 
-	for (auto& triangle : mesh.triangles) {
+	for (int tri = 0; tri < mesh.triangles.size(); ++tri) {
+		auto& triangle = mesh.triangles[tri];
+
+		if (!mesh.triangleBitVector[tri]) continue;
+
 		for (int index : triangle.vertices) {
 			ColoredVertexData vertexData;
 			vertexData.position = mesh.points[index];

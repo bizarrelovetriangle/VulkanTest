@@ -32,19 +32,19 @@ public:
 	{
 		Matrix4 matrix;
 		matrix = Matrix4::Scale(scale) * matrix;
-		matrix = Matrix4::Rotate(Vector4f::QuaternionFromGLTF(rotation)) * matrix;
-		matrix = Matrix4::Translation(Vector3f::FromGLTF(position)) * matrix;
+		matrix = Matrix4::Rotate(rotation) * matrix;
+		matrix = Matrix4::Translation(position) * matrix;
 		return matrix;
 	}
 
 	std::string name;
 
 	Vector3f position;
-	Vector4f rotation;
+	Vector4f rotation = Vector4f(0., 0., 0., 1.);
 	Vector3f velocity;
 	Vector4f angularVelocity;
 
-	Vector3f scale;
+	Vector3f scale = Vector3f(1., 1., 1.);
 
 	std::unique_ptr<RenderObject> renderer;
 };

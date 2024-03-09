@@ -35,13 +35,21 @@ void LinedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 	if (vertexBuffer) vertexBuffer->Dispose();
 
 	std::vector<LinedVertexData> vertexDatas;
+	for (int tri = 0; tri < mesh.triangles.size(); ++tri) {
+		auto& triangle = mesh.triangles[tri];
 
-	for (auto& triangle : mesh.triangles) {
-		for (int index : triangle.vertices) {
-			LinedVertexData vertexData;
-			vertexData.position = mesh.points[index];
-			vertexData.color = !colors.empty() ? colors[index] : propertiesUniform.baseColor;
-			vertexDatas.push_back(vertexData);
+		if (!mesh.triangleBitVector[tri]) continue;
+
+		for (int i = 0; i < 3; ++i) {
+			uint32_t org = triangle.vertices[i];
+			uint32_t dest = triangle.vertices[(i + 1) % 3];
+
+			for (uint32_t index : { org, dest }) {
+				LinedVertexData vertexData;
+				vertexData.position = mesh.points[index];
+				vertexData.color = !colors.empty() ? colors[index] : propertiesUniform.baseColor;
+				vertexDatas.push_back(vertexData);
+			}
 		}
 	}
 
