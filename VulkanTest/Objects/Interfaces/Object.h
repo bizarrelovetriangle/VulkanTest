@@ -20,6 +20,7 @@ public:
 
 	virtual void Render(RenderVisitor& renderVisitor)
 	{
+		renderer->transformUniform.model = ComposeMatrix();
 		renderer->Accept(renderVisitor);
 	}
 

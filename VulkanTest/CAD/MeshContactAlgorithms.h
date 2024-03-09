@@ -75,10 +75,6 @@ public:
 			auto nearestTriPoints = minkowskiMesh.TrianglePoints(nearestTri);
 			
 			direction = TrianglePointDir(nearestTriPoints[0], nearestTriPoints[1], nearestTriPoints[2], Vector3f::Zero());
-			auto normal = minkowskiMesh.TriangleNormal(nearestTri);
-			if (normal.Dot(direction) < 0.)
-				break;
-
 			auto minkowskiDiff = MinkowskiDiff(direction, meshA, meshB);
 
 			if (minkowskiDiff == nearestTriPoints[0] || minkowskiDiff == nearestTriPoints[1] || minkowskiDiff == nearestTriPoints[2])
@@ -102,17 +98,15 @@ public:
 				break;
 			}
 
-			float nearest = (std::numeric_limits<float>::max)();
-			for (uint32_t tri : { triA, triB, triC })
-			{
-				auto triPoints = minkowskiMesh.TrianglePoints(tri);
-				float dist = TrianglePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
-				if (dist < nearest)
+			auto triangles = { triA, triB, triC };
+			auto newTriangle = std::find_if(triangles.begin(), triangles.end(), [&](uint32_t tri)
 				{
-					nearestTri = tri;
-					nearest = dist;
-				}
-			}
+					auto triPoints = minkowskiMesh.TrianglePoints(tri);
+					return TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) > 0.;
+				});
+
+			if (newTriangle == triangles.end()) break;
+			nearestTri = *newTriangle;
 		}
 
 		result.gjkTriangular = std::make_shared<MeshModel>(minkowskiMesh);

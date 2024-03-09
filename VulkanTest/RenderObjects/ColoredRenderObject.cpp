@@ -49,7 +49,7 @@ void ColoredRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 		for (int index : triangle.vertices) {
 			ColoredVertexData vertexData;
 			vertexData.position = mesh.points[index];
-			vertexData.normal = mesh.TriangleNormal(triangle);
+			vertexData.normal = mesh.TriangleNormal(tri);
 			vertexData.color = colors[index];
 			vertexDatas.push_back(vertexData);
 		}

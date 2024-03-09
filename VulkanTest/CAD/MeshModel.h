@@ -122,8 +122,9 @@ public:
 		return { points[a], points[b], points[c] };
 	}
 
-	Vector3f TriangleNormal(const Triangle& triangle) const
+	Vector3f TriangleNormal(uint32_t tri) const
 	{
+		const auto& triangle = triangles[tri];
 		return (points[triangle.vertices[1]] - points[triangle.vertices[0]])
 			.Cross(points[triangle.vertices[2]] - points[triangle.vertices[0]])
 			.Normalized();

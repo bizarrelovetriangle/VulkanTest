@@ -35,11 +35,15 @@ void VertexedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 
 	std::vector<VertexData> vertexDatas;
 
-	for (auto& triangle : mesh.triangles) {
+	for (int tri = 0; tri < mesh.triangles.size(); ++tri) {
+		auto& triangle = mesh.triangles[tri];
+
+		if (!mesh.triangleBitVector[tri]) continue;
+
 		for (int index : triangle.vertices) {
 			VertexData vertexData;
 			vertexData.position = mesh.points[index];
-			vertexData.normal = mesh.TriangleNormal(triangle);
+			vertexData.normal = mesh.TriangleNormal(tri);
 			vertexDatas.push_back(vertexData);
 		}
 	}
