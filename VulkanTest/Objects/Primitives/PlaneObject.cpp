@@ -15,3 +15,8 @@ PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position,
 
 	renderer = std::move(planeRenderer);
 }
+
+Matrix4 PlaneObject::ComposeMatrix() const
+{
+	return plane.getMatrix();
+}

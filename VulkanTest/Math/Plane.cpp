@@ -20,7 +20,7 @@ Plane Plane::fromTwoPoints(const Vector3f& pos, const Vector3f& dest)
 	return Plane(pos, (dest - pos).Normalized());
 }
 
-Matrix4 Plane::getMatrix()
+Matrix4 Plane::getMatrix() const
 {
 	auto pos = normal * dist;
 	auto j = normal;

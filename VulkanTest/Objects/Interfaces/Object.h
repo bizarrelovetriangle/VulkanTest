@@ -29,7 +29,7 @@ public:
 		if (renderer) renderer->Dispose();
 	}
 
-	Matrix4 ComposeMatrix() const
+	virtual Matrix4 ComposeMatrix() const
 	{
 		Matrix4 matrix;
 		matrix = Matrix4::Scale(scale) * matrix;

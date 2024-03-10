@@ -9,7 +9,7 @@ public:
 	Plane(const Vector3f& normal, float dist);
 	Plane(const Vector3f& pos, const Vector3f& normal);
 	static Plane fromTwoPoints(const Vector3f& pos, const Vector3f& dest);
-	Matrix4 getMatrix();
+	Matrix4 getMatrix() const;
 
 	Vector3f normal;
 	float dist;

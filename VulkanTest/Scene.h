@@ -39,9 +39,9 @@ public:
 			objects.push_back(std::move(object));
 		}
 
-		//auto plane = std::make_shared<PlaneObject>(vulkanContext,
-		//	Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		//objects.push_back(plane);
+		auto plane = std::make_shared<PlaneObject>(vulkanContext,
+			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		objects.push_back(plane);
 
 		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
 		boundingBoxTree->CreateBoundingBoxes(objects);
