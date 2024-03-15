@@ -52,9 +52,9 @@ void VertexedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 }
 
-void VertexedRenderObject::Accept(RenderVisitor& renderVisitor)
+void VertexedRenderObject::Accept(RenderVisitor& renderVisitor, const Camera& camera)
 {
-	renderVisitor.Visit(*this);
+	renderVisitor.Visit(*this, camera);
 }
 
 void VertexedRenderObject::Dispose()

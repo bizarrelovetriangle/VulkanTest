@@ -67,7 +67,7 @@ public:
 	void UpdateTransformUniformBuffer();
 	void UpdatePropertiesUniformBuffer();
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
-	virtual void Accept(RenderVisitor& renderVisitor);
+	virtual void Accept(RenderVisitor& renderVisitor, const Camera& camera);
 	virtual void Dispose();
 
 public:

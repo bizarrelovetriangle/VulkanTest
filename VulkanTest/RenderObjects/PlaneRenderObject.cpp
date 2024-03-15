@@ -44,7 +44,7 @@ std::vector<vk::DescriptorSetLayoutBinding> PlaneRenderObject::DescriptorSetLayo
 	};
 }
 
-void PlaneRenderObject::Accept(RenderVisitor& renderVisitor)
+void PlaneRenderObject::Accept(RenderVisitor& renderVisitor, const Camera& camera)
 {
-	renderVisitor.Visit(*this);
+	renderVisitor.Visit(*this, camera);
 }

@@ -99,9 +99,9 @@ std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBin
 	};
 }
 
-void RenderObject::Accept(RenderVisitor& renderVisitor)
+void RenderObject::Accept(RenderVisitor& renderVisitor, const Camera& camera)
 {
-	renderVisitor.Visit(*this);
+	renderVisitor.Visit(*this, camera);
 }
 
 void RenderObject::Dispose()

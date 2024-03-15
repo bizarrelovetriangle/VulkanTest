@@ -3,6 +3,7 @@
 #include "../../RenderObjects/Interfaces/RenderObject.h"
 #include "../../CAD/MeshModel.h"
 #include "../../RenderVisitor.h"
+#include "../../Camera.h"
 
 class Object
 {
@@ -18,10 +19,10 @@ public:
 
 	virtual ~Object() = default;
 
-	virtual void Render(RenderVisitor& renderVisitor)
+	virtual void Render(RenderVisitor& renderVisitor, const Camera& camera)
 	{
 		renderer->transformUniform.model = ComposeMatrix();
-		renderer->Accept(renderVisitor);
+		renderer->Accept(renderVisitor, camera);
 	}
 
 	virtual void Dispose()

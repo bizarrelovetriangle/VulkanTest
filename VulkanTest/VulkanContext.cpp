@@ -26,6 +26,7 @@
 #include "Vulkan/CommandBufferDispatcher.h"
 #include "Objects/Interfaces/Object.h"
 #include "RenderObjects/Interfaces/RenderObject.h"
+#include "Camera.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -68,14 +69,14 @@ void VulkanContext::Init(GLFWwindow* window)
 
 VulkanContext::~VulkanContext() = default;
 
-void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects)
+void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
 {
     deviceController->device.waitForFences(inFlightFence, VK_TRUE, UINT64_MAX);
     deviceController->device.resetFences(inFlightFence);
 
     uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
-    RecordCommandBuffer(imageIndex, objects);
+    RecordCommandBuffer(imageIndex, objects, camera);
 
     vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore };
     vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
@@ -90,7 +91,7 @@ void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects)
 }
 
 void VulkanContext::RecordCommandBuffer(size_t imageIndex,
-    const std::vector<std::shared_ptr<Object>>& objects)
+    const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
 {
     commandBuffer->commandBuffer.reset();
     vk::CommandBufferBeginInfo beginInfo;
@@ -108,11 +109,16 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
 
     commandBuffer->commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
+    auto viewport = swapChain->CreateViewport();
+    auto scissors = swapChain->CreateScissors();
+    commandBuffer->commandBuffer.setViewport(0, 1, &viewport);
+    commandBuffer->commandBuffer.setScissor(0, 1, &scissors);
+
     RenderVisitor renderVisitor(*this, *commandBuffer, imageIndex);
 
     for (auto& object : objects)
     {
-        object->Render(renderVisitor);
+        object->Render(renderVisitor, camera);
     }
 
     commandBuffer->commandBuffer.endRenderPass();

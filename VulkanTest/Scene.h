@@ -9,6 +9,7 @@
 #include "RenderObjects/SimpleVertexedRenderObject.h"
 #include "Objects/Primitives/PlaneObject.h"
 #include "Objects/Primitives/BoundingBoxObject.h"
+#include "Camera.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -25,7 +26,13 @@ public:
 	{ 
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		window = glfwCreateWindow(width, height, "Vulkan window", nullptr, nullptr);
+		window = glfwCreateWindow(windowSize.x, windowSize.y, "Vulkan window", nullptr, nullptr);
+		glfwSetWindowUserPointer(window, this);
+		glfwSetKeyCallback(window, KeyCallback);
+		glfwSetScrollCallback(window, ScrollCallback);
+		glfwSetCursorPosCallback(window, CursorPositionCallback);
+		glfwSetMouseButtonCallback(window, MouseClickCallback);
+
 		vulkanContext.Init(window);
 
 		Deserializer deserializer(vulkanContext);
@@ -75,8 +82,49 @@ public:
 			}
 
 			glfwPollEvents();
-			vulkanContext.DrawFrame(objects);
+			vulkanContext.DrawFrame(objects, camera);
 		}
+	}
+
+	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	{
+		auto scene = (Scene*)glfwGetWindowUserPointer(window);
+		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, true);
+		if (key == GLFW_KEY_T && action == GLFW_PRESS)
+			scene->scrollMode = !scene->scrollMode;
+	}
+
+	static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+	{
+		auto scene = (Scene*)glfwGetWindowUserPointer(window);
+		Vector2f offset(xoffset, yoffset);
+
+		if (scene->scrollMode)
+			scene->camera.Scrolled(offset);
+		else
+			scene->camera.Zoom(-yoffset);
+	}
+
+	static void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
+	{
+		auto scene = (Scene*)glfwGetWindowUserPointer(window);
+		Vector2f mousePos = Vector2i(xpos, ypos) - scene->windowSize / 2;
+		mousePos.y = -mousePos.y;
+		scene->camera.MouseMoved(mousePos);
+	}
+
+	static void MouseClickCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		auto scene = (Scene*)glfwGetWindowUserPointer(window);
+		bool down = action == GLFW_PRESS;
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT)
+			scene->camera.MouseRightDown(down);
+		if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+			scene->camera.MouseMiddleDown(down);
+		if (scene->scrollMode && button == GLFW_MOUSE_BUTTON_LEFT)
+			scene->camera.MouseMiddleDown(down);
 	}
 
 	~Scene()
@@ -89,11 +137,13 @@ public:
 	}
 
 private:
-	const uint32_t width = 1900;
-	const uint32_t height = 1900;
+	const Vector2i windowSize = Vector2i(1900, 1900);
 
 	GLFWwindow* window;
 	VulkanContext vulkanContext;
+
+	bool scrollMode = false;
+	Camera camera;
 
 	std::vector<std::shared_ptr<Object>> objects;
 	std::shared_ptr<BoundingBoxTree> boundingBoxTree;

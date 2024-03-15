@@ -22,7 +22,7 @@ public:
 	VertexedRenderObject(VulkanContext& vulkanContext);
 	~VertexedRenderObject();
 	virtual void UpdateVertexBuffer(const MeshModel& mesh);
-	virtual void Accept(RenderVisitor& renderVisitor);
+	virtual void Accept(RenderVisitor& renderVisitor, const Camera& camera);
 	virtual void Dispose() override;
 
 	inline static std::string VertexShader =

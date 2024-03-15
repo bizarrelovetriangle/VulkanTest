@@ -201,10 +201,10 @@ public:
 		renderObjects.insert(std::move(minkowskiObj));
 	}
 
-	void Render(RenderVisitor& renderVisitor)
+	void Render(RenderVisitor& renderVisitor, const Camera& camera)
 	{
 		for (auto& renderObject : renderObjects)
-			renderObject->Render(renderVisitor);
+			renderObject->Render(renderVisitor, camera);
 	}
 
 	void Dispose()

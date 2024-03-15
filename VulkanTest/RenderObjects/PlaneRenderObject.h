@@ -19,7 +19,7 @@ public:
 	void UpdatePlaneUniformBuffer();
 	virtual void Dispose() override;
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
-	virtual void Accept(RenderVisitor& renderVisitor) override;
+	virtual void Accept(RenderVisitor& renderVisitor, const Camera& camera) override;
 
 public:
 	inline static std::string VertexShader =

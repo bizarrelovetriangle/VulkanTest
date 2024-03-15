@@ -27,4 +27,14 @@ public:
 		: x(x), y(y)
 	{
 	}
+
+	Vector2 operator/(T s) const
+	{
+		return Vector2(x / s, y / s);
+	}
+
+	Vector2 operator-(Vector2 v) const
+	{
+		return Vector2(x - v.x, y - v.y);
+	}
 };
