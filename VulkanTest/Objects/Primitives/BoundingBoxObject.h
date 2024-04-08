@@ -10,8 +10,8 @@ class BoundingBoxObject : public MeshObject
 public:
 	// aa - front bottom left
 	// bb - back top right
-	BoundingBoxObject(VulkanContext& vulkanContext, const BoundingBox& boundingBox);
-
+	BoundingBoxObject(VulkanContext& vulkanContext, const BoundingBox& boundingBox, bool lined = true);
+	void UpdateBoundingBox(const BoundingBox& boundingBox);
 private:
 	BoundingBox boundingBox;
 };

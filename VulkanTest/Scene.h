@@ -18,6 +18,7 @@
 #include "Objects/Interfaces/Object.h"
 #include "Utils/Deserializer.h"
 #include "CAD/BoundingBoxTree.h"
+#include "Picker.h"
 
 class Scene
 {
@@ -67,6 +68,10 @@ public:
 		object->renderer->UpdatePropertiesUniformBuffer();
 		object->UpdateVertexBuffer();
 		objects.push_back(std::move(object));
+
+		picker.Init(vulkanContext);
+		if (picker.render)
+			objects.push_back(picker.render);
 	}
 
 	void Run()
@@ -76,11 +81,13 @@ public:
 
 			if (!contactInfos.front().contact) {
 				auto& icosphere = objects[0];
-				icosphere->position += Vector3f(0.001, 0., 0.);
+				//icosphere->position += Vector3f(0.001, 0., 0.);
 				icosphere->renderer->transformUniform.model = icosphere->ComposeMatrix();
 				icosphere->renderer->UpdateTransformUniformBuffer();
 			}
 
+			picker.Update(objects, camera);
+			camera.rotatePoint = picker.pickedPos;
 			glfwPollEvents();
 			vulkanContext.DrawFrame(objects, camera);
 		}
@@ -111,7 +118,11 @@ public:
 		auto scene = (Scene*)glfwGetWindowUserPointer(window);
 		Vector2f mousePos = Vector2i(xpos, ypos) - scene->windowSize / 2;
 		mousePos.y = -mousePos.y;
+
+		mousePos = { mousePos.x / (scene->windowSize.x / 2), mousePos.y / (scene->windowSize.y / 2) };
+
 		scene->camera.MouseMoved(mousePos);
+		scene->picker.MouseMoved(mousePos);
 	}
 
 	static void MouseClickCallback(GLFWwindow* window, int button, int action, int mods)
@@ -144,6 +155,7 @@ private:
 
 	bool scrollMode = false;
 	Camera camera;
+	Picker picker;
 
 	std::vector<std::shared_ptr<Object>> objects;
 	std::shared_ptr<BoundingBoxTree> boundingBoxTree;

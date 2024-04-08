@@ -141,11 +141,16 @@ Matrix4 Matrix4::RotateZ(float radians)
 {
 	float cos = std::cos(radians);
 	float sin = std::sin(radians);
-
+	 
 	return Matrix4{
 		{ cos,-sin,  0.,  0.},
 		{ sin, cos,  0.,  0.},
 		{  0.,  0.,  1.,  0.},
 		{  0.,  0.,  0.,  1.} };
+}
+
+Matrix4 Matrix4::Inverse(const Matrix4& mat)
+{
+
 }
 

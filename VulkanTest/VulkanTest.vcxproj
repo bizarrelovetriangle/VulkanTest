@@ -197,6 +197,7 @@
     <ClInclude Include="CAD\MeshModel.h" />
     <ClInclude Include="Objects\Primitives\BoundingBoxObject.h" />
     <ClInclude Include="Math\Plane.h" />
+    <ClInclude Include="Picker.h" />
     <ClInclude Include="RenderObjects\ColoredRenderObject.h" />
     <ClInclude Include="RenderObjects\PlaneRenderObject.h" />
     <ClInclude Include="RenderObjects\LinedRenderObject.h" />

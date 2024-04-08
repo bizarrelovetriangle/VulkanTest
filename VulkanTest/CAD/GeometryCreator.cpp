@@ -4,14 +4,14 @@
 std::unique_ptr<MeshModel> GeometryCreator::createBoxByTwoPoints(const Vector3f& aa, const Vector3f& bb)
 {
 	std::vector<Vector3f> positions{
-		{ aa.x, aa.y, aa.z },
+		{ aa.x, aa.y, aa.z },   //0
 		{ bb.x, aa.y, aa.z },
 		{ bb.x, bb.y, aa.z },
-		{ aa.x, bb.y, aa.z },
-		{ aa.x, aa.y, bb.z },
-		{ bb.x, aa.y, bb.z },
-		{ bb.x, bb.y, bb.z },
-		{ aa.x, bb.y, bb.z } };
+		{ aa.x, bb.y, aa.z },   //3
+		{ aa.x, aa.y, bb.z },   //4
+		{ bb.x, aa.y, bb.z },   //5
+		{ bb.x, bb.y, bb.z },   //6
+		{ aa.x, bb.y, bb.z } }; //7
 
 	std::vector<uint32_t> indexes{
 		//front
@@ -27,8 +27,8 @@ std::unique_ptr<MeshModel> GeometryCreator::createBoxByTwoPoints(const Vector3f&
 		5, 1, 0,
 		0, 4, 5,
 		//left
-		4, 7, 3,
-		3, 0, 4,
+		3, 7, 4,
+		4, 0, 3,
 		//right
 		2, 1, 5,
 		5, 6, 2

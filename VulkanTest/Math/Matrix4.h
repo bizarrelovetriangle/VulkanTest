@@ -31,4 +31,6 @@ public:
 	static Matrix4 RotateX(float radians);
 	static Matrix4 RotateY(float radians);
 	static Matrix4 RotateZ(float radians);
+
+	static Matrix4 Inverse(const Matrix4& mat);
 };
