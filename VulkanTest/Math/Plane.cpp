@@ -20,6 +20,27 @@ Plane Plane::fromTwoPoints(const Vector3f& pos, const Vector3f& dest)
 	return Plane(pos, (dest - pos).Normalized());
 }
 
+float Plane::Distance(const Vector3f& point) const
+{
+	return normal.Dot(point) - dist;
+}
+
+bool Plane::Intersect(const Vector3f& segmentA, const Vector3f& segmentB, Vector3f* intersectPoint, float* ratio) const
+{
+	float a = Distance(segmentA);
+	float b = Distance(segmentB);
+
+	if (a * b > 0.)
+		return false;
+
+	float r = a / (a - b);
+	if (ratio)
+		*ratio = r;
+
+	if (intersectPoint)
+		*intersectPoint = segmentB * r + segmentA * (1 - r);
+}
+
 Matrix4 Plane::getMatrix() const
 {
 	auto pos = normal * dist;
@@ -27,10 +48,10 @@ Matrix4 Plane::getMatrix() const
 	auto [i, k] = j.twoPerpendicularsForJ();
 
 	Matrix4 asixRotate{
-		{i.x, j.x, k.x, pos.x},
-		{i.y, j.y, k.y, pos.y},
-		{i.z, j.z, k.z, pos.z},
-		{ 0.,  0.,  0.,    1.}};
+		{i.x,     i.y,   i.z, 0.},
+		{j.x,     j.y,   j.z, 0.},
+		{k.x,     k.y,   k.z, 0.},
+		{pos.x, pos.y, pos.z, 1.} };
 
 	return asixRotate;
 }

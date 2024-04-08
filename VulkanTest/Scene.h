@@ -24,7 +24,7 @@ class Scene
 {
 public:
 	Scene()
-	{ 
+	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		window = glfwCreateWindow(windowSize.x, windowSize.y, "Vulkan window", nullptr, nullptr);
@@ -77,6 +77,8 @@ public:
 	void Run()
 	{
 		while (!glfwWindowShouldClose(window)) {
+			glfwPollEvents();
+
 			auto contactInfos = boundingBoxTree->ComposePairs();
 
 			if (!contactInfos.front().contact) {
@@ -88,7 +90,6 @@ public:
 
 			picker.Update(objects, camera);
 			camera.rotatePoint = picker.pickedPos;
-			glfwPollEvents();
 			vulkanContext.DrawFrame(objects, camera);
 		}
 	}
@@ -122,7 +123,7 @@ public:
 		mousePos = { mousePos.x / (scene->windowSize.x / 2), mousePos.y / (scene->windowSize.y / 2) };
 
 		scene->camera.MouseMoved(mousePos);
-		scene->picker.MouseMoved(mousePos);
+		scene->picker.MouseMoved(mousePos, scene->camera);
 	}
 
 	static void MouseClickCallback(GLFWwindow* window, int button, int action, int mods)

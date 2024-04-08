@@ -11,21 +11,20 @@ Matrix4::Matrix4(const Vector4f& i, const Vector4f& j, const Vector4f& k, const 
 
 Vector4f Matrix4::operator*(const Vector4f& vec) const
 {
-	return Vector4f(i.Dot(vec), j.Dot(vec), k.Dot(vec), l.Dot(vec));
+	return i * vec.x + j * vec.y + k * vec.z + l * vec.w;
 }
 
 Matrix4 Matrix4::operator*(const Matrix4& mat) const
 {
-	auto transposed = mat.Transpose();
-	return Matrix4(transposed * i, transposed * j, transposed * k, transposed * l);
+	return Matrix4(*this * mat.i, *this * mat.j, *this * mat.k, *this * mat.l);
 }
 
 Matrix4 Matrix4::Translation(const Vector3f& vec)
 {
 	Matrix4 matrix;
-	matrix.i.w = vec.x;
-	matrix.j.w = vec.y;
-	matrix.k.w = vec.z;
+	matrix.l.x = vec.x;
+	matrix.l.y = vec.y;
+	matrix.l.z = vec.z;
 	return matrix;
 }
 
@@ -33,7 +32,7 @@ Matrix4 Matrix4::LookAt(const Vector3f& from, const Vector3f& to)
 {
 	auto k = (to - from).Normalized();
 	auto [i, j] = k.twoPerpendicularsForK(); // j should be in one plane with k and z origin
-	auto rotate = Matrix4(Vector4f(i), Vector4f(j), Vector4f(k), Vector4f(0., 0., 0., 1.)).Transpose();
+	auto rotate = Matrix4(Vector4f(i, 1.), Vector4f(j, 1.), Vector4f(k, 1.), Vector4f(0., 0., 0., 1.));
 	return Translation(from) * rotate;
 }
 
@@ -71,7 +70,7 @@ Matrix4 Matrix4::Frustum(float minDepth, float maxDepth, float angle)
 		{       0.,       1.,       0.,       0.},
 		{       0.,       0.,constPart,depenPart},
 		{       0.,       0.,       1.,       0.}};
-	return view;
+	return view.Transpose();
 }
 
 
@@ -89,6 +88,8 @@ Matrix4 Matrix4::Rotate(const Vector4f& quaternion)
 		{iA.y, jA.y, kA.y, 0.},
 		{iA.z, jA.z, kA.z, 0.},
 		{  0.,   0.,   0., 1.} };
+
+	asixRotate = asixRotate.Transpose();
 
 	auto yRotate = RotateY(angle * 2);
 	auto matrix = asixRotate * yRotate * asixRotate.Transpose();
@@ -118,11 +119,11 @@ Matrix4 Matrix4::RotateX(float radians)
 	float cos = std::cos(radians);
 	float sin = std::sin(radians);
 
-	return Matrix4{
+	return (Matrix4{
 		{  1.,  0.,  0.,  0.},
 		{  0., cos,-sin,  0.},
 		{  0., sin, cos,  0.},
-		{  0.,  0.,  0.,  1.} };
+		{  0.,  0.,  0.,  1.} }).Transpose();
 }
 
 Matrix4 Matrix4::RotateY(float radians)
@@ -130,11 +131,11 @@ Matrix4 Matrix4::RotateY(float radians)
 	float cos = std::cos(radians);
 	float sin = std::sin(radians);
 
-	return Matrix4{
+	return (Matrix4{
 		{ cos,  0.,-sin,  0.},
 		{  0.,  1.,  0.,  0.},
 		{ sin,  0., cos,  0.},
-		{  0.,  0.,  0.,  1.} };
+		{  0.,  0.,  0.,  1.} }).Transpose();
 }
 
 Matrix4 Matrix4::RotateZ(float radians)
@@ -142,15 +143,69 @@ Matrix4 Matrix4::RotateZ(float radians)
 	float cos = std::cos(radians);
 	float sin = std::sin(radians);
 	 
-	return Matrix4{
+	return (Matrix4{
 		{ cos,-sin,  0.,  0.},
 		{ sin, cos,  0.,  0.},
 		{  0.,  0.,  1.,  0.},
-		{  0.,  0.,  0.,  1.} };
+		{  0.,  0.,  0.,  1.} }).Transpose();
 }
 
-Matrix4 Matrix4::Inverse(const Matrix4& mat)
+// https://github.com/nigels-com/glt/blob/master/src/math/matrix4.cpp
+Matrix4 Matrix4::Inverse() const
 {
+	/* pre-compute 2x2 dets for last two rows when computing */
+	/* cofactors of first two rows. */
+	float d12 = k.x * l.y - l.x * k.y;
+	float d13 = k.x * l.z - l.x * k.z;
+	float d23 = k.y * l.z - l.y * k.z;
+	float d24 = k.y * l.w - l.y * k.w;
+	float d34 = k.z * l.w - l.z * k.w;
+	float d41 = k.w * l.x - l.w * k.x;
 
+	Vector4f cross4;
+	cross4.x =  (j.y * d34 - j.z * d24 + j.w * d23);
+	cross4.y = -(j.x * d34 + j.z * d41 + j.w * d13);
+	cross4.z =  (j.x * d24 + j.y * d41 + j.w * d12);
+	cross4.w = -(j.x * d23 - j.y * d13 + j.z * d12);
+
+	float det = i.x * cross4.x + i.y * cross4.y + i.z * cross4.z + i.w * cross4.w;
+
+	if (det == 0.0) {
+		throw std::exception("invert_matrix: Warning: Singular matrix");
+	}
+
+	double invDet = 1.0 / det;
+
+	Matrix4 res;
+	res.i.x =  (j.y * d34 - j.z * d24 + j.w * d23) * invDet;
+	res.i.y = -(j.x * d34 + j.z * d41 + j.w * d13) * invDet;
+	res.i.z =  (j.x * d24 + j.y * d41 + j.w * d12) * invDet;
+	res.i.w = -(j.x * d23 - j.y * d13 + j.z * d12) * invDet;
+
+	res.j.x = -(i.y * d34 - i.z * d24 + i.w * d23) * invDet;
+	res.j.y =  (i.x * d34 + i.z * d41 + i.w * d13) * invDet;
+	res.j.z = -(i.x * d24 + i.y * d41 + i.w * d12) * invDet;
+	res.j.w =  (i.x * d23 - i.y * d13 + i.z * d12) * invDet;
+
+	/* Pre-compute 2x2 dets for first two rows when computing */
+	/* cofactors of last two rows. */
+	d12 = i.x * j.y - j.x * i.y;
+	d13 = i.x * j.z - j.x * i.z;
+	d23 = i.y * j.z - j.y * i.z;
+	d24 = i.y * j.w - j.y * i.w;
+	d34 = i.z * j.w - j.z * i.w;
+	d41 = i.w * j.x - j.w * i.x;
+
+	res.k.x =  (l.y * d34 - l.z * d24 + l.w * d23) * invDet;
+	res.k.y = -(l.x * d34 + l.z * d41 + l.w * d13) * invDet;
+	res.k.z =  (l.x * d24 + l.y * d41 + l.w * d12) * invDet;
+	res.k.w = -(l.x * d23 - l.y * d13 + l.z * d12) * invDet;
+
+	res.l.x = -(k.y * d34 - k.z * d24 + k.w * d23) * invDet;
+	res.l.y =  (k.x * d34 + k.z * d41 + k.w * d13) * invDet;
+	res.l.z = -(k.x * d24 + k.y * d41 + k.w * d12) * invDet;
+	res.l.w =  (k.x * d23 - k.y * d13 + k.z * d12) * invDet;
+
+	return res.Transpose();
 }
 

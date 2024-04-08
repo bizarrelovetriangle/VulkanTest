@@ -19,7 +19,7 @@ public:
 	{
 	}
 
-	Vector4(const Vector3<T>& v3, const T& w = 0)
+	Vector4(const Vector3<T>& v3, const T& w)
 	{
 		x = v3.x;
 		y = v3.y;
@@ -44,9 +44,14 @@ public:
 		return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
 	}
 
+	Vector4<T> operator+(const Vector4<T>& v) const
+	{
+		return Vector4<T>(x + v.x, y + v.y, z + v.z, w + v.w);
+	}
+
 	Vector4<T> operator*(T s) const
 	{
-		return Vector4<T>(x * s, y * s, z * s, w / s);
+		return Vector4<T>(x * s, y * s, z * s, w * s);
 	}
 
 	Vector4<T> operator/(T s) const

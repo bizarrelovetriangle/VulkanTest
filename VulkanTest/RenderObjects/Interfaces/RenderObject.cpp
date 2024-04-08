@@ -77,11 +77,7 @@ RenderObject::~RenderObject() = default;
 
 void RenderObject::UpdateTransformUniformBuffer()
 {
-	TransformUniform temp;
-	temp.model = transformUniform.model.Transpose();
-	temp.view = transformUniform.view.Transpose();
-	temp.frustum = transformUniform.frustum.Transpose();
-	std::span<TransformUniform> uniformSpan(&temp, &temp + 1);
+	std::span<TransformUniform> uniformSpan(&transformUniform, &transformUniform + 1);
 	transformUniformBuffer->FlushData(uniformSpan);
 }
 
