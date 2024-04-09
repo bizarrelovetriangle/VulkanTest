@@ -13,7 +13,7 @@ BoundingBoxObject::BoundingBoxObject(VulkanContext& vulkanContext, const Boundin
 		? std::unique_ptr<RenderObject>(std::make_unique<LinedRenderObject>(vulkanContext))
 		: std::unique_ptr<RenderObject>(std::make_unique<SimpleVertexedRenderObject>(vulkanContext));
 	auto center = (boundingBox.aa + boundingBox.bb) / 2;
-	mesh = GeometryCreator::createBoxByTwoPoints(boundingBox.aa - center, boundingBox.bb - center);
+	mesh = GeometryCreator::CreateBoxByTwoPoints(boundingBox.aa - center, boundingBox.bb - center);
 
 	renderer->transformUniform.model = Matrix4::Translation(center);
 	renderer->UpdateTransformUniformBuffer();
@@ -27,7 +27,7 @@ BoundingBoxObject::BoundingBoxObject(VulkanContext& vulkanContext, const Boundin
 void BoundingBoxObject::UpdateBoundingBox(const BoundingBox& boundingBox)
 {
 	auto center = (boundingBox.aa + boundingBox.bb) / 2;
-	mesh = GeometryCreator::createBoxByTwoPoints(boundingBox.aa - center, boundingBox.bb - center);
+	mesh = GeometryCreator::CreateBoxByTwoPoints(boundingBox.aa - center, boundingBox.bb - center);
 
 	renderer->transformUniform.model = Matrix4::Translation(center);
 	renderer->UpdateTransformUniformBuffer();

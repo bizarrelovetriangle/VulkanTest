@@ -2,6 +2,7 @@
 #include "Objects/Interfaces/Object.h"
 #include "Objects/Interfaces/MeshObject.h"
 #include "Camera.h"
+#include "CAD/GeometryCreator.h"
 
 namespace
 {
@@ -16,26 +17,31 @@ class Picker
 public:
 	void Init(VulkanContext& vulkanContext)
 	{
-		auto boundingBox = BoundingBox();
-		boundingBox.aa = { -0.1, -0.1, -0.1 };
-		boundingBox.bb = { 0.1, 0.1, 0.1 };
-
-		render = std::make_shared<BoundingBoxObject>(vulkanContext, boundingBox, false);
-		boundingBox.renderBoundingBoxObject = render;
+		auto pointerRenderer = std::make_unique<SimpleVertexedRenderObject>(vulkanContext);
+		auto mesh = GeometryCreator::CreateIcosphere(0.1, 2);
+		pointer = std::make_shared<MeshObject>(std::move(mesh), std::move(pointerRenderer));
+		pointer->UpdateVertexBuffer();
+		pointer->name = "pointer";
 	}
 
+	// Invert view!
 	void Update(const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
 	{
 		auto inverseView = camera.view.Inverse();
 		auto segmentA = ToVector3(inverseView * Vector4f(Vector3f::Zero(), 1.));
 		auto segmentB = ToVector3(inverseView * Vector4f(mouseDirection * 1000, 1.));
-		
+
+		pointer->position = segmentA;
+		focusedPos = std::nullopt;
+		focusedObj = nullptr;
+
 		float minDist = (std::numeric_limits<float>::max)();
-		Vector3f pos = segmentA;
+		Vector3f pos;
+		std::shared_ptr<Object> obj;
 
 		for (auto& object : objects)
 		{
-			if (std::dynamic_pointer_cast<BoundingBoxObject>(object)) continue;
+			if (object->name == "pointer") continue;
 
 			auto meshObject = std::dynamic_pointer_cast<MeshObject>(object);
 			if (meshObject)
@@ -47,52 +53,46 @@ public:
 				{
 					if (!triangleBV[i]) continue;
 					auto points = mesh.TrianglePoints(i);
-
 					for (auto& point : points)
 						point = ToVector3(objMatrix * Vector4f(point, 1.));
 
-					auto triNorm = (points[1] - points[0]).Cross(points[2] - points[0]).Normalized();
-
-					if (triNorm.Dot(segmentB - segmentA) > 0.)
-						continue;
-
-					Plane plane(points.front(), triNorm);
 					float ratio = 0.;
 					Vector3f intersectPoint;
-					if (plane.Intersect(segmentA, segmentB, &intersectPoint, &ratio))
+					if (GeometryFunctions::SegmentTriangleIntersetion(
+						segmentA, segmentB, points[0], points[1], points[2], intersectPoint, &ratio))
 					{
-						Vector3f a_b_point_vector = (points[1] - points[0]).Cross(intersectPoint - points[0]);
-						Vector3f b_c_point_vector = (points[2] - points[1]).Cross(intersectPoint - points[1]);
-						Vector3f c_a_point_vector = (points[0] - points[2]).Cross(intersectPoint - points[2]);
-
-						bool inside =
-							triNorm.Dot(a_b_point_vector) > 0 &&
-							triNorm.Dot(b_c_point_vector) > 0 &&
-							triNorm.Dot(c_a_point_vector) > 0;
-						
-						if (!inside) continue;
-
 						if (ratio < minDist)
 						{
-							pos = intersectPoint;
 							minDist = ratio;
+							pos = intersectPoint;
+							obj = object;
 						}
 					}
 				}
 			}
 		}
 
-		render->position = pos;
+		if (minDist != (std::numeric_limits<float>::max)())
+		{
+			pointer->position = pos;
+			focusedPos = pos;
+			focusedObj = obj;
+		}
 	}
 
 	void MouseMoved(Vector2f mousePos, const Camera& camera)
 	{
-		mouseDirection = Vector3f(mousePos.x, mousePos.y, 1.).Normalized();
-		//render->position = ToVector3(camera.view.Inverse() * Vector4f(mouseDirection * 5, 1));
+		auto vec4 = camera.proj.Inverse() * Vector4f(mousePos.x, mousePos.y, 1, 1);
+		mouseDirection = ToVector3(vec4).Normalized();
+		//pointer->position = ToVector3(camera.view.Inverse() * Vector4f(mouseDirection * 5, 1));
 	}
 
-	std::shared_ptr<Object> pickedObj;
-	std::shared_ptr<BoundingBoxObject> render;
 	Vector3f mouseDirection;
-	Vector3f pickedPos;
+	std::shared_ptr<MeshObject> pointer;
+
+	std::shared_ptr<Object> focusedObj;
+	std::optional<Vector3f> focusedPos;
+
+	std::shared_ptr<Object> pickedObj;
+	std::optional<Vector3f> pickedPos;
 };

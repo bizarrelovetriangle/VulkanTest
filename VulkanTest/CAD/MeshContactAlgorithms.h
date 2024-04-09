@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <optional>
 #include <queue>
+#include "GeometryFunctions.h"
 
 struct ContactInfo
 {
@@ -65,7 +66,7 @@ public:
 		auto triPoints = minkowskiMesh.TrianglePoints(tri);
 
 		// face the triangle to the zero point
-		if (TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) < 0.)
+		if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) < 0.)
 			std::swap(minkowskiMesh.triangles[tri].vertices[0], minkowskiMesh.triangles[tri].vertices[2]);
 
 		uint32_t nearestTri = tri;
@@ -74,7 +75,7 @@ public:
 		{
 			auto nearestTriPoints = minkowskiMesh.TrianglePoints(nearestTri);
 			
-			direction = TrianglePointDir(nearestTriPoints[0], nearestTriPoints[1], nearestTriPoints[2], Vector3f::Zero());
+			direction = GeometryFunctions::TrianglePointDir(nearestTriPoints[0], nearestTriPoints[1], nearestTriPoints[2], Vector3f::Zero());
 			auto minkowskiDiff = MinkowskiDiff(direction, meshA, meshB);
 
 			if (minkowskiDiff == nearestTriPoints[0] || minkowskiDiff == nearestTriPoints[1] || minkowskiDiff == nearestTriPoints[2])
@@ -92,7 +93,7 @@ public:
 			uint32_t triC = minkowskiMesh.AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
 
 			// check only the newly created triangular pyramid
-			if (PointInsideTriangularPyramid(Vector3f::Zero(), minkowskiMesh, { triA, triB, triC }))
+			if (GeometryFunctions::PointInsideTriangularPyramid(Vector3f::Zero(), minkowskiMesh, { triA, triB, triC }))
 			{
 				result.contact = true;
 				break;
@@ -102,7 +103,7 @@ public:
 			auto newTriangle = std::find_if(triangles.begin(), triangles.end(), [&](uint32_t tri)
 				{
 					auto triPoints = minkowskiMesh.TrianglePoints(tri);
-					return TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) > 0.;
+					return GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) > 0.;
 				});
 
 			if (newTriangle == triangles.end()) break;
@@ -130,64 +131,6 @@ public:
 			farthest = (std::max)(farthest, pair);
 		}
 		return farthest.second;
-	}
-
-	bool PointInsideTriangularPyramid(const Vector3f& point, const MeshModel& mesh, const std::vector<uint32_t> triIndexes)
-	{
-		auto& meshPoints = mesh.points;
-		for (uint32_t triIndex : triIndexes)
-		{
-			auto& triVerts = mesh.triangles[triIndex].vertices;
-			float dist = TrianglePlanePointDist(
-				meshPoints[triVerts[0]], meshPoints[triVerts[1]], meshPoints[triVerts[2]], point);
-			if (dist > 0) return false;
-		}
-		return true;
-	}
-
-	float TrianglePlanePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
-	{
-		auto normal = (b - a).Cross(c - a).Normalized();
-		return normal.Dot(point - a);
-	}
-
-	float TrianglePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
-	{
-		// here we check if the point is inside a prism that created with sides and normal of the triangle
-		// if the point is outside two sides simultaniously, calculating the distance for only one of them will be sufficient
-		auto triNormal = (b - a).Cross(c - a);
-		Vector3f a_b_point_vector = (b - a).Cross(point - a);
-		Vector3f b_c_point_vector = (c - b).Cross(point - b);
-		Vector3f c_a_point_vector = (a - c).Cross(point - c);
-
-		auto test1 = triNormal.Dot(a_b_point_vector) > 0;
-		auto test2 = triNormal.Dot(b_c_point_vector) > 0;
-		auto test3 = triNormal.Dot(c_a_point_vector) > 0;
-
-		if (!test1) return LinePointDist(a, b, point);
-		if (!test2) return LinePointDist(b, c, point);
-		if (!test3) return LinePointDist(c, a, point);
-
-		auto normal = (b - a).Cross(c - a).Normalized();
-		float planeDist = std::abs(normal.Dot(point - a));
-		return planeDist;
-	}
-
-	float LinePointDist(const Vector3f& a, const Vector3f& b, const Vector3f& point)
-	{
-		auto a_b = b - a;
-		auto a_b_normalized = a_b.Normalized();
-		auto proj_length = a_b_normalized.Dot(point - a);
-		if (proj_length < 0.) return (point - a).Length();
-		if (proj_length > a_b.Length()) return (point - b).Length();
-		return (a_b_normalized * proj_length + a - point).Length();
-	}
-
-	Vector3f TrianglePointDir(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
-	{
-		auto normal = (b - a).Cross(c - a).Normalized();
-		float planeDist = normal.Dot(point - a);
-		return (normal * planeDist).Normalized();
 	}
 
 	void CreateObject(const MeshModel& mesh)

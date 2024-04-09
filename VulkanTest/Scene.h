@@ -70,8 +70,8 @@ public:
 		objects.push_back(std::move(object));
 
 		picker.Init(vulkanContext);
-		if (picker.render)
-			objects.push_back(picker.render);
+		if (picker.pointer)
+			objects.push_back(picker.pointer);
 	}
 
 	void Run()
@@ -89,7 +89,7 @@ public:
 			}
 
 			picker.Update(objects, camera);
-			camera.rotatePoint = picker.pickedPos;
+			//camera.rotatePoint = picker.pickedPos;
 			vulkanContext.DrawFrame(objects, camera);
 		}
 	}

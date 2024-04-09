@@ -24,7 +24,7 @@ public:
 class PropertiesUniform
 {
 public:
-	alignas(16) Vector4f baseColor;
+	alignas(16) Vector4f baseColor = Vector4f(0., 0.2, 0.2, 1.);
 	alignas(4) bool hasTexture = false;
 	alignas(4) bool hasColors = false;
 };
