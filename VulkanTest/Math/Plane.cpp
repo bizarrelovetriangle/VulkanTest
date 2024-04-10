@@ -45,12 +45,12 @@ Matrix4 Plane::getMatrix() const
 {
 	auto pos = normal * dist;
 	auto j = normal;
-	auto [i, k] = j.twoPerpendicularsForJ();
+	auto [i, k] = j.twoPerpendiculars();
 
 	Matrix4 asixRotate{
-		{i.x,     i.y,   i.z, 0.},
-		{j.x,     j.y,   j.z, 0.},
-		{k.x,     k.y,   k.z, 0.},
+		{i.x  ,   i.y,   i.z, 0.},
+		{j.x  ,   j.y,   j.z, 0.},
+		{k.x  ,   k.y,   k.z, 0.},
 		{pos.x, pos.y, pos.z, 1.} };
 
 	return asixRotate;

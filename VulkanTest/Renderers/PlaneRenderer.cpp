@@ -8,7 +8,7 @@
 #include "../VulkanContext.h"
 
 PlaneRenderer::PlaneRenderer(VulkanContext& vulkanContext)
-	: Renderer(vulkanContext)
+	: VertexedRenderer(vulkanContext)
 {
 	std::span<PlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
 	evenPlaneObjectUniformBuffer = BufferData::Create<PlaneObjectUniform>(
@@ -32,7 +32,7 @@ void PlaneRenderer::UpdatePlaneUniformBuffer()
 void PlaneRenderer::Dispose()
 {
 	evenPlaneObjectUniformBuffer->Dispose();
-	Renderer::Dispose();
+	VertexedRenderer::Dispose();
 }
 
 std::vector<vk::DescriptorSetLayoutBinding> PlaneRenderer::DescriptorSetLayoutBinding()
@@ -42,9 +42,4 @@ std::vector<vk::DescriptorSetLayoutBinding> PlaneRenderer::DescriptorSetLayoutBi
 		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
 		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
 	};
-}
-
-void PlaneRenderer::Accept(RenderVisitor& renderVisitor, const Camera& camera)
-{
-	renderVisitor.Visit(*this, camera);
 }

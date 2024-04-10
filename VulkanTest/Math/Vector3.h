@@ -109,22 +109,15 @@ public:
 	}
 
 	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
-	std::pair<Vector3<T>, Vector3<T>> twoPerpendicularsForJ()
+	std::pair<Vector3<T>, Vector3<T>> twoPerpendiculars()
 	{
 		Vector3f zPlus(0., 0., 1.);
 		Vector3f yPlus(0., 1., 0.);
 
 		auto j = this->Normalized();
-		auto i = (j.Cross(zPlus).Length() > 10e-8 ? j.Cross(zPlus) : j.Cross(yPlus)).Normalized();
-		auto k = i.Cross(j);
+		auto i = (j.Cross(zPlus).Length() > 10e-8 ? -j.Cross(zPlus) : -j.Cross(yPlus)).Normalized();
+		auto k = j.Cross(i);
 		return std::make_pair(i, k);
-	}
-
-	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
-	std::pair<Vector3<T>, Vector3<T>> twoPerpendicularsForK()
-	{
-		auto [i, j] = twoPerpendicularsForJ();
-		return std::make_pair(i, -j);
 	}
 
 	static Vector3<T> FromGLTF(const Vector3<T>& vec)

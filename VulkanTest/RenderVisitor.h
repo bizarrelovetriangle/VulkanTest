@@ -16,7 +16,6 @@ public:
 	RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex);
 
 	void Visit(Renderer& Renderer, const Camera& camera);
-	void Visit(PlaneRenderer& Renderer, const Camera& camera);
 	void Visit(VertexedRenderer& Renderer, const Camera& camera);
 
 private:

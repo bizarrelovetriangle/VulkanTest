@@ -1,11 +1,11 @@
 #pragma once
-#include "../Interfaces/Object.h"
+#include "../Interfaces/MeshObject.h"
 #include "../../Math/Plane.h"
 
-class PlaneObject : public Object
+class PlaneObject : public MeshObject
 {
 public:
 	PlaneObject(VulkanContext& vulkanContext, const Vector3f& position, const Vector3f& normal);
-	Plane plane;
 	virtual Matrix4 ComposeMatrix() const override;
+	Plane plane;
 };

@@ -38,8 +38,14 @@ public:
 		return { contact };
 	}
 
-	// Make Plane object meshefied
+	// EPA
 	// Update: GJK required to proceed through all points anyway
+	// 
+	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. Triangle normals
+	// But what about deleted triangles?..
+	// 
+	// Utilize Vulkan memory barriers
+	// 
 	// GJK algorithm not required points rotation.. Or not
 	// Shall we do what now. GJP for two convex bodies, look that out, test that out
 	void AddToTree(std::shared_ptr<MeshObject> meshObject)

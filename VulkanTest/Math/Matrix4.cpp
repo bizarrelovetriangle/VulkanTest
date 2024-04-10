@@ -31,7 +31,7 @@ Matrix4 Matrix4::Translation(const Vector3f& vec)
 Matrix4 Matrix4::LookAt(const Vector3f& from, const Vector3f& to)
 {
 	auto k = (to - from).Normalized();
-	auto [i, j] = k.twoPerpendicularsForK(); // j should be in one plane with k and z origin
+	auto [i, j] = k.twoPerpendiculars(); // j should be in one plane with k and z origin
 	auto rotate = Matrix4(Vector4f(i, 1.), Vector4f(j, 1.), Vector4f(k, 1.), Vector4f(0., 0., 0., 1.));
 	return Translation(from) * rotate;
 }
@@ -81,7 +81,7 @@ Matrix4 Matrix4::Rotate(const Vector4f& quaternion)
 	if (angle == 0) return Matrix4();
 
 	auto jA = Vector3f(quaternion.x, quaternion.y, quaternion.z) / std::sin(angle);
-	auto [iA, kA] = jA.twoPerpendicularsForJ(); // Why is it matter?
+	auto [iA, kA] = jA.twoPerpendiculars();
 
 	Matrix4 asixRotate{
 		{iA.x, jA.x, kA.x, 0.},

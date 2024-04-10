@@ -70,7 +70,7 @@ public:
 	template <class T>
 	static Vector4<T> QuaternionFromGLTF(const Vector4<T>& vec)
 	{
-		auto dir = -Vector3<T>::FromGLTF(Vector3<T>(vec.x, vec.y, vec.z));
+		auto dir = Vector3<T>::FromGLTF(Vector3<T>(vec.x, vec.y, vec.z));
 		return Vector4<T>(dir, vec.w);
 	}
 };

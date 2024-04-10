@@ -19,44 +19,28 @@ RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& comman
 {
 }
 
-void RenderVisitor::Visit(Renderer& Renderer, const Camera& camera)
+void RenderVisitor::Visit(Renderer& renderer, const Camera& camera)
 {
 }
 
-void RenderVisitor::Visit(PlaneRenderer& planeObject, const Camera& camera)
+void RenderVisitor::Visit(VertexedRenderer& renderer, const Camera& camera)
 {
-	auto& pipeline = *planeObject.shared->pipeline;
+	auto& pipeline = *renderer.shared->pipeline;
 	BindPipeline(pipeline);
 
 	commandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0,
-		planeObject.descriptorSets->descriptorSets[imageIndex], {});
+		renderer.descriptorSets->descriptorSets[imageIndex], {});
 
-	planeObject.transformUniform.view = camera.view;
-	planeObject.transformUniform.frustum = camera.proj;
-	planeObject.UpdateTransformUniformBuffer();
-
-	commandBuffer.draw(6, 1, 0, 0);
-}
-
-void RenderVisitor::Visit(VertexedRenderer& Renderer, const Camera& camera)
-{
-	auto& pipeline = *Renderer.shared->pipeline;
-	BindPipeline(pipeline);
-
-	commandBuffer.bindDescriptorSets(
-		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0,
-		Renderer.descriptorSets->descriptorSets[imageIndex], {});
-
-	vk::Buffer vertexBuffers[] = { Renderer.vertexBuffer->buffer };
+	vk::Buffer vertexBuffers[] = { renderer.vertexBuffer->buffer };
 	vk::DeviceSize vertexOffsets[] = { 0 };
 	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
 
-	Renderer.transformUniform.view = camera.view;
-	Renderer.transformUniform.frustum = camera.proj;
-	Renderer.UpdateTransformUniformBuffer();
+	renderer.transformUniform.view = camera.view;
+	renderer.transformUniform.frustum = camera.proj;
+	renderer.UpdateTransformUniformBuffer();
 
-	commandBuffer.draw(Renderer.vertexBuffer->count, 1, 0, 0);
+	commandBuffer.draw(renderer.vertexBuffer->count, 1, 0, 0);
 }
 
 void RenderVisitor::BindPipeline(Pipeline& pipeline)
