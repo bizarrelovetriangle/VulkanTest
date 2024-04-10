@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 class VulkanContext;
 class ImageData;
-class RenderObjectUniform;
+class RendererUniform;
 class BufferData;
 
 class DescriptorSets

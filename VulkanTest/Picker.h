@@ -17,7 +17,7 @@ class Picker
 public:
 	void Init(VulkanContext& vulkanContext)
 	{
-		auto pointerRenderer = std::make_unique<SimpleVertexedRenderObject>(vulkanContext);
+		auto pointerRenderer = std::make_unique<SimpleVertexedRenderer>(vulkanContext);
 		auto mesh = GeometryCreator::CreateIcosphere(0.1, 2);
 		pointer = std::make_shared<MeshObject>(std::move(mesh), std::move(pointerRenderer));
 		pointer->UpdateVertexBuffer();

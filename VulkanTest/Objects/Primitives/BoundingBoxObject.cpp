@@ -3,15 +3,15 @@
 #include "../../Vulkan/DescriptorSets.h"
 #include "../../Vulkan/Data/BufferData.h"
 #include "../../CAD/GeometryCreator.h"
-#include "../../RenderObjects/LinedRenderObject.h"
-#include "../../RenderObjects/SimpleVertexedRenderObject.h"
+#include "../../Renderers/LinedRenderer.h"
+#include "../../Renderers/SimpleVertexedRenderer.h"
 
 BoundingBoxObject::BoundingBoxObject(VulkanContext& vulkanContext, const BoundingBox& boundingBox, bool lined)
 	: boundingBox(boundingBox)
 {
 	renderer = lined
-		? std::unique_ptr<RenderObject>(std::make_unique<LinedRenderObject>(vulkanContext))
-		: std::unique_ptr<RenderObject>(std::make_unique<SimpleVertexedRenderObject>(vulkanContext));
+		? std::unique_ptr<Renderer>(std::make_unique<LinedRenderer>(vulkanContext))
+		: std::unique_ptr<Renderer>(std::make_unique<SimpleVertexedRenderer>(vulkanContext));
 	auto center = (boundingBox.aa + boundingBox.bb) / 2;
 	mesh = GeometryCreator::CreateBoxByTwoPoints(boundingBox.aa - center, boundingBox.bb - center);
 

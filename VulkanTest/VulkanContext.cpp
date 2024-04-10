@@ -25,7 +25,7 @@
 #include "Utils/GLTFReader.h"
 #include "Vulkan/CommandBufferDispatcher.h"
 #include "Objects/Interfaces/Object.h"
-#include "RenderObjects/Interfaces/RenderObject.h"
+#include "Renderers/Interfaces/Renderer.h"
 #include "Camera.h"
 
 #define GLFW_INCLUDE_VULKAN

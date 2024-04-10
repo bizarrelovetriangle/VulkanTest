@@ -1,4 +1,4 @@
-#include "VertexedRenderObject.h"
+#include "VertexedRenderer.h"
 #include "../../Utils/GLTFReader.h"
 #include "../../Vulkan/Data/DeviceMemory/DeviceMemory.h"
 #include "../../RenderVisitor.h"
@@ -22,14 +22,14 @@ std::vector<vk::VertexInputAttributeDescription> VertexData::AttributeDescriptio
 }
 
 
-VertexedRenderObject::VertexedRenderObject(VulkanContext& vulkanContext)
-	: RenderObject(vulkanContext)
+VertexedRenderer::VertexedRenderer(VulkanContext& vulkanContext)
+	: Renderer(vulkanContext)
 {
 }
 
-VertexedRenderObject::~VertexedRenderObject() = default;
+VertexedRenderer::~VertexedRenderer() = default;
 
-void VertexedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
+void VertexedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
 	if (vertexBuffer) vertexBuffer->Dispose();
 
@@ -52,14 +52,14 @@ void VertexedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 }
 
-void VertexedRenderObject::Accept(RenderVisitor& renderVisitor, const Camera& camera)
+void VertexedRenderer::Accept(RenderVisitor& renderVisitor, const Camera& camera)
 {
 	renderVisitor.Visit(*this, camera);
 }
 
-void VertexedRenderObject::Dispose()
+void VertexedRenderer::Dispose()
 {
-	RenderObject::Dispose();
+	Renderer::Dispose();
 	vertexBuffer->Dispose();
 }
 

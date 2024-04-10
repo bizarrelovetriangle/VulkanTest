@@ -29,11 +29,11 @@ public:
 	alignas(4) bool hasColors = false;
 };
 
-class RenderObjectShared
+class RendererShared
 {
 public:
-	RenderObjectShared(VulkanContext& vulkanContext);
-	~RenderObjectShared();
+	RendererShared(VulkanContext& vulkanContext);
+	~RendererShared();
 
 	vk::DescriptorSetLayout descriptorSetLayout;
 	std::vector<vk::VertexInputBindingDescription> vertexDataBindings;
@@ -47,7 +47,7 @@ private:
 };
 
 template <class T>
-class Shared : public RenderObjectShared
+class Shared : public RendererShared
 {
 public:
 	static std::shared_ptr<Shared<T>> getInstance(VulkanContext& vulkanContext, bool lined = false);
@@ -58,11 +58,11 @@ private:
 };
 
 
-class RenderObject
+class Renderer
 {
 public:
-	RenderObject(VulkanContext& vulkanContext);
-	virtual ~RenderObject();
+	Renderer(VulkanContext& vulkanContext);
+	virtual ~Renderer();
 
 	void UpdateTransformUniformBuffer();
 	void UpdatePropertiesUniformBuffer();
@@ -77,7 +77,7 @@ public:
 	std::unique_ptr<BufferData> propertiesUniformBuffer;
 
 	std::unique_ptr<DescriptorSets> descriptorSets;
-	std::shared_ptr<RenderObjectShared> shared;
+	std::shared_ptr<RendererShared> shared;
 
 protected:
 	VulkanContext& vulkanContext;

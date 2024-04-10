@@ -1,4 +1,4 @@
-#include "LinedRenderObject.h"
+#include "LinedRenderer.h"
 #include "../RenderVisitor.h"
 #include "../Vulkan/DescriptorSets.h"
 #include "../Utils/GLTFReader.h"
@@ -21,16 +21,16 @@ std::vector<vk::VertexInputAttributeDescription> LinedVertexData::AttributeDescr
 	return { positionDescription, colorDescription };
 }
 
-LinedRenderObject::LinedRenderObject(VulkanContext& vulkanContext, std::vector<Vector4f> colors)
-	: VertexedRenderObject(vulkanContext), colors(colors)
+LinedRenderer::LinedRenderer(VulkanContext& vulkanContext, std::vector<Vector4f> colors)
+	: VertexedRenderer(vulkanContext), colors(colors)
 {
-	shared = Shared<LinedRenderObject>::getInstance(vulkanContext, true);
+	shared = Shared<LinedRenderer>::getInstance(vulkanContext, true);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
 	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
 }
 
-void LinedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
+void LinedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
 	if (vertexBuffer) vertexBuffer->Dispose();
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "../Objects/Interfaces/Object.h"
-#include "../RenderObjects/LinedRenderObject.h"
+#include "../Renderers/LinedRenderer.h"
 
 class Deserializer
 {
@@ -11,20 +11,20 @@ public:
 
 	std::unique_ptr<MeshObject> Deserialize(SerializedObject& serializedObject)
 	{
-		std::unique_ptr<VertexedRenderObject> renderer;
+		std::unique_ptr<VertexedRenderer> renderer;
 
 		if (serializedObject.textureData.has_value())
 		{
-			renderer = std::make_unique<TexturedRenderObject>(vulkanContext_,
+			renderer = std::make_unique<TexturedRenderer>(vulkanContext_,
 				*serializedObject.textureData, serializedObject.textureCoords);
 		}
 		else if (!serializedObject.colors.empty())
 		{
-			renderer = std::make_unique<ColoredRenderObject>(vulkanContext_, serializedObject.colors);
+			renderer = std::make_unique<ColoredRenderer>(vulkanContext_, serializedObject.colors);
 		}
 		else if (!serializedObject.indexes.empty())
 		{
-			renderer = std::make_unique<LinedRenderObject>(vulkanContext_);
+			renderer = std::make_unique<LinedRenderer>(vulkanContext_);
 		}
 
 		renderer->propertiesUniform.baseColor = serializedObject.baseColor;

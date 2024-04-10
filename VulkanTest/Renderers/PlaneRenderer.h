@@ -1,5 +1,5 @@
 #pragma once
-#include "Interfaces/VertexedRenderObject.h"
+#include "Interfaces/VertexedRenderer.h"
 
 class RenderVisitor;
 class BufferData;
@@ -11,11 +11,11 @@ public:
 	alignas(4) bool grided = true;
 };
 
-class PlaneRenderObject : public RenderObject
+class PlaneRenderer : public Renderer
 {
 public:
-	PlaneRenderObject(VulkanContext& vulkanContext);
-	~PlaneRenderObject();
+	PlaneRenderer(VulkanContext& vulkanContext);
+	~PlaneRenderer();
 	void UpdatePlaneUniformBuffer();
 	virtual void Dispose() override;
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();

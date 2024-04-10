@@ -5,12 +5,12 @@
 
 class SwapChain;
 class VulkanContext;
-class RenderObjectShared;
+class RendererShared;
 
 class Pipeline
 {
 public:
-	Pipeline(VulkanContext& vulkanContext, RenderObjectShared& renderObjectShared, bool lined);
+	Pipeline(VulkanContext& vulkanContext, RendererShared& RendererShared, bool lined);
 	void Dispose();
 
 public:

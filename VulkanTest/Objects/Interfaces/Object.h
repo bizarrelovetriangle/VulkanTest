@@ -1,6 +1,6 @@
 #pragma once
 #pragma once
-#include "../../RenderObjects/Interfaces/RenderObject.h"
+#include "../../Renderers/Interfaces/Renderer.h"
 #include "../../CAD/MeshModel.h"
 #include "../../RenderVisitor.h"
 #include "../../Camera.h"
@@ -12,7 +12,7 @@ public:
 	{
 	}
 
-	Object(std::unique_ptr<RenderObject> renderer)
+	Object(std::unique_ptr<Renderer> renderer)
 		: renderer(std::move(renderer))
 	{
 	}
@@ -48,5 +48,5 @@ public:
 
 	Vector3f scale = Vector3f(1., 1., 1.);
 
-	std::unique_ptr<RenderObject> renderer;
+	std::unique_ptr<Renderer> renderer;
 };

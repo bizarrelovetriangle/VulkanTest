@@ -1,5 +1,5 @@
 #pragma once
-#include "../../RenderObjects/Interfaces/VertexedRenderObject.h"
+#include "../../Renderers/Interfaces/VertexedRenderer.h"
 #include "../../CAD/MeshModel.h"
 #include "Object.h"
 
@@ -10,7 +10,7 @@ public:
 	{
 	}
 
-	MeshObject(std::unique_ptr<MeshModel> mesh, std::unique_ptr<VertexedRenderObject> renderer)
+	MeshObject(std::unique_ptr<MeshModel> mesh, std::unique_ptr<VertexedRenderer> renderer)
 		: mesh(std::move(mesh)), Object(std::move(renderer))
 	{
 
@@ -18,7 +18,7 @@ public:
 
 	void UpdateVertexBuffer()
 	{
-		auto& vertexedRendered = *((VertexedRenderObject*)renderer.get());
+		auto& vertexedRendered = *((VertexedRenderer*)renderer.get());
 		vertexedRendered.UpdateVertexBuffer(*mesh);
 	}
 

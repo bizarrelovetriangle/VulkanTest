@@ -1,13 +1,13 @@
 #pragma once
-#include "Interfaces/VertexedRenderObject.h"
+#include "Interfaces/VertexedRenderer.h"
 
 class VulkanContext;
 struct DeserializedObject;
 
-class SimpleVertexedRenderObject : public VertexedRenderObject
+class SimpleVertexedRenderer : public VertexedRenderer
 {
 public:
-	SimpleVertexedRenderObject(VulkanContext& vulkanContext);
+	SimpleVertexedRenderer(VulkanContext& vulkanContext);
 
 public:
 	inline static std::string VertexShader =

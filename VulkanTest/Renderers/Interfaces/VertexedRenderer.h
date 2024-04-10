@@ -1,5 +1,5 @@
 #pragma once
-#include "RenderObject.h"
+#include "Renderer.h"
 
 struct DeserializedObjectVertexData;
 class MeshModel;
@@ -15,12 +15,12 @@ public:
 	Vector3f normal;
 };
 
-class VertexedRenderObject : public RenderObject
+class VertexedRenderer : public Renderer
 {
 public:
 	using VertexDataType = VertexData;
-	VertexedRenderObject(VulkanContext& vulkanContext);
-	~VertexedRenderObject();
+	VertexedRenderer(VulkanContext& vulkanContext);
+	~VertexedRenderer();
 	virtual void UpdateVertexBuffer(const MeshModel& mesh);
 	virtual void Accept(RenderVisitor& renderVisitor, const Camera& camera);
 	virtual void Dispose() override;

@@ -1,5 +1,5 @@
 #pragma once
-#include "Interfaces/VertexedRenderObject.h"
+#include "Interfaces/VertexedRenderer.h"
 
 class VulcanContext;
 struct DeserializedObject;
@@ -17,14 +17,14 @@ public:
 	Vector2f textureCoord;
 };
 
-class TexturedRenderObject : public VertexedRenderObject
+class TexturedRenderer : public VertexedRenderer
 {
 public:
 	using VertexDataType = TexturedVertexData;
 
-	TexturedRenderObject(VulkanContext& vulkanContext,
+	TexturedRenderer(VulkanContext& vulkanContext,
 		std::pair<Vector2u, std::vector<std::byte>> textureData, const std::vector<Vector2f>& textureCoords);
-	~TexturedRenderObject();
+	~TexturedRenderer();
 	virtual void UpdateVertexBuffer(const MeshModel& mesh) override;
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
 	void Dispose();

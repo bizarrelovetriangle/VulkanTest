@@ -2,7 +2,7 @@
 #include "../Math/Vector3.h"
 #include "../Math/Vector2.h"
 #include "../Math/Matrix4.h"
-#include "Interfaces/VertexedRenderObject.h"
+#include "Interfaces/VertexedRenderer.h"
 
 class VulcanContext;
 struct DeserializedObject;
@@ -19,11 +19,11 @@ public:
 	Vector4f color;
 };
 
-class ColoredRenderObject : public VertexedRenderObject
+class ColoredRenderer : public VertexedRenderer
 {
 public:
 	using VertexDataType = ColoredVertexData;
-	ColoredRenderObject(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors);
+	ColoredRenderer(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors);
 	virtual void UpdateVertexBuffer(const MeshModel& mesh) override;
 
 public:

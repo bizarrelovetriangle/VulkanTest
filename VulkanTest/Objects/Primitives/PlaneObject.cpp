@@ -1,11 +1,11 @@
 #include "PlaneObject.h"
-#include "../../RenderObjects/PlaneRenderObject.h"
+#include "../../Renderers/PlaneRenderer.h"
 
 PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position, const Vector3f& normal)
 {
 	plane = Plane(position, normal);
 
-	auto planeRenderer = std::make_unique<PlaneRenderObject>(vulkanContext);
+	auto planeRenderer = std::make_unique<PlaneRenderer>(vulkanContext);
 
 	planeRenderer->transformUniform.model = plane.getMatrix();
 	planeRenderer->UpdateTransformUniformBuffer();

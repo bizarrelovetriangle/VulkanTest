@@ -1,4 +1,4 @@
-#include "PlaneRenderObject.h"
+#include "PlaneRenderer.h"
 #include "../RenderVisitor.h"
 #include "../Vulkan/DescriptorSets.h"
 #include "../Utils/GLTFReader.h"
@@ -7,35 +7,35 @@
 #include "../RenderVisitor.h"
 #include "../VulkanContext.h"
 
-PlaneRenderObject::PlaneRenderObject(VulkanContext& vulkanContext)
-	: RenderObject(vulkanContext)
+PlaneRenderer::PlaneRenderer(VulkanContext& vulkanContext)
+	: Renderer(vulkanContext)
 {
 	std::span<PlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
 	evenPlaneObjectUniformBuffer = BufferData::Create<PlaneObjectUniform>(
 		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 
-	shared = Shared<PlaneRenderObject>::getInstance(vulkanContext);
+	shared = Shared<PlaneRenderer>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
 	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
 	descriptorSets->UpdateUniformDescriptor(*evenPlaneObjectUniformBuffer, 2);
 }
 
-PlaneRenderObject::~PlaneRenderObject() = default;
+PlaneRenderer::~PlaneRenderer() = default;
 
-void PlaneRenderObject::UpdatePlaneUniformBuffer()
+void PlaneRenderer::UpdatePlaneUniformBuffer()
 {
 	std::span<PlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
 	evenPlaneObjectUniformBuffer->FlushData(uniformSpan);
 }
 
-void PlaneRenderObject::Dispose()
+void PlaneRenderer::Dispose()
 {
 	evenPlaneObjectUniformBuffer->Dispose();
-	RenderObject::Dispose();
+	Renderer::Dispose();
 }
 
-std::vector<vk::DescriptorSetLayoutBinding> PlaneRenderObject::DescriptorSetLayoutBinding()
+std::vector<vk::DescriptorSetLayoutBinding> PlaneRenderer::DescriptorSetLayoutBinding()
 {
 	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
@@ -44,7 +44,7 @@ std::vector<vk::DescriptorSetLayoutBinding> PlaneRenderObject::DescriptorSetLayo
 	};
 }
 
-void PlaneRenderObject::Accept(RenderVisitor& renderVisitor, const Camera& camera)
+void PlaneRenderer::Accept(RenderVisitor& renderVisitor, const Camera& camera)
 {
 	renderVisitor.Visit(*this, camera);
 }

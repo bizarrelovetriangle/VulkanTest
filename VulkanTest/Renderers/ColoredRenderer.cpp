@@ -1,4 +1,4 @@
-#include "ColoredRenderObject.h"
+#include "ColoredRenderer.h"
 #include "../RenderVisitor.h"
 #include "../Vulkan/DescriptorSets.h"
 #include "../Utils/GLTFReader.h"
@@ -26,16 +26,16 @@ std::vector<vk::VertexInputAttributeDescription> ColoredVertexData::AttributeDes
 }
 
 
-ColoredRenderObject::ColoredRenderObject(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors)
-	: VertexedRenderObject(vulkanContext), colors(colors)
+ColoredRenderer::ColoredRenderer(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors)
+	: VertexedRenderer(vulkanContext), colors(colors)
 {
-	shared = Shared<ColoredRenderObject>::getInstance(vulkanContext);
+	shared = Shared<ColoredRenderer>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
 	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
 }
 
-void ColoredRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
+void ColoredRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
 	if (vertexBuffer) vertexBuffer->Dispose();
 

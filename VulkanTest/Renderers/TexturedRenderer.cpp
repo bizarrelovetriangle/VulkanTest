@@ -1,4 +1,4 @@
-#include "TexturedRenderObject.h"
+#include "TexturedRenderer.h"
 #include "../RenderVisitor.h"
 #include "../Vulkan/DescriptorSets.h"
 #include "../Vulkan/DeviceController.h"
@@ -27,9 +27,9 @@ std::vector<vk::VertexInputAttributeDescription> TexturedVertexData::AttributeDe
 }
 
 
-TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext,
+TexturedRenderer::TexturedRenderer(VulkanContext& vulkanContext,
 	std::pair<Vector2u, std::vector<std::byte>> textureData, const std::vector<Vector2f>& textureCoords)
-	: VertexedRenderObject(vulkanContext), textureData(textureData), textureCoords(textureCoords)
+	: VertexedRenderer(vulkanContext), textureData(textureData), textureCoords(textureCoords)
 {
 	auto& [resolution, imageData] = textureData;
 	textureBuffer = std::make_unique<ImageData>(
@@ -38,16 +38,16 @@ TexturedRenderObject::TexturedRenderObject(VulkanContext& vulkanContext,
 	textureBuffer->FlushData(imageData);
 	textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
-	shared = Shared<TexturedRenderObject>::getInstance(vulkanContext);
+	shared = Shared<TexturedRenderer>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
 	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
 	descriptorSets->UpdateImageDescriptor(*textureBuffer, 2);
 }
 
-TexturedRenderObject::~TexturedRenderObject() = default;
+TexturedRenderer::~TexturedRenderer() = default;
 
-void TexturedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
+void TexturedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
 	if (vertexBuffer) vertexBuffer->Dispose();
 
@@ -71,7 +71,7 @@ void TexturedRenderObject::UpdateVertexBuffer(const MeshModel& mesh)
 		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 }
 
-std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderObject::DescriptorSetLayoutBinding()
+std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderer::DescriptorSetLayoutBinding()
 {
 	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
@@ -80,8 +80,8 @@ std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderObject::DescriptorSetL
 	};
 }
 
-void TexturedRenderObject::Dispose()
+void TexturedRenderer::Dispose()
 {
-	VertexedRenderObject::Dispose();
+	VertexedRenderer::Dispose();
 	textureBuffer->Dispose();
 }

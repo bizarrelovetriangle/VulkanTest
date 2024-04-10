@@ -4,7 +4,7 @@
 #include "SwapChain.h"
 #include "Data/BufferData.h"
 #include "Data/ImageData.h"
-#include "../RenderObjects/Interfaces/RenderObject.h"
+#include "../Renderers/Interfaces/Renderer.h"
 
 DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout)
 	: vulkanContext(vulkanContext), descriptorSetLayout(descriptorSetLayout)

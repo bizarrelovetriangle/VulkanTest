@@ -1,16 +1,16 @@
 #include "BufferData.h"
 #include "../DeviceController.h"
-#include "../../RenderObjects/Interfaces/RenderObject.h"
+#include "../../Renderers/Interfaces/Renderer.h"
 #include "../../VulkanContext.h"
 #include "../QueueFamilies.h"
 #include "../CommandBuffer.h"
 #include "../CommandBufferDispatcher.h"
-#include "../../RenderObjects/Interfaces/RenderObject.h"
-#include "../../RenderObjects/TexturedRenderObject.h"
-#include "../../RenderObjects/ColoredRenderObject.h"
-#include "../../RenderObjects/SimpleVertexedRenderObject.h"
-#include "../../RenderObjects/PlaneRenderObject.h"
-#include "../../RenderObjects/LinedRenderObject.h"
+#include "../../Renderers/Interfaces/Renderer.h"
+#include "../../Renderers/TexturedRenderer.h"
+#include "../../Renderers/ColoredRenderer.h"
+#include "../../Renderers/SimpleVertexedRenderer.h"
+#include "../../Renderers/PlaneRenderer.h"
+#include "../../Renderers/LinedRenderer.h"
 
 template <class T>
 std::unique_ptr<BufferData> BufferData::Create(VulkanContext& vulkanContext,

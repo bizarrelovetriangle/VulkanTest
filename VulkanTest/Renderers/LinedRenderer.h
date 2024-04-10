@@ -1,5 +1,5 @@
 #pragma once
-#include "Interfaces/VertexedRenderObject.h"
+#include "Interfaces/VertexedRenderer.h"
 
 class VulkanContext;
 struct DeserializedObject;
@@ -16,11 +16,11 @@ public:
 };
 
 
-class LinedRenderObject : public VertexedRenderObject
+class LinedRenderer : public VertexedRenderer
 {
 public:
 	using VertexDataType = LinedVertexData;
-	LinedRenderObject(VulkanContext& vulkanContext, std::vector<Vector4f> colors = {});
+	LinedRenderer(VulkanContext& vulkanContext, std::vector<Vector4f> colors = {});
 	virtual void UpdateVertexBuffer(const MeshModel& mesh) override;
 
 	std::vector<Vector4f> colors;

@@ -1,8 +1,8 @@
 #pragma once
 #include "../Objects/Interfaces/MeshObject.h"
-#include "../RenderObjects/ColoredRenderObject.h"
-#include "../RenderObjects/LinedRenderObject.h"
-#include "../RenderObjects/SimpleVertexedRenderObject.h"
+#include "../Renderers/ColoredRenderer.h"
+#include "../Renderers/LinedRenderer.h"
+#include "../Renderers/SimpleVertexedRenderer.h"
 #include <unordered_set>
 #include <optional>
 #include <queue>
@@ -135,30 +135,30 @@ public:
 
 	void CreateObject(const MeshModel& mesh)
 	{
-		auto renderer = std::make_unique<SimpleVertexedRenderObject>(vulkanContext);
+		auto renderer = std::make_unique<SimpleVertexedRenderer>(vulkanContext);
 		auto minkowskiObj = std::make_unique<MeshObject>(std::make_unique<MeshModel>(mesh), std::move(renderer));
 
 		minkowskiObj->renderer->propertiesUniform.baseColor = Vector4(0.3, 0.1, 0.1, 1.);
 		minkowskiObj->renderer->UpdatePropertiesUniformBuffer();
 		minkowskiObj->UpdateVertexBuffer();
-		renderObjects.insert(std::move(minkowskiObj));
+		Renderers.insert(std::move(minkowskiObj));
 	}
 
 	void Render(RenderVisitor& renderVisitor, const Camera& camera)
 	{
-		for (auto& renderObject : renderObjects)
-			renderObject->Render(renderVisitor, camera);
+		for (auto& Renderer : Renderers)
+			Renderer->Render(renderVisitor, camera);
 	}
 
 	void Dispose()
 	{
-		for (auto& renderObject : renderObjects)
-			renderObject->Dispose();
+		for (auto& Renderer : Renderers)
+			Renderer->Dispose();
 
-		renderObjects.clear();
+		Renderers.clear();
 	}
 
 private:
 	VulkanContext& vulkanContext;
-	std::unordered_set<std::shared_ptr<MeshObject>> renderObjects;
+	std::unordered_set<std::shared_ptr<MeshObject>> Renderers;
 };

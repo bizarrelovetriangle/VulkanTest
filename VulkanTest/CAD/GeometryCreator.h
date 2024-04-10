@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "../RenderObjects/Interfaces/VertexedRenderObject.h"
+#include "../Renderers/Interfaces/VertexedRenderer.h"
 
 class MeshModel;
 

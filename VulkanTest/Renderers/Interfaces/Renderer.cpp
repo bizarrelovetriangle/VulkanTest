@@ -1,4 +1,4 @@
-#include "RenderObject.h"
+#include "Renderer.h"
 #include "../../RenderVisitor.h"
 #include "../../Vulkan/DescriptorSets.h"
 #include "../../Utils/GLTFReader.h"
@@ -6,20 +6,20 @@
 #include "../../VulkanContext.h"
 #include "../../Utils/GLTFReader.h"
 #include "../../Vulkan/Pipeline.h"
-#include "../SimpleVertexedRenderObject.h"
-#include "../ColoredRenderObject.h"
-#include "../TexturedRenderObject.h"
-#include "../PlaneRenderObject.h"
+#include "../SimpleVertexedRenderer.h"
+#include "../ColoredRenderer.h"
+#include "../TexturedRenderer.h"
+#include "../PlaneRenderer.h"
 #include "../../Objects/Primitives/BoundingBoxObject.h"
-#include "../Interfaces/VertexedRenderObject.h"
-#include "../LinedRenderObject.h"
+#include "../Interfaces/VertexedRenderer.h"
+#include "../LinedRenderer.h"
 
-RenderObjectShared::RenderObjectShared(VulkanContext& vulkanContext)
+RendererShared::RendererShared(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
 {
 }
 
-RenderObjectShared::~RenderObjectShared()
+RendererShared::~RendererShared()
 {
 	auto& device = vulkanContext.deviceController->device;
 	device.destroyDescriptorSetLayout(descriptorSetLayout);
@@ -39,14 +39,14 @@ std::shared_ptr<Shared<T>> Shared<T>::getInstance(VulkanContext& vulkanContext, 
 
 template <class T>
 Shared<T>::Shared(VulkanContext& vulkanContext, bool lined)
-	: RenderObjectShared(vulkanContext)
+	: RendererShared(vulkanContext)
 {
 	auto& device = vulkanContext.deviceController->device;
 	auto bindings = T::DescriptorSetLayoutBinding();
 	vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, bindings);
 	descriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
 
-	if constexpr (std::is_base_of_v<VertexedRenderObject, T>)
+	if constexpr (std::is_base_of_v<VertexedRenderer, T>)
 	{
 		vertexDataBindings = { T::VertexDataType::BindingDescription() };
 		vertexDataAttributes = T::VertexDataType::AttributeDescriptions();
@@ -61,7 +61,7 @@ template <class T>
 std::weak_ptr<Shared<T>> Shared<T>::instance;
 
 
-RenderObject::RenderObject(VulkanContext& vulkanContext)
+Renderer::Renderer(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
 {
 	std::span<TransformUniform> transformUniformSpan(&transformUniform, &transformUniform + 1);
@@ -73,21 +73,21 @@ RenderObject::RenderObject(VulkanContext& vulkanContext)
 		vulkanContext, propertiesUniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 }
 
-RenderObject::~RenderObject() = default;
+Renderer::~Renderer() = default;
 
-void RenderObject::UpdateTransformUniformBuffer()
+void Renderer::UpdateTransformUniformBuffer()
 {
 	std::span<TransformUniform> uniformSpan(&transformUniform, &transformUniform + 1);
 	transformUniformBuffer->FlushData(uniformSpan);
 }
 
-void RenderObject::UpdatePropertiesUniformBuffer()
+void Renderer::UpdatePropertiesUniformBuffer()
 {
 	std::span<PropertiesUniform> uniformSpan(&propertiesUniform, &propertiesUniform + 1);
 	propertiesUniformBuffer->FlushData(uniformSpan);
 }
 
-std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBinding()
+std::vector<vk::DescriptorSetLayoutBinding> Renderer::DescriptorSetLayoutBinding()
 {
 	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
@@ -95,12 +95,12 @@ std::vector<vk::DescriptorSetLayoutBinding> RenderObject::DescriptorSetLayoutBin
 	};
 }
 
-void RenderObject::Accept(RenderVisitor& renderVisitor, const Camera& camera)
+void Renderer::Accept(RenderVisitor& renderVisitor, const Camera& camera)
 {
 	renderVisitor.Visit(*this, camera);
 }
 
-void RenderObject::Dispose()
+void Renderer::Dispose()
 {
 	transformUniformBuffer->Dispose();
 	propertiesUniformBuffer->Dispose();
@@ -108,8 +108,8 @@ void RenderObject::Dispose()
 	shared.reset();
 }
 
-template Shared<SimpleVertexedRenderObject>;
-template Shared<LinedRenderObject>;
-template Shared<ColoredRenderObject>;
-template Shared<TexturedRenderObject>;
-template Shared<PlaneRenderObject>;
+template Shared<SimpleVertexedRenderer>;
+template Shared<LinedRenderer>;
+template Shared<ColoredRenderer>;
+template Shared<TexturedRenderer>;
+template Shared<PlaneRenderer>;
