@@ -22,6 +22,7 @@ struct Triangle
 {
 	std::array<uint32_t, 3> vertices;
 	std::array<Edge, 3> edges;
+	uint32_t index;
 };
 
 struct KeyHasher
@@ -51,6 +52,7 @@ public:
 
 		for (size_t i = 0; i < indexes.size() / 3; ++i) {
 			auto& triangle = triangles.at(i);
+			triangle.index = i;
 
 			for (int j = 0; j < 3; ++j) {
 				size_t org = indexes.at(i * 3 + j);
@@ -69,6 +71,7 @@ public:
 	{
 		uint32_t triIndex = triangles.size();
 		Triangle triangle;
+		triangle.index = triIndex;
 
 		for (int j = 0; j < 3; ++j) {
 			size_t org = indexes.at(j);
@@ -87,8 +90,6 @@ public:
 	void DeleteTriangle(uint32_t tri)
 	{
 		triangleBitVector[tri] = true;
-		// todo: using of bitvector?
-		//triangles.erase(triangles.begin() + triangle);
 	}
 
 	uint32_t Origin(const Edge& edge)

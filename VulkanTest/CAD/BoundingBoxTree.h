@@ -33,7 +33,7 @@ public:
 	{
 		auto pair = std::make_pair(boundingBoxes[0].sceneObject, boundingBoxes[1].sceneObject);
 
-		auto contact = meshContactAlgorithms.GJK(*pair.first, *pair.second);
+		auto contact = meshContactAlgorithms.CheckContact(pair.first, pair.second);
 
 		return { contact };
 	}
@@ -128,7 +128,7 @@ public:
 	int64_t FindBestNeighbour(BoundingBox& newBoundingBox)
 	{
 		using type = std::pair<float, int64_t>;
-		auto less = [](type& a, type& b) { return a.first < b.first; }; // ??? lool todo, should be great
+		auto less = [](type& a, type& b) { return a.first > b.first; };
 		std::priority_queue<type, std::vector<type>, decltype(less)> pq(less);
 		pq.push(std::make_pair(0., rootBoundingBoxIndex));
 		type bestNeighbour = std::make_pair((std::numeric_limits<float>::max)(), -1);

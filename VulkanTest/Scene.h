@@ -56,12 +56,12 @@ public:
 		objects.push_back(std::dynamic_pointer_cast<Object>(boundingBoxTree));
 
 		auto& icosphere = objects[0];
-		icosphere->position -= Vector3f(1, 0., 0.);
+		icosphere->position += Vector3f(0.1, 0., 0.);
 
 		// Center point
 		auto object = deserializer.Deserialize(glTFReader.serializedObjects.front());
 		object->position = Vector3f();
-		object->scale = Vector3f(0.1, 0.1, 0.1);
+		object->scale = Vector3f(0.03, 0.03, 0.03);
 		object->renderer->transformUniform.model = object->ComposeMatrix();
 		object->renderer->UpdateTransformUniformBuffer();
 		object->renderer->propertiesUniform.baseColor = Vector4f(1., 0., 1., 1.);
@@ -90,7 +90,8 @@ public:
 
 			picker.Update(objects, camera);
 			//camera.rotatePoint = picker.pickedPos;
-			vulkanContext.DrawFrame(objects, camera);
+			auto copy = std::vector(objects.begin() + 0, objects.end());
+			vulkanContext.DrawFrame(copy, camera);
 		}
 	}
 
