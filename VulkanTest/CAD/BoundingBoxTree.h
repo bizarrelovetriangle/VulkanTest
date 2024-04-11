@@ -38,10 +38,13 @@ public:
 		return { contact };
 	}
 
-	// EPA
+	// Text click move broken.
+	// 
+	// Make EPA return original points. Clipping. Look how clipping work in my prev project
 	// Update: GJK required to proceed through all points anyway
 	// 
-	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. Triangle normals
+	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
+	// How to deal with triangle normals. Geometrical shader
 	// But what about deleted triangles?..
 	// 
 	// Utilize Vulkan memory barriers

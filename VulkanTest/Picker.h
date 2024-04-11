@@ -72,12 +72,39 @@ public:
 		}
 	}
 
+	void Pick()
+	{
+		if (focusedObj)
+		{
+			pickedObj = focusedObj;
+			pickedPos = focusedPos;
+		}
+	}
+
+	void UnPick()
+	{
+		pickedObj = nullptr;
+		pickedPos = std::nullopt;
+	}
+
 	void MouseMoved(Vector2f mousePos, const Camera& camera)
 	{
+		this->mousePos = mousePos;
 		auto vec4 = camera.proj.Inverse() * Vector4f(mousePos.x, mousePos.y, 1, 1);
 		mouseDirection = Vector3f(vec4).Normalized();
-		//pointer->position = ToVector3(camera.view.Inverse() * Vector4f(mouseDirection * 5, 1));
+		//pointer->position = camera.view.Inverse() * Vector4f(mouseDirection * 5, 1);
+
+		if (pickedObj)
+		{
+			auto inverseView = camera.view.Inverse();
+			Vector3f pickedPosView = camera.view * Vector4f(*pickedPos, 1);
+			Vector3f newPos = inverseView * Vector4f(mouseDirection * pickedPosView.Length(), 1.);
+			pickedObj->position += newPos - *pickedPos;
+			*pickedPos = newPos;
+		}
 	}
+
+	Vector2f mousePos;
 
 	Vector3f mouseDirection;
 	std::shared_ptr<MeshObject> pointer;

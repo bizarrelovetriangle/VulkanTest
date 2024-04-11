@@ -138,7 +138,7 @@ public:
 		}
 
 		type bestSoFar = std::make_pair(-(std::numeric_limits<float>::max)(), 0);
-		while (true)
+		for (int i = 0; i < 10; ++i)
 		{
 			bestSoFar = triangleDistPQ.top();
 			auto& [dist, nearestTri] = bestSoFar;

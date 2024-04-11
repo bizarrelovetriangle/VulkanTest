@@ -136,8 +136,14 @@ public:
 			scene->camera.MouseRightDown(down);
 		if (button == GLFW_MOUSE_BUTTON_MIDDLE)
 			scene->camera.MouseMiddleDown(down);
-		if (scene->scrollMode && button == GLFW_MOUSE_BUTTON_LEFT)
-			scene->camera.MouseMiddleDown(down);
+		if (button == GLFW_MOUSE_BUTTON_LEFT)
+		{
+			if (scene->scrollMode)
+				scene->camera.MouseMiddleDown(down);
+			else
+				if (down) scene->picker.Pick();
+				else scene->picker.UnPick();
+		}
 	}
 
 	~Scene()
