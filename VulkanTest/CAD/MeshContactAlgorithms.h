@@ -38,17 +38,13 @@ public:
 		// todo: get rid of it. I need reversed matrix for this
 		auto modelA = objectA->ComposeMatrix();
 		auto meshA = MeshModel(*objectA->mesh);
-		for (auto& point : meshA.points) {
-			auto vec4 = modelA * Vector4f(point, 1.);
-			point = Vector3f(vec4.x, vec4.y, vec4.z);
-		}
+		for (auto& point : meshA.points)
+			point = modelA * Vector4f(point, 1.);
 
 		auto modelB = objectB->ComposeMatrix();
 		auto meshB = MeshModel(*objectB->mesh);
-		for (auto& point : meshB.points) {
-			auto vec4 = modelB * Vector4f(point, 1.);
-			point = Vector3f(vec4.x, vec4.y, vec4.z);
-		}
+		for (auto& point : meshB.points)
+			point = modelB * Vector4f(point, 1.);
 
 		GJK(meshA, meshB, contactInfo);
 
@@ -77,14 +73,12 @@ public:
 		auto minkowskiDiffC = MinkowskiDiff(direction, meshA, meshB);
 		contactInfo.gjkTriangular->points.push_back(minkowskiDiffC);
 
-		uint32_t tri = contactInfo.gjkTriangular->AddTriangle({ 0, 1, 2 });
-		auto triPoints = contactInfo.gjkTriangular->TrianglePoints(tri);
+		uint32_t nearestTri = contactInfo.gjkTriangular->AddTriangle({ 0, 1, 2 });
 
 		// face the triangle to the zero point
+		auto triPoints = contactInfo.gjkTriangular->TrianglePoints(nearestTri);
 		if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) < 0.)
-			std::swap(contactInfo.gjkTriangular->triangles[tri].vertices[0], contactInfo.gjkTriangular->triangles[tri].vertices[2]);
-
-		uint32_t nearestTri = tri;
+			std::swap(contactInfo.gjkTriangular->triangles[nearestTri].vertices[0], contactInfo.gjkTriangular->triangles[nearestTri].vertices[2]);
 
 		for (int i = 0; i < 10; ++i)
 		{

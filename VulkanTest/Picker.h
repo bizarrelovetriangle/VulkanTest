@@ -4,14 +4,6 @@
 #include "Camera.h"
 #include "CAD/GeometryCreator.h"
 
-namespace
-{
-	Vector3f ToVector3(const Vector4f& vec)
-	{
-		return {vec.x, vec.y, vec.z};
-	}
-}
-
 class Picker
 {
 public:
@@ -28,8 +20,8 @@ public:
 	void Update(const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
 	{
 		auto inverseView = camera.view.Inverse();
-		auto segmentA = ToVector3(inverseView * Vector4f(Vector3f::Zero(), 1.));
-		auto segmentB = ToVector3(inverseView * Vector4f(mouseDirection * 1000, 1.));
+		auto segmentA = Vector3f(inverseView * Vector4f(Vector3f::Zero(), 1.));
+		auto segmentB = Vector3f(inverseView * Vector4f(mouseDirection * 1000, 1.));
 
 		pointer->position = segmentA;
 		focusedPos = std::nullopt;
@@ -54,7 +46,7 @@ public:
 					if (!triangleBV[i]) continue;
 					auto points = mesh.TrianglePoints(i);
 					for (auto& point : points)
-						point = ToVector3(objMatrix * Vector4f(point, 1.));
+						point = Vector3f(objMatrix * Vector4f(point, 1.));
 
 					float ratio = 0.;
 					Vector3f intersectPoint;
@@ -83,7 +75,7 @@ public:
 	void MouseMoved(Vector2f mousePos, const Camera& camera)
 	{
 		auto vec4 = camera.proj.Inverse() * Vector4f(mousePos.x, mousePos.y, 1, 1);
-		mouseDirection = ToVector3(vec4).Normalized();
+		mouseDirection = Vector3f(vec4).Normalized();
 		//pointer->position = ToVector3(camera.view.Inverse() * Vector4f(mouseDirection * 5, 1));
 	}
 

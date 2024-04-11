@@ -38,6 +38,11 @@ public:
 	{
 	}
 
+	operator Vector3<T>()
+	{
+		return Vector3<T>(x, y, z);
+	}
+
 	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
 	T Dot(const Vector4<T> vec) const
 	{
