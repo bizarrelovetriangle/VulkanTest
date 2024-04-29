@@ -47,27 +47,21 @@ public:
 			objects.push_back(std::move(object));
 		}
 
+		auto& icosphere = objects[0];
+		icosphere->position += Vector3f(0.1, 0., 0.);
+
 		auto plane = std::make_shared<PlaneObject>(vulkanContext,
 			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
 		objects.push_back(plane);
 
+		auto center = std::make_unique<MeshObject>(
+			GeometryCreator::CreateIcosphere(0.03, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
+		center->UpdateVertexBuffer();
+		objects.push_back(std::move(center));
+
 		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
 		boundingBoxTree->CreateBoundingBoxes(objects);
 		objects.push_back(std::dynamic_pointer_cast<Object>(boundingBoxTree));
-
-		auto& icosphere = objects[0];
-		icosphere->position += Vector3f(0.1, 0., 0.);
-
-		// Center point
-		auto object = deserializer.Deserialize(glTFReader.serializedObjects.front());
-		object->position = Vector3f();
-		object->scale = Vector3f(0.03, 0.03, 0.03);
-		object->renderer->transformUniform.model = object->ComposeMatrix();
-		object->renderer->UpdateTransformUniformBuffer();
-		object->renderer->propertiesUniform.baseColor = Vector4f(1., 0., 1., 1.);
-		object->renderer->UpdatePropertiesUniformBuffer();
-		object->UpdateVertexBuffer();
-		objects.push_back(std::move(object));
 
 		picker.Init(vulkanContext);
 		if (picker.pointer)

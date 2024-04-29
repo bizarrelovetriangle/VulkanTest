@@ -10,15 +10,24 @@
 
 struct ContactInfo
 {
-	bool contact;
-	std::shared_ptr<MeshModel> gjkTriangular;
+	bool contact = false;
+	std::shared_ptr<MeshModel> minkowskiTriangular;
+	std::vector<std::pair<uint32_t, uint32_t>> minkowskiOrgPointPairs;
 	std::pair<std::shared_ptr<MeshObject>, std::shared_ptr<MeshObject>> objectPair;
+	uint32_t bestMinkowskiTriangle = 0;
 	Vector3f contactPoint;
 	Vector3f normal;
 };
 
 class MeshContactAlgorithms
 {
+private:
+	struct MinkowskiDiff
+	{
+		Vector3f diff;
+		std::pair<uint32_t, uint32_t> pointPair;
+	};
+
 public:
 	MeshContactAlgorithms(VulkanContext& vulkanContext)
 		: vulkanContext(vulkanContext)
@@ -31,7 +40,7 @@ public:
 
 		ContactInfo contactInfo;
 		contactInfo.contact = false;
-		contactInfo.gjkTriangular = std::make_shared<MeshModel>();
+		contactInfo.minkowskiTriangular = std::make_shared<MeshModel>();
 		contactInfo.objectPair = std::make_pair(objectA, objectB);
 
 		//objectA - icosphere, objectB - sphere
@@ -61,59 +70,63 @@ public:
 	{
 		// maybe from a to b?
 		auto direction = Vector3f(1., 0., 0.);
-		auto minkowskiDiffA = MinkowskiDiff(direction, meshA, meshB);
-		contactInfo.gjkTriangular->points.push_back(minkowskiDiffA);
+		auto minkowskiDiffA = GetMinkowskiDiff(direction, meshA, meshB);
+		contactInfo.minkowskiTriangular->points.push_back(minkowskiDiffA.diff);
+		contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiffA.pointPair);
 
 		// maybe to the zero?
 		direction = -direction;
-		auto minkowskiDiffB = MinkowskiDiff(direction, meshA, meshB);
-		contactInfo.gjkTriangular->points.push_back(minkowskiDiffB);
+		auto minkowskiDiffB = GetMinkowskiDiff(direction, meshA, meshB);
+		contactInfo.minkowskiTriangular->points.push_back(minkowskiDiffB.diff);
+		contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiffB.pointPair);
 
 		direction = Vector3f(0., 0., 1.);
-		auto minkowskiDiffC = MinkowskiDiff(direction, meshA, meshB);
-		contactInfo.gjkTriangular->points.push_back(minkowskiDiffC);
+		auto minkowskiDiffC = GetMinkowskiDiff(direction, meshA, meshB);
+		contactInfo.minkowskiTriangular->points.push_back(minkowskiDiffC.diff);
+		contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiffC.pointPair);
 
-		uint32_t nearestTri = contactInfo.gjkTriangular->AddTriangle({ 0, 1, 2 });
+		uint32_t nearestTri = contactInfo.minkowskiTriangular->AddTriangle({ 0, 1, 2 });
 
 		// face the triangle to the zero point
-		auto triPoints = contactInfo.gjkTriangular->TrianglePoints(nearestTri);
+		auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(nearestTri);
 		if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) < 0.)
-			std::swap(contactInfo.gjkTriangular->triangles[nearestTri].vertices[0], contactInfo.gjkTriangular->triangles[nearestTri].vertices[2]);
+			std::swap(contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[0], contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[2]);
 
 		for (int i = 0; i < 10; ++i)
 		{
-			auto nearestTriPoints = contactInfo.gjkTriangular->TrianglePoints(nearestTri);
+			auto nearestTriPoints = contactInfo.minkowskiTriangular->TrianglePoints(nearestTri);
 
 			direction = GeometryFunctions::TrianglePointDir(nearestTriPoints[0], nearestTriPoints[1], nearestTriPoints[2], Vector3f::Zero());
-			auto minkowskiDiff = MinkowskiDiff(direction, meshA, meshB);
+			auto minkowskiDiff = GetMinkowskiDiff(direction, meshA, meshB);
 
-			if (minkowskiDiff == nearestTriPoints[0] || minkowskiDiff == nearestTriPoints[1] || minkowskiDiff == nearestTriPoints[2])
+			if (minkowskiDiff.diff == nearestTriPoints[0] || minkowskiDiff.diff == nearestTriPoints[1] || minkowskiDiff.diff == nearestTriPoints[2])
 				break;
 
-			uint32_t newPoint = contactInfo.gjkTriangular->points.size();
-			contactInfo.gjkTriangular->points.push_back(minkowskiDiff);
-			auto nearestTriVerts = contactInfo.gjkTriangular->triangles[nearestTri].vertices;
+			uint32_t newPoint = contactInfo.minkowskiTriangular->points.size();
+			contactInfo.minkowskiTriangular->points.push_back(minkowskiDiff.diff);
+			contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiff.pointPair);
 
-			for (uint32_t tri = 0; tri < contactInfo.gjkTriangular->triangleBitVector.size(); ++tri)
+			for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
 				if (tri != nearestTri)
-					contactInfo.gjkTriangular->triangleBitVector[tri] = false;
+					contactInfo.minkowskiTriangular->triangleBitVector[tri] = false;
 
-			uint32_t triA = contactInfo.gjkTriangular->AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
-			uint32_t triB = contactInfo.gjkTriangular->AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
-			uint32_t triC = contactInfo.gjkTriangular->AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
+			auto nearestTriVerts = contactInfo.minkowskiTriangular->triangles[nearestTri].vertices;
+			uint32_t triA = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
+			uint32_t triB = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
+			uint32_t triC = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
 
 			// check only the newly created triangular pyramid
-			if (GeometryFunctions::PointInsideTriangularPyramid(Vector3f::Zero(), *contactInfo.gjkTriangular, { triA, triB, triC }))
+			if (GeometryFunctions::PointInsideTriangularPyramid(Vector3f::Zero(), *contactInfo.minkowskiTriangular, { triA, triB, triC }))
 			{
 				contactInfo.contact = true;
-				std::swap(contactInfo.gjkTriangular->triangles[nearestTri].vertices[0], contactInfo.gjkTriangular->triangles[nearestTri].vertices[2]);
+				std::swap(contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[0], contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[2]);
 				break;
 			}
 
 			auto triangles = { triA, triB, triC };
 			auto newTriangle = std::find_if(triangles.begin(), triangles.end(), [&](uint32_t tri)
 				{
-					auto triPoints = contactInfo.gjkTriangular->TrianglePoints(tri);
+					auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri);
 					return GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) > 0.;
 				});
 
@@ -121,7 +134,7 @@ public:
 			nearestTri = *newTriangle;
 		}
 
-		//CreateObject(*contactInfo.gjkTriangular);
+		//CreateObject(*contactInfo.minkowskiTriangular);
 	}
 
 	void EPA(const MeshModel& meshA, const MeshModel& meshB, ContactInfo& contactInfo)
@@ -130,9 +143,9 @@ public:
 		auto less = [](type& a, type& b) { return a.first > b.first; };
 		std::priority_queue<type, std::vector<type>, decltype(less)> triangleDistPQ(less);
 
-		for (auto& tri : contactInfo.gjkTriangular->triangles) {
-			if (!contactInfo.gjkTriangular->triangleBitVector[tri.index]) continue;
-			auto triPoints = contactInfo.gjkTriangular->TrianglePoints(tri.index);
+		for (auto& tri : contactInfo.minkowskiTriangular->triangles) {
+			if (!contactInfo.minkowskiTriangular->triangleBitVector[tri.index]) continue;
+			auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri.index);
 			float dist = GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
 			triangleDistPQ.emplace(-dist, tri.index);
 		}
@@ -144,29 +157,30 @@ public:
 			auto& [dist, nearestTri] = bestSoFar;
 			triangleDistPQ.pop();
 
-			contactInfo.gjkTriangular->triangleBitVector[nearestTri] = false;
+			contactInfo.minkowskiTriangular->triangleBitVector[nearestTri] = false;
 
-			auto nearestTriPoints = contactInfo.gjkTriangular->TrianglePoints(nearestTri);
-			auto direction = contactInfo.gjkTriangular->TriangleNormal(nearestTri);
-			auto minkowskiDiff = MinkowskiDiff(direction, meshA, meshB);
+			auto nearestTriPoints = contactInfo.minkowskiTriangular->TrianglePoints(nearestTri);
+			auto direction = contactInfo.minkowskiTriangular->TriangleNormal(nearestTri);
+			auto minkowskiDiff = GetMinkowskiDiff(direction, meshA, meshB);
 
-			if (minkowskiDiff == nearestTriPoints[0] || minkowskiDiff == nearestTriPoints[1] || minkowskiDiff == nearestTriPoints[2])
+			if (minkowskiDiff.diff == nearestTriPoints[0] || minkowskiDiff.diff == nearestTriPoints[1] || minkowskiDiff.diff == nearestTriPoints[2])
 				break;
 
-			uint32_t newPoint = contactInfo.gjkTriangular->points.size();
-			contactInfo.gjkTriangular->points.push_back(minkowskiDiff);
+			uint32_t newPoint = contactInfo.minkowskiTriangular->points.size();
+			contactInfo.minkowskiTriangular->points.push_back(minkowskiDiff.diff);
+			contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiff.pointPair);
 
-			auto nearestTriVerts = contactInfo.gjkTriangular->triangles[nearestTri].vertices;
-			uint32_t triA = contactInfo.gjkTriangular->AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
-			uint32_t triB = contactInfo.gjkTriangular->AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
-			uint32_t triC = contactInfo.gjkTriangular->AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
+			auto nearestTriVerts = contactInfo.minkowskiTriangular->triangles[nearestTri].vertices;
+			uint32_t triA = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
+			uint32_t triB = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
+			uint32_t triC = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
 
 			for (uint32_t tri : { triA, triB, triC })
 			{
-				auto triPoints = contactInfo.gjkTriangular->TrianglePoints(tri);
+				auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri);
 				float dist = GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
 				if (dist > 0.) {
-					contactInfo.gjkTriangular->triangleBitVector[tri] = false;
+					contactInfo.minkowskiTriangular->triangleBitVector[tri] = false;
 					continue;
 				}
 
@@ -174,32 +188,74 @@ public:
 			}
 		}
 
-		contactInfo.normal = contactInfo.gjkTriangular->TriangleNormal(bestSoFar.second);
+		contactInfo.bestMinkowskiTriangle = bestSoFar.second;
+		contactInfo.normal = contactInfo.minkowskiTriangular->TriangleNormal(bestSoFar.second);
 
-		auto mesh = *contactInfo.gjkTriangular;
-		for (uint32_t tri = 0; tri < contactInfo.gjkTriangular->triangleBitVector.size(); ++tri)
+		auto mesh = MeshModel(*contactInfo.minkowskiTriangular);
+		for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
 			mesh.triangleBitVector[tri] = false;
 		mesh.triangleBitVector[bestSoFar.second] = true;
-
 		CreateObject(std::move(mesh));
 	}
 
 	void Clipping(const MeshModel& meshA, const MeshModel& meshB, ContactInfo& contactInfo)
 	{
+		auto& orgPoints = contactInfo.minkowskiOrgPointPairs;
+		auto& triVerts = contactInfo.minkowskiTriangular->triangles[contactInfo.bestMinkowskiTriangle].vertices;
 
+		uint32_t incidentPoint;
+
+		if (orgPoints[triVerts[0]].first == orgPoints[triVerts[1]].first &&
+			orgPoints[triVerts[0]].first == orgPoints[triVerts[2]].first &&
+			orgPoints[triVerts[1]].first == orgPoints[triVerts[2]].first)
+		{
+			incidentPoint = orgPoints[triVerts[0]].first;
+		}
+		else if(orgPoints[triVerts[0]].second == orgPoints[triVerts[1]].second &&
+			orgPoints[triVerts[0]].second == orgPoints[triVerts[2]].second &&
+			orgPoints[triVerts[1]].second == orgPoints[triVerts[2]].second)
+		{
+			incidentPoint = orgPoints[triVerts[0]].second;
+		}
+		else
+		{
+			// imperfection
+			incidentPoint = orgPoints[triVerts[0]].first;
+		}
+
+		std::vector<uint32_t> incidentTries;
+		auto referenceTri = contactInfo.bestMinkowskiTriangle;
+
+		// cut incidentTries
+		// center of edges
+		// contactPoint = 
 	}
 
-	Vector3f MinkowskiDiff(const Vector3f& direction, const MeshModel& meshA, const MeshModel& meshB)
+	void Render(RenderVisitor& renderVisitor, const Camera& camera)
 	{
-		size_t antagonistA = FarthestPoint(direction, meshA.points);
-		size_t antagonistB = FarthestPoint(-direction, meshB.points);
-		return meshA.points[antagonistA] - meshB.points[antagonistB];
+		for (auto& Renderer : Renderers)
+			Renderer->Render(renderVisitor, camera);
 	}
 
-	size_t FarthestPoint(const Vector3f& direction, const std::vector<Vector3f>& points)
+	void Dispose()
 	{
-		auto farthest = std::make_pair(-(std::numeric_limits<float>::max)(), size_t(0));
-		for (size_t i = 0; i < points.size(); ++i) {
+		for (auto& Renderer : Renderers)
+			Renderer->Dispose();
+		Renderers.clear();
+	}
+
+private:
+	MinkowskiDiff GetMinkowskiDiff(const Vector3f& direction, const MeshModel& meshA, const MeshModel& meshB)
+	{
+		uint32_t antagonistA = FarthestPoint(direction, meshA.points);
+		uint32_t antagonistB = FarthestPoint(-direction, meshB.points);
+		return MinkowskiDiff{ meshA.points[antagonistA] - meshB.points[antagonistB], { antagonistA, antagonistB } };
+	}
+
+	uint32_t FarthestPoint(const Vector3f& direction, const std::vector<Vector3f>& points)
+	{
+		auto farthest = std::make_pair(-(std::numeric_limits<float>::max)(), uint32_t(0));
+		for (uint32_t i = 0; i < points.size(); ++i) {
 			auto pair = std::make_pair(direction.Dot(points[i]), i);
 			farthest = (std::max)(farthest, pair);
 		}
@@ -215,20 +271,6 @@ public:
 		minkowskiObj->renderer->UpdatePropertiesUniformBuffer();
 		minkowskiObj->UpdateVertexBuffer();
 		Renderers.insert(std::move(minkowskiObj));
-	}
-
-	void Render(RenderVisitor& renderVisitor, const Camera& camera)
-	{
-		for (auto& Renderer : Renderers)
-			Renderer->Render(renderVisitor, camera);
-	}
-
-	void Dispose()
-	{
-		for (auto& Renderer : Renderers)
-			Renderer->Dispose();
-
-		Renderers.clear();
 	}
 
 private:
