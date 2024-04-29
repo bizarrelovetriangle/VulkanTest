@@ -26,8 +26,8 @@ std::vector<vk::VertexInputAttributeDescription> ColoredVertexData::AttributeDes
 }
 
 
-ColoredRenderer::ColoredRenderer(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors)
-	: VertexedRenderer(vulkanContext), colors(colors)
+ColoredRenderer::ColoredRenderer(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors, bool faceColoring)
+	: VertexedRenderer(vulkanContext), colors(colors), faceColoring(faceColoring)
 {
 	shared = Shared<ColoredRenderer>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
@@ -50,7 +50,7 @@ void ColoredRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 			ColoredVertexData vertexData;
 			vertexData.position = mesh.points[index];
 			vertexData.normal = mesh.TriangleNormal(tri);
-			vertexData.color = colors[index];
+			vertexData.color = !faceColoring ? colors[index] : colors[tri];
 			vertexDatas.push_back(vertexData);
 		}
 	}

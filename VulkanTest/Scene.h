@@ -47,15 +47,19 @@ public:
 			objects.push_back(std::move(object));
 		}
 
+		objects[0]->position += Vector3f(0., -1., 0.);
+		objects[1]->position += Vector3f(0., -1., 0.);
+
+
 		auto& icosphere = objects[0];
 		icosphere->position += Vector3f(0.1, 0., 0.);
 
-		auto plane = std::make_shared<PlaneObject>(vulkanContext,
-			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		objects.push_back(plane);
+		//auto plane = std::make_shared<PlaneObject>(vulkanContext,
+		//	Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		//objects.push_back(plane);
 
 		auto center = std::make_unique<MeshObject>(
-			GeometryCreator::CreateIcosphere(0.03, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
+			GeometryCreator::CreateIcosphere(0.1, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
 		center->UpdateVertexBuffer();
 		objects.push_back(std::move(center));
 

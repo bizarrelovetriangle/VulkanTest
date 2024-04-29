@@ -23,7 +23,7 @@ class ColoredRenderer : public VertexedRenderer
 {
 public:
 	using VertexDataType = ColoredVertexData;
-	ColoredRenderer(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors);
+	ColoredRenderer(VulkanContext& vulkanContext, const std::vector<Vector4f>& colors, bool faceColoring = false);
 	virtual void UpdateVertexBuffer(const MeshModel& mesh) override;
 
 public:
@@ -34,5 +34,6 @@ public:
 
 private:
 	std::vector<Vector4f> colors;
+	bool faceColoring;
 };
 

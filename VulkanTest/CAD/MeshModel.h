@@ -8,39 +8,39 @@
 #include <optional>
 #include <bitset>
 
-struct Edge
-{
-	size_t triangleIndex = 0;
-	size_t side = 0;
-
-	friend bool operator==(const Edge& a, const Edge& b) {
-		return a.triangleIndex == b.triangleIndex && a.side == b.side;
-	}
-};
-
-struct Triangle
-{
-	std::array<uint32_t, 3> vertices;
-	std::array<Edge, 3> edges;
-	uint32_t index;
-};
-
-struct KeyHasher
-{
-	size_t operator()(const std::pair<uint32_t, uint32_t>& pair) const
-	{
-		return std::hash<uint32_t>{}(pair.first) ^ std::hash<uint32_t>{}(pair.second);
-	}
-
-	size_t operator()(const Edge& edge) const
-	{
-		return std::hash<uint32_t>{}(edge.triangleIndex) ^ std::hash<uint32_t>{}(edge.side);
-	}
-};
-
 class MeshModel
 {
 public:
+	struct Edge
+	{
+		size_t triangleIndex = 0;
+		size_t side = 0;
+
+		//friend bool operator==(const Edge& a, const Edge& b) {
+		//	return a.triangleIndex == b.triangleIndex && a.side == b.side;
+		//}
+	};
+
+	struct Triangle
+	{
+		std::array<uint32_t, 3> vertices;
+		std::array<Edge, 3> edges;
+		uint32_t index;
+	};
+
+	struct KeyHasher
+	{
+		size_t operator()(const std::pair<uint32_t, uint32_t>& pair) const
+		{
+			return std::hash<uint32_t>{}(pair.first) ^ std::hash<uint32_t>{}(pair.second);
+		}
+
+		//size_t operator()(const Edge& edge) const
+		//{
+		//	return std::hash<uint32_t>{}(edge.triangleIndex) ^ std::hash<uint32_t>{}(edge.side);
+		//}
+	};
+
 	MeshModel()
 	{}
 
@@ -48,6 +48,7 @@ public:
 	{
 		triangles.resize(indexes.size() / 3);
 		triangleBitVector.resize(indexes.size() / 3, true);
+		markedTris.resize(indexes.size() / 3, false);
 		this->points = points;
 
 		for (size_t i = 0; i < indexes.size() / 3; ++i) {
@@ -79,17 +80,32 @@ public:
 			triangle.vertices[j] = org;
 			triangle.edges[j].triangleIndex = triIndex;
 			triangle.edges[j].side = j;
+
+			if (edges.contains({ org, dest })) {
+				//throw std::exception(":(");
+				int t = 2;
+			}
+
 			edges.emplace(std::make_pair(org, dest), triangle.edges[j]);
 		}
 
 		triangles.push_back(triangle);
 		triangleBitVector.push_back(true);
+		markedTris.push_back(false);
 		return triIndex;
 	}
 
 	void DeleteTriangle(uint32_t tri)
 	{
-		triangleBitVector[tri] = true;
+		triangleBitVector[tri] = false;
+		markedTris[tri] = false;
+
+		auto& triangle = triangles[tri];
+		for (auto& edge : triangle.edges) {
+			auto org = Origin(edge);
+			auto dest = Destination(edge);
+			edges.erase({ org, dest });
+		}
 	}
 
 	uint32_t Origin(const Edge& edge)
@@ -132,6 +148,7 @@ public:
 	}
 
 //private:
+	std::vector<bool> markedTris;
 	std::vector<bool> triangleBitVector;
 	std::vector<Triangle> triangles;
 	std::vector<Vector3f> points;

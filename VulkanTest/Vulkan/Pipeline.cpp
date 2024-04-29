@@ -59,8 +59,8 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RendererShared& RendererShared,
 
 	vk::PipelineColorBlendAttachmentState colorBlendAttachment(
 		false,
-		vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd,
-		vk::BlendFactor::eOne, vk::BlendFactor::eZero, vk::BlendOp::eAdd,
+		vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd,
+		vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd,
 		vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
 		vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
 	);

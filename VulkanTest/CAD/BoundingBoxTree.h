@@ -38,8 +38,11 @@ public:
 		return { contact };
 	}
 
-	// Make EPA return original points. Clipping. Look how clipping work in my prev project
+	// Vector class with arrows
+	// Allow face coloring and marking
+	// Clipping. Look how clipping work in my prev project
 	// Picker BoundingBoxes
+	// Edge and Edge Data
 	// 
 	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
 	// How to deal with triangle normals. Geometrical shader

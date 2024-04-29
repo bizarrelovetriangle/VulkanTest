@@ -7,6 +7,7 @@
 #include <optional>
 #include <queue>
 #include "GeometryFunctions.h"
+#include "GeometryCreator.h"
 
 struct ContactInfo
 {
@@ -85,12 +86,12 @@ public:
 		contactInfo.minkowskiTriangular->points.push_back(minkowskiDiffC.diff);
 		contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiffC.pointPair);
 
-		uint32_t nearestTri = contactInfo.minkowskiTriangular->AddTriangle({ 0, 1, 2 });
-
 		// face the triangle to the zero point
-		auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(nearestTri);
+		auto& triPoints = contactInfo.minkowskiTriangular->points;
 		if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero()) < 0.)
-			std::swap(contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[0], contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[2]);
+			std::swap(contactInfo.minkowskiTriangular->points[0], contactInfo.minkowskiTriangular->points[2]);
+
+		uint32_t nearestTri = contactInfo.minkowskiTriangular->AddTriangle({ 0, 1, 2 });
 
 		for (int i = 0; i < 10; ++i)
 		{
@@ -108,18 +109,22 @@ public:
 
 			for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
 				if (tri != nearestTri)
-					contactInfo.minkowskiTriangular->triangleBitVector[tri] = false;
+					contactInfo.minkowskiTriangular->DeleteTriangle(tri);
 
+			// face the triangle from the zero point
 			auto nearestTriVerts = contactInfo.minkowskiTriangular->triangles[nearestTri].vertices;
-			uint32_t triA = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
-			uint32_t triB = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
-			uint32_t triC = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
+			std::reverse(nearestTriVerts.begin(), nearestTriVerts.end());
+			contactInfo.minkowskiTriangular->DeleteTriangle(nearestTri);
+			nearestTri = contactInfo.minkowskiTriangular->AddTriangle(nearestTriVerts);
+
+			uint32_t triA = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[0], newPoint, nearestTriVerts[1] });
+			uint32_t triB = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[1], newPoint, nearestTriVerts[2] });
+			uint32_t triC = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[2], newPoint, nearestTriVerts[0] });
 
 			// check only the newly created triangular pyramid
 			if (GeometryFunctions::PointInsideTriangularPyramid(Vector3f::Zero(), *contactInfo.minkowskiTriangular, { triA, triB, triC }))
 			{
 				contactInfo.contact = true;
-				std::swap(contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[0], contactInfo.minkowskiTriangular->triangles[nearestTri].vertices[2]);
 				break;
 			}
 
@@ -139,63 +144,98 @@ public:
 
 	void EPA(const MeshModel& meshA, const MeshModel& meshB, ContactInfo& contactInfo)
 	{
-		using type = std::pair<float, uint32_t>;
-		auto less = [](type& a, type& b) { return a.first > b.first; };
-		std::priority_queue<type, std::vector<type>, decltype(less)> triangleDistPQ(less);
+		bool success = false;
+		uint32_t nearestTri = 0;
+		std::unordered_map<uint32_t, float> distances;
 
-		for (auto& tri : contactInfo.minkowskiTriangular->triangles) {
-			if (!contactInfo.minkowskiTriangular->triangleBitVector[tri.index]) continue;
-			auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri.index);
-			float dist = GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
-			triangleDistPQ.emplace(-dist, tri.index);
+		for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangles.size(); ++tri) {
+			if (!contactInfo.minkowskiTriangular->triangleBitVector[tri]) continue;
+			auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri);
+			float dist = -GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
+			distances.emplace(tri, dist);
 		}
 
-		type bestSoFar = std::make_pair(-(std::numeric_limits<float>::max)(), 0);
-		for (int i = 0; i < 10; ++i)
+		for (uint32_t i = 0; i < 100; ++i)
 		{
-			bestSoFar = triangleDistPQ.top();
-			auto& [dist, nearestTri] = bestSoFar;
-			triangleDistPQ.pop();
-
-			contactInfo.minkowskiTriangular->triangleBitVector[nearestTri] = false;
+			nearestTri = std::min_element(distances.begin(), distances.end(), [](auto& a, auto& b) { return a.second < b.second; })->first;
 
 			auto nearestTriPoints = contactInfo.minkowskiTriangular->TrianglePoints(nearestTri);
 			auto direction = contactInfo.minkowskiTriangular->TriangleNormal(nearestTri);
 			auto minkowskiDiff = GetMinkowskiDiff(direction, meshA, meshB);
 
-			if (minkowskiDiff.diff == nearestTriPoints[0] || minkowskiDiff.diff == nearestTriPoints[1] || minkowskiDiff.diff == nearestTriPoints[2])
+			if (minkowskiDiff.diff == nearestTriPoints[0] || minkowskiDiff.diff == nearestTriPoints[1] || minkowskiDiff.diff == nearestTriPoints[2]) {
+				success = true;
 				break;
+			}
+
+			if (GeometryFunctions::TrianglePlanePointDist(nearestTriPoints[0], nearestTriPoints[1], nearestTriPoints[2], minkowskiDiff.diff) < 10e-9) {
+				success = false;
+				break;
+			}
 
 			uint32_t newPoint = contactInfo.minkowskiTriangular->points.size();
 			contactInfo.minkowskiTriangular->points.push_back(minkowskiDiff.diff);
 			contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiff.pointPair);
 
-			auto nearestTriVerts = contactInfo.minkowskiTriangular->triangles[nearestTri].vertices;
-			uint32_t triA = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[0], nearestTriVerts[1], newPoint });
-			uint32_t triB = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[1], nearestTriVerts[2], newPoint });
-			uint32_t triC = contactInfo.minkowskiTriangular->AddTriangle({ nearestTriVerts[2], nearestTriVerts[0], newPoint });
+			std::unordered_set<std::pair<uint32_t, uint32_t>, MeshModel::KeyHasher> contour;
+			std::vector<uint32_t> deleteFaces;
 
-			for (uint32_t tri : { triA, triB, triC })
-			{
+			for (auto it = distances.begin(); it != distances.end();) {
+				uint32_t tri = it->first;
+				auto next = std::next(it);
+
 				auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri);
-				float dist = GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
-				if (dist > 0.) {
-					contactInfo.minkowskiTriangular->triangleBitVector[tri] = false;
-					continue;
+				if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], minkowskiDiff.diff) > 0.) {
+					auto& triangle = contactInfo.minkowskiTriangular->triangles[tri];
+					for (auto& edge : triangle.edges) {
+						auto org = contactInfo.minkowskiTriangular->Origin(edge);
+						auto dest = contactInfo.minkowskiTriangular->Destination(edge);
+
+						if (auto it = contour.find(std::make_pair(dest, org)); it != contour.end()) {
+							contour.erase(it);
+						}
+						else {
+							contour.emplace(org, dest);
+						}
+					}
+
+					distances.erase(tri);
+					deleteFaces.push_back(tri);
 				}
 
-				triangleDistPQ.emplace(-dist, tri);
+				it = next;
+			}
+
+			if (!GeometryFunctions::ContourIsCycled(contour))
+			{
+				for (auto tri : deleteFaces)
+					contactInfo.minkowskiTriangular->markedTris[tri] = true;
+				CreatePoint(minkowskiDiff.diff);
+				break;
+			}
+
+
+			for (auto tri : deleteFaces) {
+				contactInfo.minkowskiTriangular->DeleteTriangle(tri);
+			}
+
+			for (auto& edge : contour) {
+				uint32_t tri = contactInfo.minkowskiTriangular->AddTriangle({ newPoint, edge.first, edge.second });
+				auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri);
+				float dist = -GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], Vector3f::Zero());
+				distances.emplace(tri, dist);
 			}
 		}
 
-		contactInfo.bestMinkowskiTriangle = bestSoFar.second;
-		contactInfo.normal = contactInfo.minkowskiTriangular->TriangleNormal(bestSoFar.second);
+		contactInfo.bestMinkowskiTriangle = nearestTri;
+		contactInfo.normal = contactInfo.minkowskiTriangular->TriangleNormal(nearestTri);
 
 		auto mesh = MeshModel(*contactInfo.minkowskiTriangular);
-		for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
-			mesh.triangleBitVector[tri] = false;
-		mesh.triangleBitVector[bestSoFar.second] = true;
-		CreateObject(std::move(mesh));
+		//for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
+		//	if (tri != nearestTri)
+		//		mesh.DeleteTriangle(tri);
+		mesh.markedTris[nearestTri] = true;
+		CreateObject(std::move(mesh), success);
 	}
 
 	void Clipping(const MeshModel& meshA, const MeshModel& meshB, ContactInfo& contactInfo)
@@ -205,22 +245,20 @@ public:
 
 		uint32_t incidentPoint;
 
-		if (orgPoints[triVerts[0]].first == orgPoints[triVerts[1]].first &&
-			orgPoints[triVerts[0]].first == orgPoints[triVerts[2]].first &&
-			orgPoints[triVerts[1]].first == orgPoints[triVerts[2]].first)
+		if (orgPoints[triVerts[0]].first == orgPoints[triVerts[1]].first ||
+			orgPoints[triVerts[0]].first == orgPoints[triVerts[2]].first)
 		{
 			incidentPoint = orgPoints[triVerts[0]].first;
 		}
-		else if(orgPoints[triVerts[0]].second == orgPoints[triVerts[1]].second &&
-			orgPoints[triVerts[0]].second == orgPoints[triVerts[2]].second &&
-			orgPoints[triVerts[1]].second == orgPoints[triVerts[2]].second)
+		else if(orgPoints[triVerts[0]].second == orgPoints[triVerts[1]].second ||
+			orgPoints[triVerts[0]].second == orgPoints[triVerts[2]].second)
 		{
 			incidentPoint = orgPoints[triVerts[0]].second;
 		}
 		else
 		{
 			// imperfection
-			incidentPoint = orgPoints[triVerts[0]].first;
+			incidentPoint = orgPoints[triVerts[0]].second;
 		}
 
 		std::vector<uint32_t> incidentTries;
@@ -233,15 +271,15 @@ public:
 
 	void Render(RenderVisitor& renderVisitor, const Camera& camera)
 	{
-		for (auto& Renderer : Renderers)
-			Renderer->Render(renderVisitor, camera);
+		for (auto& renderer : renderers)
+			renderer->Render(renderVisitor, camera);
 	}
 
 	void Dispose()
 	{
-		for (auto& Renderer : Renderers)
-			Renderer->Dispose();
-		Renderers.clear();
+		for (auto& renderer : renderers)
+			renderer->Dispose();
+		renderers.clear();
 	}
 
 private:
@@ -262,18 +300,40 @@ private:
 		return farthest.second;
 	}
 
-	void CreateObject(const MeshModel& mesh)
+	void CreateObject(const MeshModel& mesh, bool success = false)
 	{
-		auto renderer = std::make_unique<LinedRenderer>(vulkanContext);
+		Vector4f baseColor = success
+			? Vector4(0.1, 0.3, 0.1, 1.)
+			: Vector4(0.3, 0.1, 0.1, 1.);
+
+		std::vector<Vector4f> triColors(mesh.triangles.size(), baseColor);
+
+		for (uint32_t tri = 0; tri < mesh.markedTris.size(); ++tri) {
+			if (mesh.markedTris[tri])
+				triColors[tri] = Vector4f(1., 0., 0., 1.);
+		}
+
+		auto renderer = std::make_unique<ColoredRenderer>(vulkanContext, triColors, true);
 		auto minkowskiObj = std::make_unique<MeshObject>(std::make_unique<MeshModel>(mesh), std::move(renderer));
 
-		minkowskiObj->renderer->propertiesUniform.baseColor = Vector4(0.3, 0.1, 0.1, 1.);
+		minkowskiObj->renderer->propertiesUniform.baseColor = baseColor;
 		minkowskiObj->renderer->UpdatePropertiesUniformBuffer();
 		minkowskiObj->UpdateVertexBuffer();
-		Renderers.insert(std::move(minkowskiObj));
+		renderers.insert(std::move(minkowskiObj));
+	}
+
+	void CreatePoint(const Vector3f pos)
+	{
+		auto ico = std::make_unique<MeshObject>(GeometryCreator::CreateIcosphere(0.01, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
+		ico->renderer->propertiesUniform.baseColor = Vector4f(1., 1., 1., 1.);
+		ico->position = pos;
+		ico->renderer->UpdateTransformUniformBuffer();
+		ico->renderer->UpdatePropertiesUniformBuffer();
+		ico->UpdateVertexBuffer();
+		renderers.emplace(std::move(ico));
 	}
 
 private:
 	VulkanContext& vulkanContext;
-	std::unordered_set<std::shared_ptr<MeshObject>> Renderers;
+	std::unordered_set<std::shared_ptr<MeshObject>> renderers;
 };

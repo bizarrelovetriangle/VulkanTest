@@ -2,6 +2,7 @@
 #include "../Math/Vector3.h"
 #include "../Math/Plane.h"
 #include "MeshModel.h"
+#include <map>
 
 class GeometryFunctions
 {
@@ -86,5 +87,42 @@ public:
 		auto normal = (b - a).Cross(c - a).Normalized();
 		float planeDist = normal.Dot(point - a);
 		return (normal * planeDist).Normalized();
+	}
+
+	static bool ContourIsCycled(const std::unordered_set<std::pair<uint32_t, uint32_t>, MeshModel::KeyHasher>& contour)
+	{
+		if (contour.size() == 0) {
+			return true;
+		}
+
+		std::map<uint32_t, uint32_t> map;
+		for (auto& edge : contour) {
+			if (auto p = map.emplace(edge.first, edge.second); !p.second) {
+				return false;
+			}
+		}
+
+		if (map.size() != contour.size()) {
+			return false;
+		}
+
+		uint32_t initial = map.begin()->first;
+		auto vert = initial;
+
+		for (int i = 0; i < contour.size(); ++i) {
+			if (auto it = map.find(vert); it != map.end()) {
+				vert = it->second;
+				map.erase(it);
+			}
+			else {
+				return false;
+			}
+		}
+
+		if (vert != initial) {
+			return false;
+		}
+
+		return true;
 	}
 };
