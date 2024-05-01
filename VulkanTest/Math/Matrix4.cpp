@@ -96,6 +96,14 @@ Matrix4 Matrix4::Rotate(const Vector4f& quaternion)
 	return matrix;
 }
 
+Matrix4 Matrix4::Rotate(const Vector3f& from, const Vector3f& to)
+{
+	auto fromN = from.Normalized();
+	auto toN = (from + to).Normalized(); // quaternion takes only half of the angle
+	auto quaternion = Vector4f(fromN.Cross(toN), fromN.Dot(toN));
+	return Rotate(quaternion);
+}
+
 Matrix4 Matrix4::Scale(const Vector3f& vec)
 {
 	Matrix4 matrix;

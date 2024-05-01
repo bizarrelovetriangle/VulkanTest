@@ -43,16 +43,6 @@ bool Plane::Intersect(const Vector3f& segmentA, const Vector3f& segmentB, Vector
 
 Matrix4 Plane::getMatrix() const
 {
-	auto pos = normal * dist;
-	auto j = normal;
-	auto [i, k] = j.twoPerpendiculars();
-
-	Matrix4 asixRotate{
-		{i.x  ,   i.y,   i.z, 0.},
-		{j.x  ,   j.y,   j.z, 0.},
-		{k.x  ,   k.y,   k.z, 0.},
-		{pos.x, pos.y, pos.z, 1.} };
-
-	return asixRotate;
+	return Matrix4::Translation(normal * dist) * Matrix4::Rotate(Vector3f(0., 1., 0.), normal);
 }
 

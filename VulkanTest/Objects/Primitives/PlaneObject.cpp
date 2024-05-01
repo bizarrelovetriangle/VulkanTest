@@ -6,9 +6,7 @@ PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position,
 	this->position = position;
 	plane = Plane(position, normal);
 
-	float scale = 3.;
 	std::vector<Vector3f> positions { {-1., 0., -1.}, {1., 0., -1.}, {1., 0., 1.}, {-1., 0., 1.} };
-	for (auto& pos : positions) pos = pos * scale;
 	std::vector<uint32_t> indexes{ 0, 1, 2, 2, 3, 0 };
 	mesh = std::make_unique<MeshModel>(indexes, positions);
 

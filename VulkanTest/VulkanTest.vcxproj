@@ -194,6 +194,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Objects\Interfaces\MeshObject.h" />
     <ClInclude Include="Objects\Interfaces\Object.h" />
+    <ClInclude Include="Objects\Primitives\ArrowObject.h" />
     <ClInclude Include="pch\pch.h" />
     <ClInclude Include="CAD\MeshModel.h" />
     <ClInclude Include="Objects\Primitives\BoundingBoxObject.h" />

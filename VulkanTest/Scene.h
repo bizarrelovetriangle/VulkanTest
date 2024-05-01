@@ -54,9 +54,14 @@ public:
 		auto& icosphere = objects[0];
 		icosphere->position += Vector3f(0.1, 0., 0.);
 
-		//auto plane = std::make_shared<PlaneObject>(vulkanContext,
-		//	Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		//objects.push_back(plane);
+		auto plane = std::make_shared<PlaneObject>(vulkanContext,
+			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		plane->scale = plane->scale * 3.;
+		objects.push_back(plane);
+
+		auto arrow = std::make_shared<ArrowObject>(vulkanContext,
+			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
+		objects.push_back(arrow);
 
 		auto center = std::make_unique<MeshObject>(
 			GeometryCreator::CreateIcosphere(0.1, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));

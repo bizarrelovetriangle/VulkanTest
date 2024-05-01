@@ -24,6 +24,8 @@ public:
 
 	static Matrix4 Rotate(const Vector4f& quaternion);
 
+	static Matrix4 Rotate(const Vector3f& from, const Vector3f& to);
+
 	static Matrix4 Scale(const Vector3f& vec);
 
 	Matrix4 Transpose() const;

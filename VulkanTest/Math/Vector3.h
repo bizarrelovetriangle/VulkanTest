@@ -109,7 +109,7 @@ public:
 	}
 
 	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
-	std::pair<Vector3<T>, Vector3<T>> twoPerpendiculars()
+	std::pair<Vector3<T>, Vector3<T>> twoPerpendiculars() const
 	{
 		Vector3f zPlus(0., 0., 1.);
 		Vector3f yPlus(0., 1., 0.);

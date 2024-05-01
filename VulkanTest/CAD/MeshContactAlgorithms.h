@@ -1,6 +1,7 @@
 #pragma once
 #include "../Objects/Interfaces/MeshObject.h"
 #include "../Objects/Primitives/PlaneObject.h"
+#include "../Objects/Primitives/ArrowObject.h"
 #include "../Renderers/ColoredRenderer.h"
 #include "../Renderers/LinedRenderer.h"
 #include "../Renderers/SimpleVertexedRenderer.h"
@@ -280,11 +281,18 @@ public:
 
 		std::vector<uint32_t> incidentTries;
 		
-		auto planeObj = std::make_unique<PlaneObject>(vulkanContext, arbitraryRefPoint,
-			contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
-		planeObj->scale = planeObj->scale * 0.3;
-		renderers.emplace(std::move(planeObj));
-		CreatePoint(arbitraryRefPoint);
+		{
+			auto planeObj = std::make_unique<PlaneObject>(vulkanContext, arbitraryRefPoint,
+				contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+			planeObj->scale = planeObj->scale * 0.3;
+			renderers.emplace(std::move(planeObj));
+
+			auto arrow = std::make_unique<ArrowObject>(vulkanContext, arbitraryRefPoint,
+				contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+			renderers.emplace(std::move(arrow));
+
+			CreatePoint(arbitraryRefPoint);
+		}
 
 		auto referenceTri = contactInfo.bestMinkowskiTriangle; 
 
