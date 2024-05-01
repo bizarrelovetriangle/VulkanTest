@@ -3,6 +3,7 @@
 
 PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position, const Vector3f& normal)
 {
+	this->position = position;
 	plane = Plane(position, normal);
 
 	float scale = 3.;
@@ -26,5 +27,6 @@ PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position,
 
 Matrix4 PlaneObject::ComposeMatrix() const
 {
-	return plane.getMatrix();
+	auto planeOffset = position - plane.normal * plane.normal.Dot(position);
+	return Matrix4::Translation(planeOffset) * plane.getMatrix() * Matrix4::Scale(scale);
 }

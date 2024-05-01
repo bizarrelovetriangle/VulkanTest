@@ -1,9 +1,11 @@
 #pragma once
 #include "../Objects/Interfaces/MeshObject.h"
+#include "../Objects/Primitives/PlaneObject.h"
 #include "../Renderers/ColoredRenderer.h"
 #include "../Renderers/LinedRenderer.h"
 #include "../Renderers/SimpleVertexedRenderer.h"
 #include <unordered_set>
+#include <set>
 #include <optional>
 #include <queue>
 #include "GeometryFunctions.h"
@@ -230,12 +232,14 @@ public:
 		contactInfo.bestMinkowskiTriangle = nearestTri;
 		contactInfo.normal = contactInfo.minkowskiTriangular->TriangleNormal(nearestTri);
 
+		for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
+			if (contactInfo.minkowskiTriangular->triangleBitVector[tri])
+				if (tri != nearestTri)
+					contactInfo.minkowskiTriangular->DeleteTriangle(tri);
+
 		auto mesh = MeshModel(*contactInfo.minkowskiTriangular);
-		//for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
-		//	if (tri != nearestTri)
-		//		mesh.DeleteTriangle(tri);
 		mesh.markedTris[nearestTri] = true;
-		CreateObject(std::move(mesh), success);
+		//CreateObject(std::move(mesh), success);
 	}
 
 	void Clipping(const MeshModel& meshA, const MeshModel& meshB, ContactInfo& contactInfo)
@@ -243,26 +247,46 @@ public:
 		auto& orgPoints = contactInfo.minkowskiOrgPointPairs;
 		auto& triVerts = contactInfo.minkowskiTriangular->triangles[contactInfo.bestMinkowskiTriangle].vertices;
 
-		uint32_t incidentPoint;
+		bool incidentIsObjectA = false;
 
-		if (orgPoints[triVerts[0]].first == orgPoints[triVerts[1]].first ||
-			orgPoints[triVerts[0]].first == orgPoints[triVerts[2]].first)
-		{
-			incidentPoint = orgPoints[triVerts[0]].first;
+		if (orgPoints[triVerts[0]].first == orgPoints[triVerts[1]].first) {
+			incidentIsObjectA = true;
 		}
-		else if(orgPoints[triVerts[0]].second == orgPoints[triVerts[1]].second ||
-			orgPoints[triVerts[0]].second == orgPoints[triVerts[2]].second)
-		{
-			incidentPoint = orgPoints[triVerts[0]].second;
+		else if (orgPoints[triVerts[0]].first == orgPoints[triVerts[2]].first) {
+			incidentIsObjectA = true;
 		}
-		else
-		{
-			// imperfection
-			incidentPoint = orgPoints[triVerts[0]].second;
+		else if(orgPoints[triVerts[0]].second == orgPoints[triVerts[1]].second) {
+			incidentIsObjectA = false;
+		}
+		else if (orgPoints[triVerts[0]].second == orgPoints[triVerts[2]].second) {
+			incidentIsObjectA = false;
+		}
+		else {
+			// we are not sure
+			incidentIsObjectA = false;
+		}
+
+		auto& arbitraryRefPoint = !incidentIsObjectA
+			? meshA.points[orgPoints[triVerts[0]].first]
+			: meshB.points[orgPoints[triVerts[0]].second];
+		Plane referencePlane(arbitraryRefPoint,
+			contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+
+		std::set<uint32_t> insidentVertexes;
+		for (uint32_t vert : triVerts) {
+			uint32_t org = incidentIsObjectA ? orgPoints[vert].first : orgPoints[vert].second;
+			insidentVertexes.emplace(org);
 		}
 
 		std::vector<uint32_t> incidentTries;
-		auto referenceTri = contactInfo.bestMinkowskiTriangle;
+		
+		auto planeObj = std::make_unique<PlaneObject>(vulkanContext, arbitraryRefPoint,
+			contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+		planeObj->scale = planeObj->scale * 0.3;
+		renderers.emplace(std::move(planeObj));
+		CreatePoint(arbitraryRefPoint);
+
+		auto referenceTri = contactInfo.bestMinkowskiTriangle; 
 
 		// cut incidentTries
 		// center of edges
@@ -324,8 +348,8 @@ private:
 
 	void CreatePoint(const Vector3f pos)
 	{
-		auto ico = std::make_unique<MeshObject>(GeometryCreator::CreateIcosphere(0.01, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
-		ico->renderer->propertiesUniform.baseColor = Vector4f(1., 1., 1., 1.);
+		auto ico = std::make_unique<MeshObject>(GeometryCreator::CreateIcosphere(0.1, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
+		ico->renderer->propertiesUniform.baseColor = Vector4f(1., 0., 1., 1.);
 		ico->position = pos;
 		ico->renderer->UpdateTransformUniformBuffer();
 		ico->renderer->UpdatePropertiesUniformBuffer();
