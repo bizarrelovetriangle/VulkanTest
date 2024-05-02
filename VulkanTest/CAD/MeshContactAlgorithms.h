@@ -9,8 +9,10 @@
 #include <set>
 #include <optional>
 #include <queue>
+#include <algorithm>
 #include "GeometryFunctions.h"
 #include "GeometryCreator.h"
+#include <numeric>
 
 struct ContactInfo
 {
@@ -19,6 +21,7 @@ struct ContactInfo
 	std::vector<std::pair<uint32_t, uint32_t>> minkowskiOrgPointPairs;
 	std::pair<std::shared_ptr<MeshObject>, std::shared_ptr<MeshObject>> objectPair;
 	uint32_t bestMinkowskiTriangle = 0;
+	float penetration;
 	Vector3f contactPoint;
 	Vector3f normal;
 };
@@ -232,6 +235,8 @@ public:
 
 		contactInfo.bestMinkowskiTriangle = nearestTri;
 		contactInfo.normal = contactInfo.minkowskiTriangular->TriangleNormal(nearestTri);
+		auto& triangle = contactInfo.minkowskiTriangular->triangles[nearestTri];
+		contactInfo.penetration = contactInfo.normal.Dot(contactInfo.minkowskiTriangular->points[triangle.vertices.front()]);
 
 		for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
 			if (contactInfo.minkowskiTriangular->triangleBitVector[tri])
@@ -248,61 +253,49 @@ public:
 		auto& orgPoints = contactInfo.minkowskiOrgPointPairs;
 		auto& triVerts = contactInfo.minkowskiTriangular->triangles[contactInfo.bestMinkowskiTriangle].vertices;
 
-		bool incidentIsObjectA = false;
+		bool referenceIsObjectA = false;
 
 		if (orgPoints[triVerts[0]].first == orgPoints[triVerts[1]].first) {
-			incidentIsObjectA = true;
+			referenceIsObjectA = false;
 		}
 		else if (orgPoints[triVerts[0]].first == orgPoints[triVerts[2]].first) {
-			incidentIsObjectA = true;
+			referenceIsObjectA = false;
 		}
 		else if(orgPoints[triVerts[0]].second == orgPoints[triVerts[1]].second) {
-			incidentIsObjectA = false;
+			referenceIsObjectA = true;
 		}
 		else if (orgPoints[triVerts[0]].second == orgPoints[triVerts[2]].second) {
-			incidentIsObjectA = false;
+			referenceIsObjectA = true;
 		}
 		else {
 			// we are not sure
-			incidentIsObjectA = false;
+			referenceIsObjectA = true;
 		}
 
-		auto& arbitraryRefPoint = !incidentIsObjectA
+		auto penetrationDirection = contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle);
+		if (referenceIsObjectA) penetrationDirection = -penetrationDirection;
+
+		auto& arbitraryRefPoint = referenceIsObjectA
 			? meshA.points[orgPoints[triVerts[0]].first]
 			: meshB.points[orgPoints[triVerts[0]].second];
-		Plane referencePlane(arbitraryRefPoint,
-			contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+		Plane referencePlane(arbitraryRefPoint, -penetrationDirection);
 
-		std::set<uint32_t> insidentVertexes;
-		for (uint32_t vert : triVerts) {
-			uint32_t org = incidentIsObjectA ? orgPoints[vert].first : orgPoints[vert].second;
-			insidentVertexes.emplace(org);
-		}
-
-		std::vector<uint32_t> incidentTries;
+		auto& incidentMesh = !referenceIsObjectA ? meshA : meshB;
+		auto intersections = referencePlane.MeshIntersections(incidentMesh);
+		auto intersectionsCenter = std::accumulate(intersections.begin(), intersections.end(), Vector3f()) / intersections.size();
 		
 		{
-			auto planeObj = std::make_unique<PlaneObject>(vulkanContext, arbitraryRefPoint,
+			auto planeObj = std::make_unique<PlaneObject>(vulkanContext, intersectionsCenter,
 				contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
-			planeObj->scale = planeObj->scale * 0.3;
+			planeObj->scale = planeObj->scale * 0.5;
 			renderers.emplace(std::move(planeObj));
 
-			auto& arbitraryIncPoint = incidentIsObjectA
-				? meshA.points[orgPoints[triVerts[0]].first]
-				: meshB.points[orgPoints[triVerts[0]].second];
-			auto normal = contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle);
-			if (incidentIsObjectA) normal = -normal;
-			auto arrow = std::make_unique<ArrowObject>(vulkanContext, arbitraryIncPoint, normal);
+			auto arrow = std::make_unique<ArrowObject>(vulkanContext, intersectionsCenter, penetrationDirection);
+			arrow->scale = arrow->scale * contactInfo.penetration;
 			renderers.emplace(std::move(arrow));
-
-			CreatePoint(arbitraryRefPoint);
 		}
 
-		auto referenceTri = contactInfo.bestMinkowskiTriangle; 
-
-		// cut incidentTries
-		// center of edges
-		// contactPoint = 
+		contactInfo.contactPoint = intersectionsCenter;
 	}
 
 	void Render(RenderVisitor& renderVisitor, const Camera& camera)

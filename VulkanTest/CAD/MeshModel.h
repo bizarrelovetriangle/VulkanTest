@@ -81,12 +81,10 @@ public:
 			triangle.edges[j].triangleIndex = triIndex;
 			triangle.edges[j].side = j;
 
-			if (edges.contains({ org, dest })) {
-				//throw std::exception(":(");
-				int t = 2;
+			auto pair = edges.emplace(std::make_pair(org, dest), triangle.edges[j]);
+			if (!pair.second) {
+				throw std::exception(":(");
 			}
-
-			edges.emplace(std::make_pair(org, dest), triangle.edges[j]);
 		}
 
 		triangles.push_back(triangle);

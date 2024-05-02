@@ -1,4 +1,5 @@
 #include "Plane.h"
+#include "../CAD/MeshModel.h";
 
 Plane::Plane() : normal(Vector3f(0., 0., 1.)), dist(0.)
 {
@@ -23,6 +24,20 @@ Plane Plane::fromTwoPoints(const Vector3f& pos, const Vector3f& dest)
 float Plane::Distance(const Vector3f& point) const
 {
 	return normal.Dot(point) - dist;
+}
+
+std::vector<Vector3f> Plane::MeshIntersections(const MeshModel& mesh) const
+{
+	std::vector<Vector3f> result;
+	for (auto& [points, _] : mesh.edges) {
+		if (points.first < points.second) {
+			Vector3f intersection;
+			if (Intersect(mesh.points[points.first], mesh.points[points.second], &intersection)) {
+				result.push_back(intersection);
+			}
+		}
+	}
+	return result;
 }
 
 bool Plane::Intersect(const Vector3f& segmentA, const Vector3f& segmentB, Vector3f* intersectPoint, float* ratio) const

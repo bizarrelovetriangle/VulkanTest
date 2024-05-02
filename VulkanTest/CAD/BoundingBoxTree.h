@@ -38,21 +38,18 @@ public:
 		return { contact };
 	}
 
-	// Vector class with arrows
-	// Allow face coloring and marking
-	// Clipping. Look how clipping work in my prev project
-	// Picker BoundingBoxes
-	// Edge and Edge Data
+	// Add grid for the plane
+	// Test the Picker with BoundingBoxes
+	// BoundingBoxTree merge tree nodes and check collisions
 	// 
 	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
 	// How to deal with triangle normals. Geometrical shader
 	// But what about deleted triangles?..
+	// Interactive vector class with arrows
+	// Edge and Edge Data
 	// 
 	// Utilize Vulkan memory barriers
 	// 
-	// GJK required to proceed through all points anyway
-	// GJK algorithm not required points rotation.. Or not
-	// Shall we do what now. GJP for two convex bodies, look that out, test that out
 	void AddToTree(std::shared_ptr<MeshObject> meshObject)
 	{
 		auto& mesh = *meshObject->mesh;

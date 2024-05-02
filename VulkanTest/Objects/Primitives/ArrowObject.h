@@ -37,7 +37,7 @@ public:
 
 	virtual Matrix4 ComposeMatrix() const override
 	{
-		return Matrix4::Translation(position) * Matrix4::Rotate(Vector3f(0., 1., 0.), direction);
+		return Matrix4::Translation(position) * Matrix4::Rotate(Vector3f(0., 1., 0.), direction) * Matrix4::Scale(scale);
 	}
 
 private:
