@@ -32,6 +32,7 @@ Matrix4 Matrix4::LookAt(const Vector3f& from, const Vector3f& to)
 {
 	auto k = (to - from).Normalized();
 	auto [i, j] = k.twoPerpendiculars(); // j should be in one plane with k and z origin
+	j = -j;
 	auto rotate = Matrix4(Vector4f(i, 1.), Vector4f(j, 1.), Vector4f(k, 1.), Vector4f(0., 0., 0., 1.));
 	return Translation(from) * rotate;
 }
