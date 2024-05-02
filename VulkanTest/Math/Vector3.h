@@ -115,7 +115,8 @@ public:
 		Vector3f yPlus(0., 1., 0.);
 
 		auto j = this->Normalized();
-		auto i = (j.Cross(zPlus).Length() > 10e-8 ? -j.Cross(zPlus) : -j.Cross(yPlus)).Normalized();
+		auto ref = j.Cross(zPlus).Length() > 10e-8 ? zPlus : yPlus;
+		auto i = j.Cross(ref).Normalized();
 		auto k = j.Cross(i);
 		return std::make_pair(i, k);
 	}
