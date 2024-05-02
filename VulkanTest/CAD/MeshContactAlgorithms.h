@@ -287,8 +287,12 @@ public:
 			planeObj->scale = planeObj->scale * 0.3;
 			renderers.emplace(std::move(planeObj));
 
-			auto arrow = std::make_unique<ArrowObject>(vulkanContext, arbitraryRefPoint,
-				contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+			auto& arbitraryIncPoint = incidentIsObjectA
+				? meshA.points[orgPoints[triVerts[0]].first]
+				: meshB.points[orgPoints[triVerts[0]].second];
+			auto normal = contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle);
+			if (incidentIsObjectA) normal = -normal;
+			auto arrow = std::make_unique<ArrowObject>(vulkanContext, arbitraryIncPoint, normal);
 			renderers.emplace(std::move(arrow));
 
 			CreatePoint(arbitraryRefPoint);
