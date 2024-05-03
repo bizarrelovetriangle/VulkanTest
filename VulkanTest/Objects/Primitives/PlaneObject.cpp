@@ -26,5 +26,5 @@ PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position,
 Matrix4 PlaneObject::ComposeMatrix() const
 {
 	auto planeOffset = position - plane.normal * plane.normal.Dot(position);
-	return Matrix4::Translation(planeOffset) * plane.getMatrix() * Matrix4::Scale(scale);
+	return Matrix4::Translate(planeOffset) * plane.getMatrix() * Matrix4::Scale(scale);
 }

@@ -16,7 +16,7 @@ public:
 	Vector4f operator*(const Vector4f& vec) const;
 	Matrix4 operator*(const Matrix4& mat) const;
 
-	static Matrix4 Translation(const Vector3f& vec);
+	static Matrix4 Translate(const Vector3f& vec);
 
 	static Matrix4 LookAt(const Vector3f& from, const Vector3f& to);
 

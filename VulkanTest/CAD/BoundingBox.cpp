@@ -32,8 +32,7 @@ BoundingBox::BoundingBox(const BoundingBox& boundingBox, const Matrix4& model)
 {
 	auto points = boundingBox.GetPoints();
 	for (auto& point : points) {
-		auto vec4 = model * Vector4f(point, 1.);
-		point = Vector3f(vec4.x, vec4.y, vec4.z);
+		point = model * Vector4f(point, 1.);
 	}
 
 	aa = Vector3f(max, max, max);

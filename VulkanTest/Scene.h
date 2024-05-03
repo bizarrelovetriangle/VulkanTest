@@ -59,13 +59,13 @@ public:
 		objects.push_back(plane);
 
 		auto center = std::make_unique<MeshObject>(
-			GeometryCreator::CreateIcosphere(0.1, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
+			GeometryCreator::CreateIcosphere(0.02, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
 		center->interactive = false;
 		objects.push_back(std::move(center));
 
 		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
 		boundingBoxTree->CreateBoundingBoxes(objects);
-		objects.push_back(std::dynamic_pointer_cast<Object>(boundingBoxTree));
+		objects.push_back(boundingBoxTree);
 
 		picker.Init(vulkanContext);
 		if (picker.pointer)
@@ -77,13 +77,8 @@ public:
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 
+			boundingBoxTree->UpdateBoundingBoxes(objects);
 			auto contactInfos = boundingBoxTree->ComposePairs();
-
-			if (!contactInfos.front().contact) {
-				auto& icosphere = objects[0];
-				icosphere->renderer->transformUniform.model = icosphere->ComposeMatrix();
-				icosphere->renderer->UpdateTransformUniformBuffer();
-			}
 
 			picker.Update(objects, camera);
 			//camera.rotatePoint = picker.pickedPos;

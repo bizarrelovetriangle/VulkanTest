@@ -348,6 +348,7 @@ private:
 		minkowskiObj->renderer->propertiesUniform.baseColor = baseColor;
 		minkowskiObj->renderer->UpdatePropertiesUniformBuffer();
 		minkowskiObj->UpdateVertexBuffer();
+		minkowskiObj->interactive = false;
 		renderers.insert(std::move(minkowskiObj));
 	}
 
@@ -358,6 +359,7 @@ private:
 		ico->position = pos;
 		ico->renderer->UpdateTransformUniformBuffer();
 		ico->renderer->UpdatePropertiesUniformBuffer();
+		ico->interactive = false;
 		ico->UpdateVertexBuffer();
 		renderers.emplace(std::move(ico));
 	}

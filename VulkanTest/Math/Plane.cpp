@@ -58,6 +58,6 @@ bool Plane::Intersect(const Vector3f& segmentA, const Vector3f& segmentB, Vector
 
 Matrix4 Plane::getMatrix() const
 {
-	return Matrix4::Translation(normal * dist) * Matrix4::Rotate(Vector3f(0., 1., 0.), normal);
+	return Matrix4::Translate(normal * dist) * Matrix4::Rotate(Vector3f(0., 1., 0.), normal);
 }
 

@@ -19,7 +19,7 @@ Matrix4 Matrix4::operator*(const Matrix4& mat) const
 	return Matrix4(*this * mat.i, *this * mat.j, *this * mat.k, *this * mat.l);
 }
 
-Matrix4 Matrix4::Translation(const Vector3f& vec)
+Matrix4 Matrix4::Translate(const Vector3f& vec)
 {
 	Matrix4 matrix;
 	matrix.l.x = vec.x;
@@ -34,7 +34,7 @@ Matrix4 Matrix4::LookAt(const Vector3f& from, const Vector3f& to)
 	auto [i, j] = k.twoPerpendiculars(); // j should be in one plane with k and z origin
 	j = -j;
 	auto rotate = Matrix4(Vector4f(i, 1.), Vector4f(j, 1.), Vector4f(k, 1.), Vector4f(0., 0., 0., 1.));
-	return Translation(from) * rotate;
+	return Translate(from) * rotate;
 }
 
 Matrix4 Matrix4::Frustum(float minDepth, float maxDepth, float angle)

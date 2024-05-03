@@ -20,10 +20,30 @@ public:
 	{
 		for (auto& object : objects)
 		{
+			if (!object->interactive) continue;
+
 			if (auto meshObject = std::dynamic_pointer_cast<MeshObject>(object); meshObject)
 			{
 				auto& mesh = *meshObject->mesh;
-				AddBoundingBoxObject(mesh.localBoundingBox, meshObject->ComposeMatrix());
+				AddBoundingBoxObject(mesh.localBoundingBox, meshObject);
+				AddToTree(meshObject);
+			}
+		}
+	}
+
+	void UpdateBoundingBoxes(std::vector<std::shared_ptr<Object>>& objects)
+	{
+		Dispose();
+
+		for (auto& object : objects)
+		{
+			if (!object->interactive) continue;
+
+			if (auto meshObject = std::dynamic_pointer_cast<MeshObject>(object); meshObject)
+			{
+				auto& mesh = *meshObject->mesh;
+				mesh.localBoundingBox.renderBoundingBoxObject = nullptr;
+				AddBoundingBoxObject(mesh.localBoundingBox, meshObject);
 				AddToTree(meshObject);
 			}
 		}
@@ -38,6 +58,7 @@ public:
 		return { contact };
 	}
 
+	// Move object with camera zoom in/out
 	// Add grid for the plane
 	// Test the Picker with BoundingBoxes
 	// Update RenderVisitor class. Use separate uniform for camera and view marixes
@@ -164,7 +185,7 @@ public:
 		return bestNeighbour.second;
 	}
 
-	void AddBoundingBoxObject(BoundingBox& boundingBox, Matrix4 model = Matrix4())
+	void AddBoundingBoxObject(BoundingBox& boundingBox, std::shared_ptr<MeshObject> refObject= nullptr)
 	{
 		if (boundingBox.renderBoundingBoxObject) {
 			boundingBox.renderBoundingBoxObject->Dispose();
@@ -173,8 +194,11 @@ public:
 
 		auto boundingBoxObject = std::make_shared<BoundingBoxObject>(vulkanContext, boundingBox);
 		boundingBox.renderBoundingBoxObject = boundingBoxObject;
-		auto& boundingBoxObjectModel = boundingBoxObject->renderer->transformUniform.model;
-		boundingBoxObjectModel = model * boundingBoxObjectModel;
+		if (refObject) {
+			boundingBoxObject->position = refObject->position;
+			boundingBoxObject->rotation = refObject->rotation;
+			boundingBoxObject->scale = refObject->scale;
+		}
 		boundingBoxObjects.insert(boundingBoxObject);
 	}
 
@@ -218,6 +242,9 @@ public:
 	{
 		for (auto& boundingBoxObject : boundingBoxObjects)
 			boundingBoxObject->Dispose();
+		boundingBoxes.clear();
+		boundingBoxObjects.clear();
+
 		meshContactAlgorithms.Dispose();
 	}
 

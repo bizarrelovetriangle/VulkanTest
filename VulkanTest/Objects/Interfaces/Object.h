@@ -35,7 +35,7 @@ public:
 		Matrix4 matrix;
 		matrix = Matrix4::Scale(scale) * matrix;
 		matrix = Matrix4::Rotate(rotation) * matrix;
-		matrix = Matrix4::Translation(position) * matrix;
+		matrix = Matrix4::Translate(position) * matrix;
 		return matrix;
 	}
 
