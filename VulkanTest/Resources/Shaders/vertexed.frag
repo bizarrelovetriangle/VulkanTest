@@ -26,5 +26,5 @@ void main()
 		color = vec4(0., 0.2, 0.1, 1.);
 	}
 
-	outColor = factor * color;
+	outColor = vec4(factor * color.xyz, color.w);
 }

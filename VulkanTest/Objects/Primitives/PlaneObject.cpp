@@ -15,7 +15,7 @@ PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position,
 	planeRenderer->transformUniform.model = plane.getMatrix();
 	planeRenderer->UpdateTransformUniformBuffer();
 
-	planeRenderer->evenPlaneObjectUniform.color = Vector4f(0.5, 0., 0.5, 1.);
+	planeRenderer->evenPlaneObjectUniform.color = Vector4f(0.1, 0.1, 0.2, 1.);
 	planeRenderer->UpdatePlaneUniformBuffer();
 
 	renderer = std::move(planeRenderer);

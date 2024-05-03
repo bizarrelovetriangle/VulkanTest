@@ -7,6 +7,7 @@
 #include "Renderers/ColoredRenderer.h"
 #include "Renderers/TexturedRenderer.h"
 #include "Renderers/SimpleVertexedRenderer.h"
+#include "Renderers/PlaneRenderer.h"
 #include "Objects/Primitives/PlaneObject.h"
 #include "Objects/Primitives/BoundingBoxObject.h"
 #include "Camera.h"
@@ -56,12 +57,14 @@ public:
 
 		auto plane = std::make_shared<PlaneObject>(vulkanContext,
 			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		plane->scale = plane->scale * 3.;
-		objects.push_back(plane);
+		plane->scale = plane->scale * 300.;
+		auto planeRenderer = (PlaneRenderer*)plane->renderer.get();
+		//planeRenderer->evenPlaneObjectUniform.color = plane->scale;
+		planeRenderer->evenPlaneObjectUniform.gridScale = plane->scale;
+		planeRenderer->evenPlaneObjectUniform.gridded = true;
+		planeRenderer->UpdatePlaneUniformBuffer();
 
-		auto arrow = std::make_shared<ArrowObject>(vulkanContext,
-			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
-		objects.push_back(arrow);
+		objects.push_back(plane);
 
 		auto center = std::make_unique<MeshObject>(
 			GeometryCreator::CreateIcosphere(0.1, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));

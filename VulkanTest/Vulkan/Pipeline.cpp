@@ -58,7 +58,7 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RendererShared& RendererShared,
 		{}, true, true, vk::CompareOp::eLess, false, false, {}, {}, 0., 1.);
 
 	vk::PipelineColorBlendAttachmentState colorBlendAttachment(
-		false,
+		true,
 		vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd,
 		vk::BlendFactor::eSrcAlpha, vk::BlendFactor::eOneMinusSrcAlpha, vk::BlendOp::eAdd,
 		vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |

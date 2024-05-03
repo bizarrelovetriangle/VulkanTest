@@ -8,7 +8,8 @@ class PlaneObjectUniform
 {
 public:
 	alignas(16) Vector4f color;
-	alignas(4) bool grided = true;
+	alignas(16) Vector3f gridScale = Vector3f(1., 1., 1.);
+	alignas(4) bool gridded = false;
 };
 
 class PlaneRenderer : public VertexedRenderer
