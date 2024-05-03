@@ -13,7 +13,7 @@ public:
 	MeshObject(std::unique_ptr<MeshModel> mesh, std::unique_ptr<VertexedRenderer> renderer)
 		: mesh(std::move(mesh)), Object(std::move(renderer))
 	{
-
+		UpdateVertexBuffer();
 	}
 
 	void UpdateVertexBuffer()

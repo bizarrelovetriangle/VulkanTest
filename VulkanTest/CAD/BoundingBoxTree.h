@@ -40,6 +40,7 @@ public:
 
 	// Add grid for the plane
 	// Test the Picker with BoundingBoxes
+	// Update RenderVisitor class. Use separate uniform for camera and view marixes
 	// BoundingBoxTree merge tree nodes and check collisions
 	// 
 	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
@@ -52,6 +53,8 @@ public:
 	// 
 	void AddToTree(std::shared_ptr<MeshObject> meshObject)
 	{
+		if (!meshObject->interactive) return;
+
 		auto& mesh = *meshObject->mesh;
 		size_t newBoundingBox = NextFree();
 		boundingBoxes[newBoundingBox] = BoundingBox(mesh.localBoundingBox, meshObject->ComposeMatrix());
@@ -74,7 +77,7 @@ public:
 		AddBoundingBoxObject(boundingBoxes[newParent]);
 
 		if (neighbour != rootBoundingBoxIndex) {
-			ParentRef(neighbour) = newParent;
+			ParentsRefToThis(neighbour) = newParent;
 		}
 
 		boundingBoxes[newBoundingBox].parent = newParent;
@@ -111,7 +114,7 @@ public:
 		int64_t parentBoundingBox = boundingBoxes[boundingBox].parent;
 		int64_t siblingBoundingBox = Sibling(boundingBox);
 		boundingBoxes[siblingBoundingBox].parent = boundingBoxes[parentBoundingBox].parent;
-		ParentRef(parentBoundingBox) = siblingBoundingBox;
+		ParentsRefToThis(parentBoundingBox) = siblingBoundingBox;
 
 		auto& parentObject = boundingBoxes[parentBoundingBox].renderBoundingBoxObject;
 		parentObject->Dispose();
@@ -175,7 +178,7 @@ public:
 		boundingBoxObjects.insert(boundingBoxObject);
 	}
 
-	int64_t& ParentRef(int64_t boundingBox)
+	int64_t& ParentsRefToThis(int64_t boundingBox)
 	{
 		auto parent = boundingBoxes[boundingBox].parent;
 		return boundingBoxes[parent].children.first == boundingBox
@@ -206,8 +209,8 @@ public:
 
 	virtual void Render(RenderVisitor& renderVisitor, const Camera& camera) override
 	{
-		//for (auto& boundingBoxObject : boundingBoxObjects)
-		//	boundingBoxObject->Render(renderVisitor, camera);
+		for (auto& boundingBoxObject : boundingBoxObjects)
+			boundingBoxObject->Render(renderVisitor, camera);
 		meshContactAlgorithms.Render(renderVisitor, camera);
 	}
 

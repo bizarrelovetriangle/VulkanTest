@@ -12,8 +12,7 @@ public:
 		auto pointerRenderer = std::make_unique<SimpleVertexedRenderer>(vulkanContext);
 		auto mesh = GeometryCreator::CreateIcosphere(0.1, 2);
 		pointer = std::make_shared<MeshObject>(std::move(mesh), std::move(pointerRenderer));
-		pointer->UpdateVertexBuffer();
-		pointer->name = "pointer";
+		pointer->interactive = false;
 	}
 
 	// Invert view!
@@ -33,7 +32,7 @@ public:
 
 		for (auto& object : objects)
 		{
-			if (object->name == "pointer") continue;
+			if (!object->interactive) continue;
 
 			auto meshObject = std::dynamic_pointer_cast<MeshObject>(object);
 			if (meshObject)

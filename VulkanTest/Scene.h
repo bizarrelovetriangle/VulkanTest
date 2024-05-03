@@ -48,27 +48,19 @@ public:
 			objects.push_back(std::move(object));
 		}
 
-		objects[0]->position += Vector3f(0., -1., 0.);
-		objects[1]->position += Vector3f(0., -1., 0.);
-
-
-		auto& icosphere = objects[0];
-		icosphere->position += Vector3f(0.1, 0., 0.);
-
 		auto plane = std::make_shared<PlaneObject>(vulkanContext,
 			Vector3f(0., -1., 0.), Vector3f(0., 1., 0.));
 		plane->scale = plane->scale * 300.;
+		plane->interactive = false;
 		auto planeRenderer = (PlaneRenderer*)plane->renderer.get();
-		//planeRenderer->evenPlaneObjectUniform.color = plane->scale;
 		planeRenderer->evenPlaneObjectUniform.gridScale = plane->scale;
 		planeRenderer->evenPlaneObjectUniform.gridded = true;
 		planeRenderer->UpdatePlaneUniformBuffer();
-
 		objects.push_back(plane);
 
 		auto center = std::make_unique<MeshObject>(
 			GeometryCreator::CreateIcosphere(0.1, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
-		center->UpdateVertexBuffer();
+		center->interactive = false;
 		objects.push_back(std::move(center));
 
 		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
@@ -89,7 +81,6 @@ public:
 
 			if (!contactInfos.front().contact) {
 				auto& icosphere = objects[0];
-				//icosphere->position += Vector3f(0.001, 0., 0.);
 				icosphere->renderer->transformUniform.model = icosphere->ComposeMatrix();
 				icosphere->renderer->UpdateTransformUniformBuffer();
 			}
