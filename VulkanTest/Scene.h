@@ -39,8 +39,8 @@ public:
 
 		Deserializer deserializer(vulkanContext);
 		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\scene.gltf");
-		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\hard_monkey.gltf");
-		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\FirstContact.gltf");
+		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\hard_monkey.gltf");
+		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\FirstContact.gltf");
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
@@ -78,7 +78,7 @@ public:
 			glfwPollEvents();
 
 			boundingBoxTree->UpdateBoundingBoxes(objects);
-			auto contactInfos = boundingBoxTree->ComposePairs();
+			//auto contactInfos = boundingBoxTree->ComposePairs();
 
 			picker.Update(objects, camera);
 			//camera.rotatePoint = picker.pickedPos;

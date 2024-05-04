@@ -106,38 +106,39 @@ std::unique_ptr<MeshModel> GeometryCreator::CreateBoxByTwoPoints(const Vector3f&
 	return mesh;
 }
 
-std::vector<Vector3f> GeometryCreator::CreateLinedBoxByTwoPoints(const Vector3f& aa, const Vector3f& bb)
+std::unique_ptr<MeshModel> GeometryCreator::CreateLinedBoxByTwoPoints(const Vector3f& aa, const Vector3f& bb)
 {
-	Vector3f frontBottomLeft = { aa.x, aa.y, aa.z };
-	Vector3f frontBottomRight = { bb.x, aa.y, aa.z };
-	Vector3f frontTopRight = { bb.x, bb.y, aa.z };
-	Vector3f frontTopLeft = { aa.x, bb.y, aa.z };
+	std::vector<Vector3f> positions{
+		{ aa.x, aa.y, aa.z },   //0
+		{ bb.x, aa.y, aa.z },   //1
+		{ bb.x, bb.y, aa.z },   //2
+		{ aa.x, bb.y, aa.z },   //3
+		{ aa.x, aa.y, bb.z },   //4
+		{ bb.x, aa.y, bb.z },   //5
+		{ bb.x, bb.y, bb.z },   //6
+		{ aa.x, bb.y, bb.z } }; //7
 
-	Vector3f backBottomLeft = { aa.x, aa.y, bb.z };
-	Vector3f backBottomRight = { bb.x, aa.y, bb.z };
-	Vector3f backTopRight = { bb.x, bb.y, bb.z };
-	Vector3f backTopLeft = { aa.x, bb.y, bb.z };
-
-	std::vector<Vector3f> vertexData
+	std::vector<uint32_t> indexes
 	{
 		//front
-		frontBottomLeft, frontBottomRight,
-		frontBottomRight, frontTopRight,
-		frontTopRight, frontTopLeft,
-		frontTopLeft, frontBottomLeft,
+		0, 1, 1,
+		1, 2, 2,
+		2, 3, 3,
+		3, 0, 0,
 
 		//back
-		backBottomLeft, backBottomRight,
-		backBottomRight, backTopRight,
-		backTopRight, backTopLeft,
-		backTopLeft, backBottomLeft,
+		4, 5, 5,
+		5, 6, 6,
+		6, 7, 7,
+		7, 4, 4,
 
 		//edjes
-		frontBottomLeft, backBottomLeft,
-		frontBottomRight, backBottomRight,
-		frontTopRight, backTopRight,
-		frontTopLeft, backTopLeft,
+		0, 4, 4,
+		1, 5, 5,
+		2, 6, 6,
+		3, 7, 7,
 	};
 
-	return vertexData;
+	auto mesh = std::make_unique<MeshModel>(indexes, positions);
+	return mesh;
 }
