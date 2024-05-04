@@ -58,11 +58,9 @@ public:
 		return { contact };
 	}
 
-	// Move object with camera zoom in/out
-	// Test the Picker with BoundingBoxes
-	// Update RenderVisitor class. Use separate uniform for camera and view marixes
 	// Fix BoundingBoxTree. Make it update objects in tree while they move
 	// BoundingBoxTree merge tree nodes and check collisions
+	// Test the Picker with BoundingBoxes
 	// 
 	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
 	// How to deal with triangle normals. Geometrical shader
@@ -164,22 +162,24 @@ public:
 			auto [prevExpantionVolume, index] = pq.top();
 			pq.pop();
 
-			auto& boundingBox = boundingBoxes[index];
+			auto& potentNeighbourBox = boundingBoxes[index];
 
-			if (boundingBox.sceneObject)
+			float unionBoxVolume = BoundingBox::Union(potentNeighbourBox, newBoundingBox).GetVolume();
+			float volumeToStayHere = prevExpantionVolume + unionBoxVolume;
+			type potentialNeighbour = std::make_pair(volumeToStayHere, index);
+			bestNeighbour = (std::min)(bestNeighbour, potentialNeighbour);
+
+			if (potentNeighbourBox.sceneObject)
 			{
-				float creationVolume = BoundingBox::Union(boundingBox, newBoundingBox).GetVolume();
-				type potentialNeighbour = std::make_pair(creationVolume + prevExpantionVolume, index);
-				bestNeighbour = (std::min)(bestNeighbour, potentialNeighbour);
 				continue;
 			}
 
-			float currentExpantionVolume = prevExpantionVolume + BoundingBox::Union(boundingBox, newBoundingBox).GetVolume() - boundingBox.GetVolume();
+			float currentExpantionVolume = volumeToStayHere - potentNeighbourBox.GetVolume();
 
 			if (currentExpantionVolume > bestNeighbour.first) continue;
 
-			pq.push(std::make_pair(currentExpantionVolume, boundingBox.children.first));
-			pq.push(std::make_pair(currentExpantionVolume, boundingBox.children.second));
+			pq.push(std::make_pair(currentExpantionVolume, potentNeighbourBox.children.first));
+			pq.push(std::make_pair(currentExpantionVolume, potentNeighbourBox.children.second));
 		}
 
 		return bestNeighbour.second;
