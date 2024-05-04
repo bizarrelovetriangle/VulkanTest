@@ -10,21 +10,21 @@ layout(location = 2) out vec2 outTexturePos;
 
 layout(binding = 0) uniform Uniform
 {
-	mat4x4 model;
-	mat4x4 view;
-	mat4x4 frustum;
+	mat4x4 modelToWorld;
+	mat4x4 worldToView;
+	mat4x4 viewToProj;
 } Transform;
 
 void main()
 {
-	mat4 viewSpace = Transform.view * Transform.model;
-	vec3 viewPos = vec3(viewSpace * vec4(pos, 1.));
+	mat4 modelToView = Transform.worldToView * Transform.modelToWorld;
+	vec3 viewPos = vec3(modelToView * vec4(pos, 1.));
 	outViewPosition = viewPos;
 
-	mat3 normalMatrix = transpose(inverse(mat3(viewSpace)));
+	mat3 normalMatrix = transpose(inverse(mat3(modelToView)));
 	outViewNormal = normalize(normalMatrix * normal);
 
 	outTexturePos = texturePos;
 
-	gl_Position = Transform.frustum * vec4(viewPos, 1.0);
+	gl_Position = Transform.viewToProj * vec4(viewPos, 1.0);
 }
