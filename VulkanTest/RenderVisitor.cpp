@@ -19,14 +19,14 @@ RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& comman
 {
 }
 
-void RenderVisitor::Visit(Renderer& renderer, const Camera& camera)
+void RenderVisitor::Visit(Renderer& renderer)
 {
 }
 
-void RenderVisitor::Visit(VertexedRenderer& renderer, const Camera& camera)
+void RenderVisitor::Visit(VertexedRenderer& renderer)
 {
 	auto& pipeline = *renderer.shared->pipeline;
-	BindPipeline(pipeline);
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphicsPipeline);
 
 	commandBuffer.bindDescriptorSets(
 		vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0,
@@ -36,15 +36,7 @@ void RenderVisitor::Visit(VertexedRenderer& renderer, const Camera& camera)
 	vk::DeviceSize vertexOffsets[] = { 0 };
 	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
 
-	renderer.transformUniform.view = camera.worldToView;
-	renderer.transformUniform.frustum = camera.viewToProj;
-	renderer.UpdateTransformUniformBuffer();
-
 	commandBuffer.draw(renderer.vertexBuffer->count, 1, 0, 0);
 }
 
-void RenderVisitor::BindPipeline(Pipeline& pipeline)
-{
-	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphicsPipeline);
-}
 

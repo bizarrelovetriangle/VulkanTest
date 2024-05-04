@@ -11,13 +11,8 @@ PlaneObject::PlaneObject(VulkanContext& vulkanContext, const Vector3f& position,
 	mesh = std::make_unique<MeshModel>(indexes, positions);
 
 	auto planeRenderer = std::make_unique<PlaneRenderer>(vulkanContext);
-
-	planeRenderer->transformUniform.model = plane.getMatrix();
-	planeRenderer->UpdateTransformUniformBuffer();
-
 	planeRenderer->evenPlaneObjectUniform.color = Vector4f(0.1, 0.1, 0.2, 1.);
 	planeRenderer->UpdatePlaneUniformBuffer();
-
 	renderer = std::move(planeRenderer);
 
 	UpdateVertexBuffer();

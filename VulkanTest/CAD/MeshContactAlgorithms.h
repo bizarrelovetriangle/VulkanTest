@@ -298,10 +298,10 @@ public:
 		contactInfo.contactPoint = intersectionsCenter;
 	}
 
-	void Render(RenderVisitor& renderVisitor, const Camera& camera)
+	void Render(RenderVisitor& renderVisitor)
 	{
 		for (auto& renderer : renderers)
-			renderer->Render(renderVisitor, camera);
+			renderer->Render(renderVisitor);
 	}
 
 	void Dispose()

@@ -6,13 +6,12 @@ layout(location = 2) in vec4 inColor;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 1) uniform Uniform
+layout(binding = 2) uniform Uniform
 {
 	vec4 baseColor;
 	bool hasTexture;
 	bool hasColors;
 };
-
 
 void main()
 {

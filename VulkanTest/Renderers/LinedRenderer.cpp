@@ -26,8 +26,9 @@ LinedRenderer::LinedRenderer(VulkanContext& vulkanContext, std::vector<Vector4f>
 {
 	shared = Shared<LinedRenderer>::getInstance(vulkanContext, true);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
-	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
-	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*vulkanContext.commonUniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 2);
 }
 
 void LinedRenderer::UpdateVertexBuffer(const MeshModel& mesh)

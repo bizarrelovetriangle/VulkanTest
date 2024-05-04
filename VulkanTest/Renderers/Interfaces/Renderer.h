@@ -2,9 +2,7 @@
 #include "../../Math/Vector3.h"
 #include "../../Math/Vector2.h"
 #include "../../Math/Matrix4.h"
-#include "../../VulkanContext.h"
 #include <memory>
-#include "../../Vulkan/DeviceController.h"
 
 class RenderVisitor;
 class DescriptorSets;
@@ -12,13 +10,13 @@ struct DeserializedObject;
 struct DeserializedObjectVertexData;
 class BufferData;
 class Pipeline;
+class VulkanContext;
+class Camera;
 
 class TransformUniform
 {
 public:
-	alignas(16) Matrix4 model;
-	alignas(16) Matrix4 view;
-	alignas(16) Matrix4 frustum;
+	alignas(16) Matrix4 modelToWorld;
 };
 
 class PropertiesUniform
@@ -67,7 +65,7 @@ public:
 	void UpdateTransformUniformBuffer();
 	void UpdatePropertiesUniformBuffer();
 	static std::vector<vk::DescriptorSetLayoutBinding> DescriptorSetLayoutBinding();
-	virtual void Accept(RenderVisitor& renderVisitor, const Camera& camera);
+	virtual void Accept(RenderVisitor& renderVisitor);
 	virtual void Dispose();
 
 public:

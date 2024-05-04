@@ -16,9 +16,10 @@ PlaneRenderer::PlaneRenderer(VulkanContext& vulkanContext)
 
 	shared = Shared<PlaneRenderer>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
-	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
-	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
-	descriptorSets->UpdateUniformDescriptor(*evenPlaneObjectUniformBuffer, 2);
+	descriptorSets->UpdateUniformDescriptor(*vulkanContext.commonUniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 2);
+	descriptorSets->UpdateUniformDescriptor(*evenPlaneObjectUniformBuffer, 3);
 }
 
 PlaneRenderer::~PlaneRenderer() = default;
@@ -40,6 +41,7 @@ std::vector<vk::DescriptorSetLayoutBinding> PlaneRenderer::DescriptorSetLayoutBi
 	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
 		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
-		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
+		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(3, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
 	};
 }

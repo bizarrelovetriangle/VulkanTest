@@ -8,16 +8,20 @@ layout(location = 0) out vec3 outViewPosition;
 layout(location = 1) out vec3 outViewNormal;
 layout(location = 2) out vec2 outTexturePos;
 
-layout(binding = 0) uniform Uniform
+layout(binding = 0) uniform CommonUniform
 {
-	mat4x4 modelToWorld;
 	mat4x4 worldToView;
 	mat4x4 viewToProj;
+} Common;
+
+layout(binding = 1) uniform TransformUniform
+{
+	mat4x4 modelToWorld;
 } Transform;
 
 void main()
 {
-	mat4 modelToView = Transform.worldToView * Transform.modelToWorld;
+	mat4 modelToView = Common.worldToView * Transform.modelToWorld;
 	vec3 viewPos = vec3(modelToView * vec4(pos, 1.));
 	outViewPosition = viewPos;
 
@@ -26,5 +30,5 @@ void main()
 
 	outTexturePos = texturePos;
 
-	gl_Position = Transform.viewToProj * vec4(viewPos, 1.0);
+	gl_Position = Common.viewToProj * vec4(viewPos, 1.0);
 }

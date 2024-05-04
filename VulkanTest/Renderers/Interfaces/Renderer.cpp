@@ -13,6 +13,8 @@
 #include "../../Objects/Primitives/BoundingBoxObject.h"
 #include "../Interfaces/VertexedRenderer.h"
 #include "../LinedRenderer.h"
+#include "../../Camera.h"
+#include "../../Vulkan/DeviceController.h"
 
 RendererShared::RendererShared(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
@@ -91,13 +93,14 @@ std::vector<vk::DescriptorSetLayoutBinding> Renderer::DescriptorSetLayoutBinding
 {
 	return {
 		vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
-		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
+		vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		vk::DescriptorSetLayoutBinding(2, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll)
 	};
 }
 
-void Renderer::Accept(RenderVisitor& renderVisitor, const Camera& camera)
+void Renderer::Accept(RenderVisitor& renderVisitor)
 {
-	renderVisitor.Visit(*this, camera);
+	renderVisitor.Visit(*this);
 }
 
 void Renderer::Dispose()

@@ -4,7 +4,7 @@ layout(location = 0) out vec4 outColor;
 
 layout(location = 0) in vec4 inColor;
 
-layout(binding = 1) uniform Uniform
+layout(binding = 2) uniform Uniform
 {
 	vec4 baseColor;
 	bool hasTexture;

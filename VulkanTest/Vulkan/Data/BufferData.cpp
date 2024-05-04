@@ -94,6 +94,8 @@ template std::unique_ptr<BufferData> BufferData::Create<Vector3f>(VulkanContext&
 	std::span<Vector3f> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 template std::unique_ptr<BufferData> BufferData::Create<LinedVertexData>(VulkanContext& vulkanContext,
 	std::span<LinedVertexData> data, MemoryType memoryType, vk::BufferUsageFlags usage);
+template std::unique_ptr<BufferData> BufferData::Create<CommonUniform>(VulkanContext& vulkanContext,
+	std::span<CommonUniform> data, MemoryType memoryType, vk::BufferUsageFlags usage);
 
 template void BufferData::FlushData(std::span<VertexData> data);
 template void BufferData::FlushData(std::span<TexturedVertexData> data);
@@ -105,4 +107,5 @@ template void BufferData::FlushData(std::span<PlaneObjectUniform> data);
 template void BufferData::FlushData(std::span<TransformUniform> data);
 template void BufferData::FlushData(std::span<Vector3f> data);
 template void BufferData::FlushData(std::span<LinedVertexData> data);
+template void BufferData::FlushData(std::span<CommonUniform> data);
 

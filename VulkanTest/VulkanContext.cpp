@@ -33,6 +33,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include "RenderVisitor.h"
+#include "Vulkan/Data/BufferData.h"
 
 void VulkanContext::Init(GLFWwindow* window)
 {
@@ -65,7 +66,13 @@ void VulkanContext::Init(GLFWwindow* window)
     renderFinishedSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
     vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
     inFlightFence = deviceController->device.createFence(fenceInfo);
+
+    std::span<CommonUniform> commonUniformSpan(&commonUniform, &commonUniform + 1);
+    commonUniformBuffer = BufferData::Create<CommonUniform>(
+        *this, commonUniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 }
+
+VulkanContext::VulkanContext() = default;
 
 VulkanContext::~VulkanContext() = default;
 
@@ -93,6 +100,11 @@ void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects, con
 void VulkanContext::RecordCommandBuffer(size_t imageIndex,
     const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
 {
+    commonUniform.worldToView = camera.worldToView;
+    commonUniform.viewToProj = camera.viewToProj;
+    std::span<CommonUniform> commonUniformSpan(&commonUniform, &commonUniform + 1);
+    commonUniformBuffer->FlushData(commonUniformSpan);
+
     commandBuffer->commandBuffer.reset();
     vk::CommandBufferBeginInfo beginInfo;
     commandBuffer->commandBuffer.begin(beginInfo);
@@ -118,7 +130,7 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
 
     for (auto& object : objects)
     {
-        object->Render(renderVisitor, camera);
+        object->Render(renderVisitor);
     }
 
     commandBuffer->commandBuffer.endRenderPass();
@@ -127,12 +139,13 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
 
 void VulkanContext::Await()
 {
-
     vkDeviceWaitIdle(deviceController->device);
 }
 
 void VulkanContext::Dispose()
 {
+    commonUniformBuffer->Dispose();
+
     swapChain->Dispose();
     commandBufferDispatcher->Dispose();
     commandBuffer->Dispose();

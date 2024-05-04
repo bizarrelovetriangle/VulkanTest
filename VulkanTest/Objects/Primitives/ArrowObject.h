@@ -23,13 +23,8 @@ public:
 		mesh = std::make_unique<MeshModel>(indexes, positions);
 
 		auto linedRenderer = std::make_unique<LinedRenderer>(vulkanContext);
-
-		linedRenderer->transformUniform.model = ComposeMatrix();
-		linedRenderer->UpdateTransformUniformBuffer();
-
 		linedRenderer->propertiesUniform.baseColor = Vector4f(0., 0.5, 0.5, 1.);
 		linedRenderer->UpdatePropertiesUniformBuffer();
-
 		renderer = std::move(linedRenderer);
 
 		interactive = false;

@@ -38,10 +38,6 @@ public:
 		object->rotation = serializedObject.rotation;
 		object->scale = serializedObject.scale;
 
-		object->renderer->transformUniform.model = object->ComposeMatrix();
-		object->renderer->UpdateTransformUniformBuffer();
-		object->UpdateVertexBuffer();
-
 		return std::move(object);
 	}
 

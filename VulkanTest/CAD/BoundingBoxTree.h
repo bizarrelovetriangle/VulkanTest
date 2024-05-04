@@ -231,11 +231,11 @@ public:
 		return next;
 	}
 
-	virtual void Render(RenderVisitor& renderVisitor, const Camera& camera) override
+	virtual void Render(RenderVisitor& renderVisitor) override
 	{
 		for (auto& boundingBoxObject : boundingBoxObjects)
-			boundingBoxObject->Render(renderVisitor, camera);
-		meshContactAlgorithms.Render(renderVisitor, camera);
+			boundingBoxObject->Render(renderVisitor);
+		meshContactAlgorithms.Render(renderVisitor);
 	}
 
 	virtual void Dispose() override

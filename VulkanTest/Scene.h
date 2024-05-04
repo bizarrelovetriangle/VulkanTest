@@ -82,8 +82,7 @@ public:
 
 			picker.Update(objects);
 			//camera.rotatePoint = picker.pickedPos;
-			auto copy = std::vector(objects.begin() + 0, objects.end());
-			vulkanContext.DrawFrame(copy, camera);
+			vulkanContext.DrawFrame(objects, camera);
 		}
 	}
 

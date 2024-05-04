@@ -31,8 +31,9 @@ ColoredRenderer::ColoredRenderer(VulkanContext& vulkanContext, const std::vector
 {
 	shared = Shared<ColoredRenderer>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
-	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 0);
-	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*vulkanContext.commonUniformBuffer, 0);
+	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 1);
+	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 2);
 }
 
 void ColoredRenderer::UpdateVertexBuffer(const MeshModel& mesh)

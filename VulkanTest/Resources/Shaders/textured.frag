@@ -6,13 +6,13 @@ layout(location = 2) in vec2 inTexturePos;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 1) uniform Uniform
+layout(binding = 2) uniform Uniform
 {
 	vec4 baseColor;
 	bool hasTexture;
 	bool hasColors;
 };
-layout(binding = 2) uniform sampler2D texSampler;
+layout(binding = 3) uniform sampler2D texSampler;
 
 
 void main()

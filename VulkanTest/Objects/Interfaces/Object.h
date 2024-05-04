@@ -19,10 +19,11 @@ public:
 
 	virtual ~Object() = default;
 
-	virtual void Render(RenderVisitor& renderVisitor, const Camera& camera)
+	virtual void Render(RenderVisitor& renderVisitor)
 	{
-		renderer->transformUniform.model = ComposeMatrix();
-		renderer->Accept(renderVisitor, camera);
+		renderer->transformUniform.modelToWorld = ComposeMatrix();
+		renderer->UpdateTransformUniformBuffer();
+		renderer->Accept(renderVisitor);
 	}
 
 	virtual void Dispose()

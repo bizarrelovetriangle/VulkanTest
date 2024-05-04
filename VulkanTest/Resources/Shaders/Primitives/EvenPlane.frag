@@ -6,7 +6,7 @@ layout(location = 2) in vec3 inOrgPosition;
 
 layout(location = 0) out vec4 outColor;
 
-layout(binding = 2) uniform UniformBufferObject
+layout(binding = 3) uniform UniformBufferObject
 {
 	vec4 color;
 	vec3 gridScale;
