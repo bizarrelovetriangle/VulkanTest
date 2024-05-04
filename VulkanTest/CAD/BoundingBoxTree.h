@@ -59,7 +59,6 @@ public:
 	}
 
 	// Move object with camera zoom in/out
-	// Add grid for the plane
 	// Test the Picker with BoundingBoxes
 	// Update RenderVisitor class. Use separate uniform for camera and view marixes
 	// BoundingBoxTree merge tree nodes and check collisions

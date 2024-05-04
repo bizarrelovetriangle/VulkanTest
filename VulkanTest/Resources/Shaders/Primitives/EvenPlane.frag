@@ -30,12 +30,24 @@ void main()
 	if (Uniform.gridded) {
 		vec3 scaledOrgPos = vec3(inOrgPosition.x * Uniform.gridScale.x, inOrgPosition.y * Uniform.gridScale.y, inOrgPosition.z * Uniform.gridScale.z);
 
+		// Tiles
 		if (scaledOrgPos.x < 0) --scaledOrgPos.x;
 		if (scaledOrgPos.z < 0) --scaledOrgPos.z;
-
+		
 		if ((int(scaledOrgPos.x) % 2 == 0) != (int(scaledOrgPos.z) % 2 == 0)) {
 			color = vec4(0.1, 0.1, 0.1, 0.);
 		}
+
+		// Grid
+		//float xFactor = abs(scaledOrgPos.x);
+		//xFactor = abs(xFactor - int(xFactor + 0.5));
+		//
+		//float zFactor = abs(scaledOrgPos.z);
+		//zFactor = abs(zFactor - int(zFactor + 0.5));
+		//
+		//if (xFactor > 0.02 && zFactor > 0.02) {
+		//	color = vec4(0.1, 0.1, 0.1, 0.);
+		//}
 
 		outColor = factor * color;
 	}
