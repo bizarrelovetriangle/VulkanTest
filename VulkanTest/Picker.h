@@ -7,20 +7,20 @@
 class Picker
 {
 public:
-	void Init(VulkanContext& vulkanContext)
+	void Init(VulkanContext& vulkanContext, const Camera& camera)
 	{
+		this->camera = &camera;
 		auto pointerRenderer = std::make_unique<SimpleVertexedRenderer>(vulkanContext);
 		auto mesh = GeometryCreator::CreateIcosphere(0.1, 2);
 		pointer = std::make_shared<MeshObject>(std::move(mesh), std::move(pointerRenderer));
 		pointer->interactive = false;
 	}
 
-	// Invert view!
-	void Update(const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
+	void Update(const std::vector<std::shared_ptr<Object>>& objects)
 	{
-		auto inverseView = camera.view.Inverse();
-		auto segmentA = Vector3f(inverseView * Vector4f(Vector3f::Zero(), 1.));
-		auto segmentB = Vector3f(inverseView * Vector4f(mouseDirection * 1000, 1.));
+		auto viewToWorld = camera->worldToView.Inverse();
+		auto segmentA = Vector3f(viewToWorld * Vector4f(Vector3f::Zero(), 1.));
+		auto segmentB = Vector3f(viewToWorld * Vector4f(mouseDirection * 1000, 1.));
 
 		pointer->position = segmentA;
 		focusedPos = std::nullopt;
@@ -77,6 +77,9 @@ public:
 		{
 			pickedObj = focusedObj;
 			pickedPos = focusedPos;
+
+			Vector3f pickedPosView = camera->worldToView * Vector4f(*pickedPos, 1);
+			pickedCameraDist = pickedPosView.Length();
 		}
 	}
 
@@ -86,21 +89,23 @@ public:
 		pickedPos = std::nullopt;
 	}
 
-	void MouseMoved(Vector2f mousePos, const Camera& camera)
+	void MouseMoved(Vector2f mousePos)
 	{
 		this->mousePos = mousePos;
-		auto vec4 = camera.proj.Inverse() * Vector4f(mousePos.x, mousePos.y, 1, 1);
+		auto projToView = camera->viewToProj.Inverse();
+		auto vec4 = projToView * Vector4f(mousePos.x, mousePos.y, 1, 1);
 		mouseDirection = Vector3f(vec4).Normalized();
-		//pointer->position = camera.view.Inverse() * Vector4f(mouseDirection * 5, 1);
+		//pointer->position = camera->view.Inverse() * Vector4f(mouseDirection * 5, 1);
+	}
 
-		if (pickedObj)
-		{
-			auto inverseView = camera.view.Inverse();
-			Vector3f pickedPosView = camera.view * Vector4f(*pickedPos, 1);
-			Vector3f newPos = inverseView * Vector4f(mouseDirection * pickedPosView.Length(), 1.);
-			pickedObj->position += newPos - *pickedPos;
-			*pickedPos = newPos;
-		}
+	void UpdatePicked()
+	{
+		if (!pickedObj) return;
+
+		auto viewToWorld = camera->worldToView.Inverse();
+		Vector3f newPos = viewToWorld * Vector4f(mouseDirection * pickedCameraDist, 1.);
+		pickedObj->position += newPos - *pickedPos;
+		*pickedPos = newPos;
 	}
 
 	Vector2f mousePos;
@@ -113,4 +118,8 @@ public:
 
 	std::shared_ptr<Object> pickedObj;
 	std::optional<Vector3f> pickedPos;
+	float pickedCameraDist = 0.;
+
+private:
+	const Camera* camera;
 };

@@ -67,7 +67,7 @@ public:
 		boundingBoxTree->CreateBoundingBoxes(objects);
 		objects.push_back(boundingBoxTree);
 
-		picker.Init(vulkanContext);
+		picker.Init(vulkanContext, camera);
 		if (picker.pointer)
 			objects.push_back(picker.pointer);
 	}
@@ -80,7 +80,7 @@ public:
 			boundingBoxTree->UpdateBoundingBoxes(objects);
 			//auto contactInfos = boundingBoxTree->ComposePairs();
 
-			picker.Update(objects, camera);
+			picker.Update(objects);
 			//camera.rotatePoint = picker.pickedPos;
 			auto copy = std::vector(objects.begin() + 0, objects.end());
 			vulkanContext.DrawFrame(copy, camera);
@@ -105,6 +105,8 @@ public:
 			scene->camera.Scrolled(offset);
 		else
 			scene->camera.Zoom(-yoffset);
+
+		scene->picker.UpdatePicked();
 	}
 
 	static void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
@@ -116,7 +118,8 @@ public:
 		mousePos = { mousePos.x / (scene->windowSize.x / 2), mousePos.y / (scene->windowSize.y / 2) };
 
 		scene->camera.MouseMoved(mousePos);
-		scene->picker.MouseMoved(mousePos, scene->camera);
+		scene->picker.MouseMoved(mousePos);
+		scene->picker.UpdatePicked();
 	}
 
 	static void MouseClickCallback(GLFWwindow* window, int button, int action, int mods)

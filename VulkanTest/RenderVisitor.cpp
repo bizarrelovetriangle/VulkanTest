@@ -36,8 +36,8 @@ void RenderVisitor::Visit(VertexedRenderer& renderer, const Camera& camera)
 	vk::DeviceSize vertexOffsets[] = { 0 };
 	commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
 
-	renderer.transformUniform.view = camera.view;
-	renderer.transformUniform.frustum = camera.proj;
+	renderer.transformUniform.view = camera.worldToView;
+	renderer.transformUniform.frustum = camera.viewToProj;
 	renderer.UpdateTransformUniformBuffer();
 
 	commandBuffer.draw(renderer.vertexBuffer->count, 1, 0, 0);

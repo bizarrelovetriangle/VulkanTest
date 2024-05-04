@@ -61,6 +61,7 @@ public:
 	// Move object with camera zoom in/out
 	// Test the Picker with BoundingBoxes
 	// Update RenderVisitor class. Use separate uniform for camera and view marixes
+	// Fix BoundingBoxTree. Make it update objects in tree while they move
 	// BoundingBoxTree merge tree nodes and check collisions
 	// 
 	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
