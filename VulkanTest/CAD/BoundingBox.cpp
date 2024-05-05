@@ -28,7 +28,7 @@ BoundingBox::BoundingBox(const MeshModel& mesh)
 	}
 }
 
-BoundingBox::BoundingBox(const BoundingBox& boundingBox, const Matrix4& model)
+BoundingBox::BoundingBox(const BoundingBox& boundingBox, const Matrix4& model, float offset)
 {
 	auto points = boundingBox.GetPoints();
 	for (auto& point : points) {
@@ -48,6 +48,9 @@ BoundingBox::BoundingBox(const BoundingBox& boundingBox, const Matrix4& model)
 		if (point.y > bb.y) bb.y = point.y;
 		if (point.z > bb.z) bb.z = point.z;
 	}
+
+	aa = aa - Vector3f(offset);
+	bb = bb + Vector3f(offset);
 }
 
 float BoundingBox::GetVolume() const
@@ -64,6 +67,22 @@ std::array<Vector3f, 8> BoundingBox::GetPoints() const
 			for (int k = 0; k < 2; ++k)
 				result[i * 4 + j * 2 + k] = Vector3f(k ? aa.x : bb.x, j ? aa.y : bb.y, i ? aa.z : bb.z);
 	return result;
+}
+
+bool BoundingBox::Intersect(const BoundingBox& box) const
+{
+	auto less = [](auto& a, auto& b) { return a.x < b.x && a.y < b.y && a.z < b.z; };
+	auto greater = [](auto& a, auto& b){ return a.x > b.x && a.y > b.y && a.z > b.z; };
+	return less(aa, box.aa)
+		? greater(bb, box.aa)
+		: less(aa, box.bb) && greater(bb, box.bb);
+}
+
+bool BoundingBox::Exceed(const BoundingBox& exceededBox) const
+{
+	return
+		aa.x < exceededBox.aa.x || aa.y < exceededBox.aa.y || aa.z < exceededBox.aa.z ||
+		bb.x > exceededBox.bb.x || bb.y > exceededBox.bb.y || bb.z > exceededBox.bb.z;
 }
 
 BoundingBox BoundingBox::Union(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB)

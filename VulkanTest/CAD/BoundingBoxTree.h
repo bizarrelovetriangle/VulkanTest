@@ -13,10 +13,9 @@ public:
 	BoundingBoxTree(VulkanContext& vulkanContext)
 		: vulkanContext(vulkanContext), meshContactAlgorithms(vulkanContext)
 	{
-
 	}
 
-	void CreateBoundingBoxes(std::vector<std::shared_ptr<Object>>& objects)
+	void UpdateTree(std::vector<std::shared_ptr<Object>>& objects)
 	{
 		for (auto& object : objects)
 		{
@@ -24,27 +23,20 @@ public:
 
 			if (auto meshObject = std::dynamic_pointer_cast<MeshObject>(object); meshObject)
 			{
-				auto& mesh = *meshObject->mesh;
-				AddBoundingBoxObject(mesh.localBoundingBox, meshObject);
-				AddToTree(meshObject);
-			}
-		}
-	}
+				UpdateBoundingBoxObject(meshObject->mesh->localBoundingBox, meshObject);
 
-	void UpdateBoundingBoxes(std::vector<std::shared_ptr<Object>>& objects)
-	{
-		Dispose();
+				if (meshObject->mesh->localBoundingBox.parent == -1) {
+					AddToTree(meshObject);
+				}
+				else {
+					auto& orgBoundingBox = boundingBoxes[meshObject->mesh->localBoundingBox.parent];
+					auto boundingBox = BoundingBox(meshObject->mesh->localBoundingBox, meshObject->ComposeMatrix());
 
-		for (auto& object : objects)
-		{
-			if (!object->interactive) continue;
-
-			if (auto meshObject = std::dynamic_pointer_cast<MeshObject>(object); meshObject)
-			{
-				auto& mesh = *meshObject->mesh;
-				mesh.localBoundingBox.renderBoundingBoxObject = nullptr;
-				AddBoundingBoxObject(mesh.localBoundingBox, meshObject);
-				AddToTree(meshObject);
+					if (boundingBox.Exceed(orgBoundingBox)) {
+						RemoveFromTree(meshObject);
+						AddToTree(meshObject);
+					}
+				}
 			}
 		}
 	}
@@ -58,6 +50,7 @@ public:
 		return { contact };
 	}
 
+	// Create uniform class
 	// Fix BoundingBoxTree. Make it update objects in tree while they move
 	// BoundingBoxTree merge tree nodes and check collisions
 	// Test the Picker with BoundingBoxes
@@ -69,60 +62,55 @@ public:
 	// Edge and Edge Data
 	// 
 	// Utilize Vulkan memory barriers
-	// 
+
 	void AddToTree(std::shared_ptr<MeshObject> meshObject)
 	{
-		if (!meshObject->interactive) return;
-
 		auto& mesh = *meshObject->mesh;
 		size_t newBoundingBox = NextFree();
-		boundingBoxes[newBoundingBox] = BoundingBox(mesh.localBoundingBox, meshObject->ComposeMatrix());
+		boundingBoxes[newBoundingBox] = BoundingBox(mesh.localBoundingBox, meshObject->ComposeMatrix(), 0.3);
 		boundingBoxes[newBoundingBox].sceneObject = meshObject;
 		mesh.localBoundingBox.parent = newBoundingBox;
-		AddBoundingBoxObject(boundingBoxes[newBoundingBox]);
+		UpdateBoundingBoxObject(boundingBoxes[newBoundingBox]);
 
-		if (boundingBoxes.size() == 1) {
+		if (rootBoundingBoxIndex == -1) {
 			rootBoundingBoxIndex = newBoundingBox;
 			return;
 		}
 
-		int64_t neighbour = FindBestNeighbour(boundingBoxes[newBoundingBox]);
+		int64_t sibling = FindBestSibling(boundingBoxes[newBoundingBox]);
 
 		size_t newParent = NextFree();
-		boundingBoxes[newParent] = BoundingBox::Union(boundingBoxes[neighbour], boundingBoxes[newBoundingBox]);
+		boundingBoxes[newParent] = BoundingBox::Union(boundingBoxes[sibling], boundingBoxes[newBoundingBox]);
 		boundingBoxes[newParent].children.first = newBoundingBox;
-		boundingBoxes[newParent].children.second = neighbour;
-		boundingBoxes[newParent].parent = boundingBoxes[neighbour].parent;
-		AddBoundingBoxObject(boundingBoxes[newParent]);
+		boundingBoxes[newParent].children.second = sibling;
+		boundingBoxes[newParent].parent = boundingBoxes[sibling].parent;
+		UpdateBoundingBoxObject(boundingBoxes[newParent]);
 
-		if (neighbour != rootBoundingBoxIndex) {
-			ParentsRefToThis(neighbour) = newParent;
+		if (sibling == rootBoundingBoxIndex) {
+			rootBoundingBoxIndex = newParent;
+		}
+		else {
+			ParentsRefToThis(sibling) = newParent;
 		}
 
 		boundingBoxes[newBoundingBox].parent = newParent;
-		boundingBoxes[neighbour].parent = newParent;
-
-		if (neighbour == rootBoundingBoxIndex) {
-			rootBoundingBoxIndex = newParent;
-			return;
-		}
+		boundingBoxes[sibling].parent = newParent;
 
 		int64_t parent = boundingBoxes[newParent].parent;
 		while (parent != -1) {
 			auto& parentRef = boundingBoxes[parent];
 			parentRef.Reset(boundingBoxes[parentRef.children.first], boundingBoxes[parentRef.children.second]);
-			AddBoundingBoxObject(parentRef);
+			UpdateBoundingBoxObject(parentRef);
 			parent = parentRef.parent;
 		}
 	}
 
 	void RemoveFromTree(std::shared_ptr<MeshObject> meshObject)
 	{
-		int64_t boundingBox = meshObject->mesh->localBoundingBox.parent;
+		RemoveBoundingBoxObjects(meshObject);
 
-		auto& object = boundingBoxes[boundingBox].renderBoundingBoxObject;
-		object->Dispose();
-		boundingBoxObjects.erase(object);
+		int64_t boundingBox = meshObject->mesh->localBoundingBox.parent;
+		meshObject->mesh->localBoundingBox.parent = -1;
 		freeBuckets.push_back(boundingBox);
 
 		if (boundingBox == rootBoundingBoxIndex) {
@@ -133,7 +121,13 @@ public:
 		int64_t parentBoundingBox = boundingBoxes[boundingBox].parent;
 		int64_t siblingBoundingBox = Sibling(boundingBox);
 		boundingBoxes[siblingBoundingBox].parent = boundingBoxes[parentBoundingBox].parent;
-		ParentsRefToThis(parentBoundingBox) = siblingBoundingBox;
+
+		if (parentBoundingBox == rootBoundingBoxIndex) {
+			rootBoundingBoxIndex = siblingBoundingBox;
+		}
+		else {
+			ParentsRefToThis(parentBoundingBox) = siblingBoundingBox;
+		}
 
 		auto& parentObject = boundingBoxes[parentBoundingBox].renderBoundingBoxObject;
 		parentObject->Dispose();
@@ -144,62 +138,45 @@ public:
 		while (parent != -1) {
 			auto& parentRef = boundingBoxes[parent];
 			parentRef.Reset(boundingBoxes[parentRef.children.first], boundingBoxes[parentRef.children.second]);
-			AddBoundingBoxObject(parentRef);
+			UpdateBoundingBoxObject(parentRef);
 			parent = parentRef.parent;
 		}
 	}
 
-	int64_t FindBestNeighbour(BoundingBox& newBoundingBox)
+	int64_t FindBestSibling(BoundingBox& newBoundingBox)
 	{
 		using type = std::pair<float, int64_t>;
 		auto less = [](type& a, type& b) { return a.first > b.first; };
 		std::priority_queue<type, std::vector<type>, decltype(less)> pq(less);
 		pq.push(std::make_pair(0., rootBoundingBoxIndex));
-		type bestNeighbour = std::make_pair((std::numeric_limits<float>::max)(), -1);
+		type bestSibling = std::make_pair((std::numeric_limits<float>::max)(), -1);
 
 		while (!pq.empty())
 		{
 			auto [prevExpantionVolume, index] = pq.top();
 			pq.pop();
 
-			auto& potentNeighbourBox = boundingBoxes[index];
+			auto& potentSiblingBox = boundingBoxes[index];
 
-			float unionBoxVolume = BoundingBox::Union(potentNeighbourBox, newBoundingBox).GetVolume();
+			float unionBoxVolume = BoundingBox::Union(potentSiblingBox, newBoundingBox).GetVolume();
 			float volumeToStayHere = prevExpantionVolume + unionBoxVolume;
-			type potentialNeighbour = std::make_pair(volumeToStayHere, index);
-			bestNeighbour = (std::min)(bestNeighbour, potentialNeighbour);
+			type potentialSibling = std::make_pair(volumeToStayHere, index);
+			bestSibling = (std::min)(bestSibling, potentialSibling);
 
-			if (potentNeighbourBox.sceneObject)
+			if (potentSiblingBox.sceneObject)
 			{
 				continue;
 			}
 
-			float currentExpantionVolume = volumeToStayHere - potentNeighbourBox.GetVolume();
+			float currentExpantionVolume = volumeToStayHere - potentSiblingBox.GetVolume();
 
-			if (currentExpantionVolume > bestNeighbour.first) continue;
+			if (currentExpantionVolume > bestSibling.first) continue;
 
-			pq.push(std::make_pair(currentExpantionVolume, potentNeighbourBox.children.first));
-			pq.push(std::make_pair(currentExpantionVolume, potentNeighbourBox.children.second));
+			pq.push(std::make_pair(currentExpantionVolume, potentSiblingBox.children.first));
+			pq.push(std::make_pair(currentExpantionVolume, potentSiblingBox.children.second));
 		}
 
-		return bestNeighbour.second;
-	}
-
-	void AddBoundingBoxObject(BoundingBox& boundingBox, std::shared_ptr<MeshObject> refObject= nullptr)
-	{
-		if (boundingBox.renderBoundingBoxObject) {
-			boundingBox.renderBoundingBoxObject->Dispose();
-			boundingBoxObjects.erase(boundingBox.renderBoundingBoxObject);
-		}
-
-		auto boundingBoxObject = std::make_shared<BoundingBoxObject>(vulkanContext, boundingBox);
-		boundingBox.renderBoundingBoxObject = boundingBoxObject;
-		if (refObject) {
-			boundingBoxObject->position = refObject->position;
-			boundingBoxObject->rotation = refObject->rotation;
-			boundingBoxObject->scale = refObject->scale;
-		}
-		boundingBoxObjects.insert(boundingBoxObject);
+		return bestSibling.second;
 	}
 
 	int64_t& ParentsRefToThis(int64_t boundingBox)
@@ -231,6 +208,38 @@ public:
 		return next;
 	}
 
+	void UpdateBoundingBoxObject(BoundingBox& boundingBox, std::shared_ptr<MeshObject> refObject = nullptr)
+	{
+		auto& boundingBoxObject = boundingBox.renderBoundingBoxObject;
+
+		if (!boundingBoxObject) {
+			boundingBoxObject = std::make_shared<BoundingBoxObject>(vulkanContext, boundingBox);
+			boundingBoxObjects.insert(boundingBoxObject);
+
+			if (refObject) {
+				boundingBoxObject->renderer->propertiesUniform.baseColor = Vector4f(1., 1., 1., 1.);
+				boundingBoxObject->renderer->UpdatePropertiesUniformBuffer();
+			}
+		}
+		else {
+			boundingBoxObject->UpdateBoundingBox(boundingBox);
+		}
+
+		if (refObject) {
+			boundingBoxObject->position = refObject->position;
+			boundingBoxObject->rotation = refObject->rotation;
+			boundingBoxObject->scale = refObject->scale;
+		}
+	}
+
+	void RemoveBoundingBoxObjects(std::shared_ptr<MeshObject> meshObject)
+	{
+		int64_t boundingBox = meshObject->mesh->localBoundingBox.parent;
+		auto& object = boundingBoxes[boundingBox].renderBoundingBoxObject;
+		object->Dispose();
+		boundingBoxObjects.erase(object);
+	}
+
 	virtual void Render(RenderVisitor& renderVisitor) override
 	{
 		for (auto& boundingBoxObject : boundingBoxObjects)
@@ -244,11 +253,12 @@ public:
 			boundingBoxObject->Dispose();
 		boundingBoxes.clear();
 		boundingBoxObjects.clear();
+		rootBoundingBoxIndex = -1;
 
 		meshContactAlgorithms.Dispose();
 	}
 
-	int64_t rootBoundingBoxIndex = 0;
+	int64_t rootBoundingBoxIndex = -1;
 	std::vector<int64_t> freeBuckets;
 	std::vector<BoundingBox> boundingBoxes;
 	std::unordered_set<std::shared_ptr<BoundingBoxObject>> boundingBoxObjects;

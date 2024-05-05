@@ -64,7 +64,6 @@ public:
 		objects.push_back(std::move(center));
 
 		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
-		boundingBoxTree->CreateBoundingBoxes(objects);
 		objects.push_back(boundingBoxTree);
 
 		picker.Init(vulkanContext, camera);
@@ -77,7 +76,7 @@ public:
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 
-			boundingBoxTree->UpdateBoundingBoxes(objects);
+			boundingBoxTree->UpdateTree(objects);
 			//auto contactInfos = boundingBoxTree->ComposePairs();
 
 			picker.Update(objects);

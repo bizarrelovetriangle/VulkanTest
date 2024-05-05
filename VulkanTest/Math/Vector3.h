@@ -21,6 +21,11 @@ public:
 	{
 	}
 
+	Vector3(T s)
+		: x(s), y(s), z(s)
+	{
+	}
+
 	Vector3(T x, T y, T z)
 		: x(x), y(y), z(z)
 	{

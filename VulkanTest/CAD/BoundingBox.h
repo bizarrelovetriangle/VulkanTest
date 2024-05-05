@@ -12,11 +12,13 @@ class BoundingBox
 public:
 	BoundingBox();
 	BoundingBox(const MeshModel& mesh);
-	BoundingBox(const BoundingBox& boundingBox, const Matrix4& model);
+	BoundingBox(const BoundingBox& boundingBox, const Matrix4& model, float offset = 0.);
 
 	float GetVolume() const;
 	std::array<Vector3f, 8> GetPoints() const;
 
+	bool Intersect(const BoundingBox& box) const;
+	bool Exceed(const BoundingBox& exceededBox) const;
 	static BoundingBox Union(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB);
 	void Reset(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB);
 

@@ -14,4 +14,5 @@ public:
 	void UpdateBoundingBox(const BoundingBox& boundingBox);
 private:
 	BoundingBox boundingBox;
+	bool lined;
 };
