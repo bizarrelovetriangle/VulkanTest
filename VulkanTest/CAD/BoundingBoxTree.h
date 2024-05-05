@@ -21,20 +21,22 @@ public:
 		{
 			if (!object->interactive) continue;
 
-			if (auto meshObject = std::dynamic_pointer_cast<MeshObject>(object); meshObject)
+			if (auto meshObject = std::dynamic_pointer_cast<MeshObject>(object); meshObject && !meshObject->convexSegments.empty())
 			{
-				UpdateBoundingBoxObject(meshObject->mesh->localBoundingBox, meshObject);
+				for (auto& mesh : meshObject->convexSegments) {
+					UpdateBoundingBoxObject(mesh.localBoundingBox, meshObject);
 
-				if (meshObject->mesh->localBoundingBox.parent == -1) {
-					AddToTree(meshObject);
-				}
-				else {
-					auto& orgBoundingBox = boundingBoxes[meshObject->mesh->localBoundingBox.parent];
-					auto boundingBox = BoundingBox(meshObject->mesh->localBoundingBox, meshObject->ComposeMatrix());
+					if (mesh.localBoundingBox.parent == -1) {
+						AddToTree(mesh, meshObject);
+					}
+					else {
+						auto& orgBoundingBox = boundingBoxes[mesh.localBoundingBox.parent];
+						auto boundingBox = BoundingBox(mesh.localBoundingBox, meshObject->ComposeMatrix());
 
-					if (boundingBox.Exceed(orgBoundingBox)) {
-						RemoveFromTree(meshObject);
-						AddToTree(meshObject);
+						if (boundingBox.Exceed(orgBoundingBox)) {
+							RemoveFromTree(mesh, meshObject);
+							AddToTree(mesh, meshObject);
+						}
 					}
 				}
 			}
@@ -50,6 +52,8 @@ public:
 		return { contact };
 	}
 
+	// Add Pack function to the MeshModel
+	// Add one element BufferData::Flush override
 	// Create uniform class
 	// Fix BoundingBoxTree. Make it update objects in tree while they move
 	// BoundingBoxTree merge tree nodes and check collisions
@@ -63,12 +67,11 @@ public:
 	// 
 	// Utilize Vulkan memory barriers
 
-	void AddToTree(std::shared_ptr<MeshObject> meshObject)
+	void AddToTree(MeshModel& mesh, std::shared_ptr<MeshObject> object)
 	{
-		auto& mesh = *meshObject->mesh;
 		size_t newBoundingBox = NextFree();
-		boundingBoxes[newBoundingBox] = BoundingBox(mesh.localBoundingBox, meshObject->ComposeMatrix(), 0.3);
-		boundingBoxes[newBoundingBox].sceneObject = meshObject;
+		boundingBoxes[newBoundingBox] = BoundingBox(mesh.localBoundingBox, object->ComposeMatrix(), 0.3);
+		boundingBoxes[newBoundingBox].sceneObject = object;
 		mesh.localBoundingBox.parent = newBoundingBox;
 		UpdateBoundingBoxObject(boundingBoxes[newBoundingBox]);
 
@@ -105,12 +108,12 @@ public:
 		}
 	}
 
-	void RemoveFromTree(std::shared_ptr<MeshObject> meshObject)
+	void RemoveFromTree(MeshModel& mesh, std::shared_ptr<MeshObject> object)
 	{
-		RemoveBoundingBoxObjects(meshObject);
+		RemoveBoundingBoxObjects(mesh);
 
-		int64_t boundingBox = meshObject->mesh->localBoundingBox.parent;
-		meshObject->mesh->localBoundingBox.parent = -1;
+		int64_t boundingBox = mesh.localBoundingBox.parent;
+		mesh.localBoundingBox.parent = -1;
 		freeBuckets.push_back(boundingBox);
 
 		if (boundingBox == rootBoundingBoxIndex) {
@@ -232,9 +235,9 @@ public:
 		}
 	}
 
-	void RemoveBoundingBoxObjects(std::shared_ptr<MeshObject> meshObject)
+	void RemoveBoundingBoxObjects(MeshModel& mesh)
 	{
-		int64_t boundingBox = meshObject->mesh->localBoundingBox.parent;
+		int64_t boundingBox = mesh.localBoundingBox.parent;
 		auto& object = boundingBoxes[boundingBox].renderBoundingBoxObject;
 		object->Dispose();
 		boundingBoxObjects.erase(object);

@@ -106,19 +106,19 @@ public:
 		}
 	}
 
-	uint32_t Origin(const Edge& edge)
+	uint32_t Origin(const Edge& edge) const
 	{
 		auto& triangle = triangles.at(edge.triangleIndex);
 		return triangle.vertices.at(edge.side);
 	}
 
-	uint32_t Destination(const Edge& edge)
+	uint32_t Destination(const Edge& edge) const
 	{
 		auto& triangle = triangles.at(edge.triangleIndex);
 		return triangle.vertices.at((edge.side + 1) % 3);
 	}
 
-	std::optional<Edge> CombinedEdge(const Edge& edge)
+	std::optional<Edge> CombinedEdge(const Edge& edge) const
 	{
 		size_t org = Origin(edge);
 		size_t dest = Destination(edge);

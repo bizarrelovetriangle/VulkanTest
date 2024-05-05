@@ -23,4 +23,5 @@ public:
 	}
 
 	std::unique_ptr<MeshModel> mesh;
+	std::vector<MeshModel> convexSegments;
 };

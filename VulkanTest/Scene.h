@@ -20,6 +20,7 @@
 #include "Utils/Deserializer.h"
 #include "CAD/BoundingBoxTree.h"
 #include "Picker.h"
+#include "CAD/Desegmentator.h"
 
 class Scene
 {
@@ -38,13 +39,12 @@ public:
 		vulkanContext.Init(window);
 
 		Deserializer deserializer(vulkanContext);
-		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\scene.gltf");
-		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\hard_monkey.gltf");
-		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\FirstContact.gltf");
+		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\untitled.gltf");
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
 			auto object = deserializer.Deserialize(serializedObject);
+			object->convexSegments = Desegmentator::ConvexSegments(*object->mesh);
 			objects.push_back(std::move(object));
 		}
 

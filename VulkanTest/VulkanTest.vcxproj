@@ -189,6 +189,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CAD\Desegmentator.h" />
     <ClInclude Include="CAD\GeometryFunctions.h" />
     <ClInclude Include="CAD\MeshContactAlgorithms.h" />
     <ClInclude Include="Camera.h" />
