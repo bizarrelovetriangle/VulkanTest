@@ -31,8 +31,6 @@ VertexedRenderer::~VertexedRenderer() = default;
 
 void VertexedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
-	if (vertexBuffer) vertexBuffer->Dispose();
-
 	std::vector<VertexData> vertexDatas;
 
 	for (int tri = 0; tri < mesh.triangles.size(); ++tri) {
@@ -48,8 +46,14 @@ void VertexedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 		}
 	}
 
-	vertexBuffer = BufferData::Create<VertexData>(
-		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+	if (vertexBuffer) {
+		std::span<VertexData> vertexSpan = vertexDatas;
+		vertexBuffer->FlushData(vertexSpan);
+	}
+	else {
+		vertexBuffer = BufferData::Create<VertexData>(
+			vulkanContext, vertexDatas, MemoryType::Universal, vk::BufferUsageFlagBits::eVertexBuffer);
+	}
 }
 
 void VertexedRenderer::Accept(RenderVisitor& renderVisitor)

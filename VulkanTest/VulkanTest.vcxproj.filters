@@ -42,9 +42,6 @@
     <ClCompile Include="Vulkan\VulkanAuxiliary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\Data\BufferData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RenderVisitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

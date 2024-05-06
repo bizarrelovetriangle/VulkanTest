@@ -54,7 +54,12 @@ void ColoredRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 		}
 	}
 
-	if (vertexBuffer) vertexBuffer->Dispose();
-	vertexBuffer = BufferData::Create<ColoredVertexData>(
-		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+	if (vertexBuffer) {
+		std::span<ColoredVertexData> vertexSpan = vertexDatas;
+		vertexBuffer->FlushData(vertexSpan);
+	}
+	else {
+		vertexBuffer = BufferData::Create<ColoredVertexData>(
+			vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+	}
 }

@@ -66,22 +66,26 @@ std::weak_ptr<Shared<T>> Shared<T>::instance;
 Renderer::Renderer(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
 {
+	std::span<TransformUniform> transformSpan(&transformUniform, &transformUniform + 1);
 	transformUniformBuffer = BufferData::Create<TransformUniform>(
-		vulkanContext, transformUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+		vulkanContext, transformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+	std::span<PropertiesUniform> propertiesSpan(&propertiesUniform, &propertiesUniform + 1);
 	propertiesUniformBuffer = BufferData::Create<PropertiesUniform>(
-		vulkanContext, propertiesUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+		vulkanContext, propertiesSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 }
 
 Renderer::~Renderer() = default;
 
 void Renderer::UpdateTransformUniformBuffer()
 {
-	transformUniformBuffer->FlushData(transformUniform);
+	std::span<TransformUniform> transformSpan(&transformUniform, &transformUniform + 1);
+	transformUniformBuffer->FlushData(transformSpan);
 }
 
 void Renderer::UpdatePropertiesUniformBuffer()
 {
-	propertiesUniformBuffer->FlushData(propertiesUniform);
+	std::span<PropertiesUniform> propertiesSpan(&propertiesUniform, &propertiesUniform + 1);
+	propertiesUniformBuffer->FlushData(propertiesSpan);
 }
 
 std::vector<vk::DescriptorSetLayoutBinding> Renderer::DescriptorSetLayoutBinding()

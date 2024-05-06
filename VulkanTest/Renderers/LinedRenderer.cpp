@@ -33,8 +33,6 @@ LinedRenderer::LinedRenderer(VulkanContext& vulkanContext, std::vector<Vector4f>
 
 void LinedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
-	if (vertexBuffer) vertexBuffer->Dispose();
-
 	std::vector<LinedVertexData> vertexDatas;
 	for (int tri = 0; tri < mesh.triangles.size(); ++tri) {
 		auto& triangle = mesh.triangles[tri];
@@ -54,6 +52,12 @@ void LinedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 		}
 	}
 
-	vertexBuffer = BufferData::Create<LinedVertexData>(
-		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+	if (vertexBuffer) {
+		std::span<LinedVertexData> vertexSpan = vertexDatas;
+		vertexBuffer->FlushData(vertexSpan);
+	}
+	else {
+		vertexBuffer = BufferData::Create<LinedVertexData>(
+			vulkanContext, vertexDatas, MemoryType::Universal, vk::BufferUsageFlagBits::eVertexBuffer);
+	}
 }

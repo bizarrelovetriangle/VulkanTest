@@ -7,6 +7,13 @@ DeviceMemory::DeviceMemory(VulkanContext& vulkanContext, MemoryType memoryType)
 {
 }
 
+DeviceMemory& DeviceMemory::operator=(const DeviceMemory& deviceMemory)
+{
+	memoryType = deviceMemory.memoryType;
+	memory = deviceMemory.memory;
+	return *this;
+}
+
 void DeviceMemory::AllocateMemory(const vk::MemoryRequirements& memoryRequirements)
 {
 	vk::MemoryPropertyFlags memoryProperties{};

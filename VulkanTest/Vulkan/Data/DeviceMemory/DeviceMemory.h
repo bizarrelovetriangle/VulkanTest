@@ -10,6 +10,7 @@ class DeviceMemory
 {
 public:
 	DeviceMemory(VulkanContext& vulkanContext, MemoryType memoryType);
+	DeviceMemory& operator=(const DeviceMemory& deviceMemory);
 	void AllocateMemory(const vk::MemoryRequirements& memoryRequirements);
 	void FlushMemory(std::span<std::byte> data);
 	void Dispose();

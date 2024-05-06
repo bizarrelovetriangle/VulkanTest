@@ -178,7 +178,6 @@
     <ClCompile Include="RenderVisitor.cpp" />
     <ClCompile Include="Vulkan\CommandBuffer.cpp" />
     <ClCompile Include="Vulkan\DeviceController.cpp" />
-    <ClCompile Include="Vulkan\Data\BufferData.cpp" />
     <ClCompile Include="Vulkan\Pipeline.cpp" />
     <ClCompile Include="Vulkan\QueueFamilies.cpp" />
     <ClCompile Include="Vulkan\RenderPass.cpp" />

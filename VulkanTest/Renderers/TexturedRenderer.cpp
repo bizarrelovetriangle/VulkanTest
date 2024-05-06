@@ -50,8 +50,6 @@ TexturedRenderer::~TexturedRenderer() = default;
 
 void TexturedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
-	if (vertexBuffer) vertexBuffer->Dispose();
-
 	std::vector<TexturedVertexData> vertexDatas;
 
 	for (int tri = 0; tri < mesh.triangles.size(); ++tri) {
@@ -68,8 +66,14 @@ void TexturedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 		}
 	}
 
-	vertexBuffer = BufferData::Create<TexturedVertexData>(
-		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+	if (vertexBuffer) {
+		std::span<TexturedVertexData> vertexSpan = vertexDatas;
+		vertexBuffer->FlushData(vertexSpan);
+	}
+	else {
+		vertexBuffer = BufferData::Create<TexturedVertexData>(
+			vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
+	}
 }
 
 std::vector<vk::DescriptorSetLayoutBinding> TexturedRenderer::DescriptorSetLayoutBinding()
