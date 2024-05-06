@@ -52,6 +52,7 @@ public:
 		return { contact };
 	}
 
+	// Optimize UpdateVertexBuffer method
 	// Add Pack function to the MeshModel
 	// Add one element BufferData::Flush override
 	// Create uniform class

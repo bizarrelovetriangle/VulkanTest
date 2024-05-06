@@ -38,8 +38,6 @@ ColoredRenderer::ColoredRenderer(VulkanContext& vulkanContext, const std::vector
 
 void ColoredRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 {
-	if (vertexBuffer) vertexBuffer->Dispose();
-
 	std::vector<ColoredVertexData> vertexDatas;
 
 	for (int tri = 0; tri < mesh.triangles.size(); ++tri) {
@@ -56,6 +54,7 @@ void ColoredRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 		}
 	}
 
+	if (vertexBuffer) vertexBuffer->Dispose();
 	vertexBuffer = BufferData::Create<ColoredVertexData>(
 		vulkanContext, vertexDatas, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eVertexBuffer);
 }
