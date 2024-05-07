@@ -13,12 +13,24 @@ class MeshModel
 public:
 	struct Edge
 	{
-		size_t triangleIndex = 0;
-		size_t side = 0;
+		uint32_t data = (std::numeric_limits<uint32_t>::max)();
 
-		//friend bool operator==(const Edge& a, const Edge& b) {
-		//	return a.triangleIndex == b.triangleIndex && a.side == b.side;
-		//}
+		Edge() {}
+
+		Edge(uint32_t tri, uint32_t side)
+		{
+			data = (tri << 2) | side;
+		}
+
+		uint32_t Triangle() const
+		{
+			return data >> 2;
+		}
+
+		uint32_t Side() const
+		{
+			return data & 03;
+		}
 	};
 
 	struct Triangle
@@ -34,11 +46,6 @@ public:
 		{
 			return std::hash<uint32_t>{}(pair.first) ^ std::hash<uint32_t>{}(pair.second);
 		}
-
-		//size_t operator()(const Edge& edge) const
-		//{
-		//	return std::hash<uint32_t>{}(edge.triangleIndex) ^ std::hash<uint32_t>{}(edge.side);
-		//}
 	};
 
 	MeshModel()
@@ -51,17 +58,16 @@ public:
 		markedTris.resize(indexes.size() / 3, false);
 		this->points = points;
 
-		for (size_t i = 0; i < indexes.size() / 3; ++i) {
-			auto& triangle = triangles.at(i);
-			triangle.index = i;
+		for (size_t tri = 0; tri < indexes.size() / 3; ++tri) {
+			auto& triangle = triangles.at(tri);
+			triangle.index = tri;
 
-			for (int j = 0; j < 3; ++j) {
-				size_t org = indexes.at(i * 3 + j);
-				size_t dest = indexes.at(i * 3 + (j + 1) % 3);
-				triangle.vertices[j] = org;
-				triangle.edges[j].triangleIndex = i;
-				triangle.edges[j].side = j;
-				edges.emplace(std::make_pair(org, dest), triangle.edges[j]);
+			for (int side = 0; side < 3; ++side) {
+				size_t org = indexes.at(tri * 3 + side);
+				size_t dest = indexes.at(tri * 3 + (side + 1) % 3);
+				triangle.vertices[side] = org;
+				triangle.edges[side] = Edge(tri, side);
+				edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
 			}
 		}
 
@@ -70,18 +76,17 @@ public:
 
 	uint32_t AddTriangle(std::array<uint32_t, 3> indexes)
 	{
-		uint32_t triIndex = triangles.size();
+		uint32_t tri = triangles.size();
 		Triangle triangle;
-		triangle.index = triIndex;
+		triangle.index = tri;
 
-		for (int j = 0; j < 3; ++j) {
-			size_t org = indexes.at(j);
-			size_t dest = indexes.at((j + 1) % 3);
-			triangle.vertices[j] = org;
-			triangle.edges[j].triangleIndex = triIndex;
-			triangle.edges[j].side = j;
+		for (int side = 0; side < 3; ++side) {
+			size_t org = indexes.at(side);
+			size_t dest = indexes.at((side + 1) % 3);
+			triangle.vertices[side] = org;
+			triangle.edges[side] = Edge(tri, side);
 
-			auto pair = edges.emplace(std::make_pair(org, dest), triangle.edges[j]);
+			auto pair = edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
 			if (!pair.second) {
 				throw std::exception(":(");
 			}
@@ -90,7 +95,7 @@ public:
 		triangles.push_back(triangle);
 		triangleBitVector.push_back(true);
 		markedTris.push_back(false);
-		return triIndex;
+		return tri;
 	}
 
 	void DeleteTriangle(uint32_t tri)
@@ -108,14 +113,14 @@ public:
 
 	uint32_t Origin(const Edge& edge) const
 	{
-		auto& triangle = triangles.at(edge.triangleIndex);
-		return triangle.vertices.at(edge.side);
+		auto& triangle = triangles.at(edge.Triangle());
+		return triangle.vertices.at(edge.Side());
 	}
 
 	uint32_t Destination(const Edge& edge) const
 	{
-		auto& triangle = triangles.at(edge.triangleIndex);
-		return triangle.vertices.at((edge.side + 1) % 3);
+		auto& triangle = triangles.at(edge.Triangle());
+		return triangle.vertices.at((edge.Side() + 1) % 3);
 	}
 
 	std::optional<Edge> CombinedEdge(const Edge& edge) const

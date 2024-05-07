@@ -32,8 +32,8 @@ public:
 
 				for (auto& edge : mesh.triangles[face].edges) {
 					if (auto combEdge = mesh.CombinedEdge(edge); combEdge) {
-						if (!orgTriangles.contains(combEdge->triangleIndex)) {
-							candidateTriangles.emplace(combEdge->triangleIndex);
+						if (!orgTriangles.contains(combEdge->Triangle())) {
+							candidateTriangles.emplace(combEdge->Triangle());
 						}
 					}
 				}

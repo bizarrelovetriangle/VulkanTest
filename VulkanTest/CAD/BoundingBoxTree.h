@@ -62,8 +62,10 @@ public:
 			auto& [first, second] = traverseInfo.pair;
 
 			if (first != -1 && second != -1 && boundingBoxes[first].sceneObject && boundingBoxes[second].sceneObject) {
-				auto contactInfo = meshContactAlgorithms.CheckContact(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject);
-				if (contactInfo.contact) result.push_back(contactInfo);
+				if (boundingBoxes[first].sceneObject != boundingBoxes[second].sceneObject) {
+					auto contactInfo = meshContactAlgorithms.CheckContact(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject);
+					if (contactInfo.contact) result.push_back(contactInfo);
+				}
 				continue;
 			}
 
