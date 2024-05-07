@@ -145,6 +145,42 @@ public:
 			.Normalized();
 	}
 
+	void Pack()
+	{
+		uint32_t seedFace = 0;
+		for (; seedFace < triangleBitVector.size() && !triangleBitVector[seedFace]; ++seedFace);
+		if (seedFace == triangleBitVector.size()) return;
+
+		std::unordered_set<uint32_t> orgVertices;
+		std::vector<uint32_t> orgTriangles;
+
+
+		for (uint32_t tri = 0; tri < triangleBitVector.size(); ++tri) {
+			if (!triangleBitVector[tri]) continue;
+			auto triVerteces = triangles[tri].vertices;
+			orgTriangles.push_back(tri);
+			orgVertices.emplace(triVerteces[0]);
+			orgVertices.emplace(triVerteces[1]);
+			orgVertices.emplace(triVerteces[2]);
+		}
+
+		MeshModel packed;
+
+		std::unordered_map<uint32_t, uint32_t> vertexMap;
+		for (auto orgVert : orgVertices) {
+			vertexMap.emplace(orgVert, packed.points.size());
+			packed.points.push_back(points[orgVert]);
+		}
+
+		for (auto orgTri : orgTriangles) {
+			auto orgTriVerteces = triangles[orgTri].vertices;
+			packed.AddTriangle({ vertexMap[orgTriVerteces[0]], vertexMap[orgTriVerteces[1]], vertexMap[orgTriVerteces[2]] });
+		}
+
+		packed.localBoundingBox = BoundingBox(packed);
+		*this = packed;
+	}
+
 //private:
 	std::vector<bool> markedTris;
 	std::vector<bool> triangleBitVector;

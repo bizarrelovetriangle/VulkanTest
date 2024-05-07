@@ -42,14 +42,11 @@ public:
 			}
 
 			MeshModel segment;
-			segment.points.resize(orgVertices.size());
 
-			size_t index = 0;
 			std::unordered_map<uint32_t, uint32_t> vertexMap;
 			for (auto orgVert : orgVertices) {
-				segment.points[index] = mesh.points[orgVert];
-				vertexMap.emplace(orgVert, index);
-				++index;
+				vertexMap.emplace(orgVert, segment.points.size());
+				segment.points.push_back(mesh.points[orgVert]);
 			}
 
 			for (auto orgTri : orgTriangles) {

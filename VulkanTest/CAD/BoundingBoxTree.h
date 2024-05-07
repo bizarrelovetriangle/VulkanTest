@@ -52,10 +52,7 @@ public:
 		return { contact };
 	}
 
-	// Optimize UpdateVertexBuffer method
 	// Add Pack function to the MeshModel
-	// Add one element BufferData::Flush override
-	// Create uniform class
 	// Fix BoundingBoxTree. Make it update objects in tree while they move
 	// BoundingBoxTree merge tree nodes and check collisions
 	// Test the Picker with BoundingBoxes
@@ -67,6 +64,10 @@ public:
 	// Edge and Edge Data
 	// 
 	// Utilize Vulkan memory barriers
+
+	// backlog
+	// Add one element BufferData::Flush override
+	// Create uniform class
 
 	void AddToTree(MeshModel& mesh, std::shared_ptr<MeshObject> object)
 	{
