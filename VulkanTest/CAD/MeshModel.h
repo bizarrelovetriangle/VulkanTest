@@ -192,6 +192,7 @@ public:
 	std::vector<Triangle> triangles;
 	std::vector<Vector3f> points;
 
+	// implement in vector
 	std::unordered_map<std::pair<uint32_t, uint32_t>, Edge, KeyHasher> edges;
 
 	BoundingBox localBoundingBox;

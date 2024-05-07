@@ -49,7 +49,7 @@ public:
 		if (rootBoundingBoxIndex == -1) return result;
 
 		struct TraverseInfo {
-			std::pair<uint32_t, uint32_t> pair;
+			std::pair<int64_t, int64_t> pair;
 			bool selfCheck;
 		};
 
@@ -61,12 +61,31 @@ public:
 			traverseQueue.pop_back();
 			auto& [first, second] = traverseInfo.pair;
 
-			if (first != -1 && second != -1 && boundingBoxes[first].sceneObject && boundingBoxes[second].sceneObject) {
-				if (boundingBoxes[first].sceneObject != boundingBoxes[second].sceneObject) {
-					auto contactInfo = meshContactAlgorithms.CheckContact(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject);
-					if (contactInfo.contact) result.push_back(contactInfo);
+			if (first != -1 && second != -1 && boundingBoxes[first].Intersect(boundingBoxes[second])) {
+				if (boundingBoxes[first].sceneObject && boundingBoxes[second].sceneObject) {
+					if (boundingBoxes[first].sceneObject != boundingBoxes[second].sceneObject) {
+						auto contactInfo = meshContactAlgorithms.CheckContact(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject);
+						if (contactInfo.contact)
+							result.push_back(contactInfo);
+					}
+					continue;
 				}
-				continue;
+
+				if (boundingBoxes[first].sceneObject) {
+					traverseQueue.emplace_back(std::make_pair(first, boundingBoxes[second].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(first, boundingBoxes[second].children.second), false);
+				}
+				else if (boundingBoxes[second].sceneObject) {
+					traverseQueue.emplace_back(std::make_pair(second, boundingBoxes[first].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(second, boundingBoxes[first].children.second), false);
+				}
+				else {
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.first, boundingBoxes[second].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.first, boundingBoxes[second].children.second), false);
+
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.second, boundingBoxes[second].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.second, boundingBoxes[second].children.second), false);
+				}
 			}
 
 			if (traverseInfo.selfCheck) {
@@ -75,23 +94,6 @@ public:
 				}
 				if (second != -1 && !boundingBoxes[second].sceneObject) {
 					traverseQueue.emplace_back(boundingBoxes[second].children, true);
-				}
-			}
-
-			if (first != -1 && second != -1 && boundingBoxes[first].Intersect(boundingBoxes[second])) {
-				if (boundingBoxes[first].sceneObject && !boundingBoxes[second].sceneObject) {
-					traverseQueue.emplace_back(std::make_pair(first, boundingBoxes[second].children.first), false);
-					traverseQueue.emplace_back(std::make_pair(first, boundingBoxes[second].children.second), false);
-				}
-				else if (!boundingBoxes[first].sceneObject && boundingBoxes[second].sceneObject) {
-					traverseQueue.emplace_back(std::make_pair(second, boundingBoxes[first].children.first), false);
-					traverseQueue.emplace_back(std::make_pair(second, boundingBoxes[first].children.second), false);
-				}
-				else {
-					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.first, boundingBoxes[second].children.first), false);
-					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.first, boundingBoxes[second].children.second), false);
-					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.second, boundingBoxes[second].children.first), false);
-					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.second, boundingBoxes[second].children.second), false);
 				}
 			}
 		}
