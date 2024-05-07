@@ -45,15 +45,58 @@ public:
 
 	std::vector<ContactInfo> ComposePairs()
 	{
-		auto pair = std::make_pair(boundingBoxes[0].sceneObject, boundingBoxes[1].sceneObject);
+		std::vector<ContactInfo> result;
+		if (rootBoundingBoxIndex == -1) return result;
 
-		auto contact = meshContactAlgorithms.CheckContact(pair.first, pair.second);
+		struct TraverseInfo {
+			std::pair<uint32_t, uint32_t> pair;
+			bool selfCheck;
+		};
 
-		return { contact };
+		std::vector<TraverseInfo> traverseQueue{ { boundingBoxes[rootBoundingBoxIndex].children, true } };
+
+		while (!traverseQueue.empty())
+		{
+			auto traverseInfo = traverseQueue.back();
+			traverseQueue.pop_back();
+			auto& [first, second] = traverseInfo.pair;
+
+			if (first != -1 && second != -1 && boundingBoxes[first].sceneObject && boundingBoxes[second].sceneObject) {
+				auto contactInfo = meshContactAlgorithms.CheckContact(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject);
+				if (contactInfo.contact) result.push_back(contactInfo);
+				continue;
+			}
+
+			if (traverseInfo.selfCheck) {
+				if (first != -1 && !boundingBoxes[first].sceneObject) {
+					traverseQueue.emplace_back(boundingBoxes[first].children, true);
+				}
+				if (second != -1 && !boundingBoxes[second].sceneObject) {
+					traverseQueue.emplace_back(boundingBoxes[second].children, true);
+				}
+			}
+
+			if (first != -1 && second != -1 && boundingBoxes[first].Intersect(boundingBoxes[second])) {
+				if (boundingBoxes[first].sceneObject && !boundingBoxes[second].sceneObject) {
+					traverseQueue.emplace_back(std::make_pair(first, boundingBoxes[second].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(first, boundingBoxes[second].children.second), false);
+				}
+				else if (!boundingBoxes[first].sceneObject && boundingBoxes[second].sceneObject) {
+					traverseQueue.emplace_back(std::make_pair(second, boundingBoxes[first].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(second, boundingBoxes[first].children.second), false);
+				}
+				else {
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.first, boundingBoxes[second].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.first, boundingBoxes[second].children.second), false);
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.second, boundingBoxes[second].children.first), false);
+					traverseQueue.emplace_back(std::make_pair(boundingBoxes[first].children.second, boundingBoxes[second].children.second), false);
+				}
+			}
+		}
+
+		return result;
 	}
 
-	// Add Pack function to the MeshModel
-	// Fix BoundingBoxTree. Make it update objects in tree while they move
 	// BoundingBoxTree merge tree nodes and check collisions
 	// Test the Picker with BoundingBoxes
 	// 

@@ -77,7 +77,7 @@ public:
 			glfwPollEvents();
 
 			boundingBoxTree->UpdateTree(objects);
-			//auto contactInfos = boundingBoxTree->ComposePairs();
+			auto contactInfos = boundingBoxTree->ComposePairs();
 
 			picker.Update(objects);
 			//camera.rotatePoint = picker.pickedPos;
