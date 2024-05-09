@@ -7,6 +7,15 @@
 #include "BoundingBox.h"
 #include <optional>
 #include <bitset>
+#include "../Utils/FlatHashMap.h"
+
+struct KeyHasher
+{
+	size_t operator()(const std::pair<uint32_t, uint32_t>& pair) const
+	{
+		return std::hash<uint32_t>{}(pair.first) ^ std::hash<uint32_t>{}(pair.second);
+	}
+};
 
 class MeshModel
 {
@@ -40,14 +49,6 @@ public:
 		uint32_t index;
 	};
 
-	struct KeyHasher
-	{
-		size_t operator()(const std::pair<uint32_t, uint32_t>& pair) const
-		{
-			return std::hash<uint32_t>{}(pair.first) ^ std::hash<uint32_t>{}(pair.second);
-		}
-	};
-
 	MeshModel()
 	{}
 
@@ -67,7 +68,7 @@ public:
 				size_t dest = indexes.at(tri * 3 + (side + 1) % 3);
 				triangle.vertices[side] = org;
 				triangle.edges[side] = Edge(tri, side);
-				edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
+				edges.Insert(std::make_pair(org, dest), triangle.edges[side]);
 			}
 		}
 
@@ -86,7 +87,7 @@ public:
 			triangle.vertices[side] = org;
 			triangle.edges[side] = Edge(tri, side);
 
-			auto pair = edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
+			auto pair = edges.Insert(std::make_pair(org, dest), triangle.edges[side]);
 			if (!pair.second) {
 				throw std::exception(":(");
 			}
@@ -107,7 +108,7 @@ public:
 		for (auto& edge : triangle.edges) {
 			auto org = Origin(edge);
 			auto dest = Destination(edge);
-			edges.erase({ org, dest });
+			edges.Erase({ org, dest });
 		}
 	}
 
@@ -127,7 +128,7 @@ public:
 	{
 		size_t org = Origin(edge);
 		size_t dest = Destination(edge);
-		if (auto it = edges.find(std::make_pair(dest, org)); it != edges.end()) {
+		if (auto it = edges.Find(std::make_pair(dest, org)); it != edges.end()) {
 			return it->second;
 		}
 		return std::nullopt;
@@ -193,7 +194,7 @@ public:
 	std::vector<Vector3f> points;
 
 	// implement in vector
-	std::unordered_map<std::pair<uint32_t, uint32_t>, Edge, KeyHasher> edges;
+	FlatHashMap<std::pair<uint32_t, uint32_t>, Edge, KeyHasher> edges;
 
 	BoundingBox localBoundingBox;
 };

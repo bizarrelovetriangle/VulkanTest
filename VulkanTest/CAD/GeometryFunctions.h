@@ -89,7 +89,7 @@ public:
 		return (normal * planeDist).Normalized();
 	}
 
-	static bool ContourIsCycled(const std::unordered_set<std::pair<uint32_t, uint32_t>, MeshModel::KeyHasher>& contour)
+	static bool ContourIsCycled(const std::unordered_set<std::pair<uint32_t, uint32_t>, KeyHasher>& contour)
 	{
 		if (contour.size() == 0) {
 			return true;
@@ -100,10 +100,6 @@ public:
 			if (auto p = map.emplace(edge.first, edge.second); !p.second) {
 				return false;
 			}
-		}
-
-		if (map.size() != contour.size()) {
-			return false;
 		}
 
 		uint32_t initial = map.begin()->first;
