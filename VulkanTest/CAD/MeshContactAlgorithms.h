@@ -5,6 +5,7 @@
 #include "../Renderers/ColoredRenderer.h"
 #include "../Renderers/LinedRenderer.h"
 #include "../Renderers/SimpleVertexedRenderer.h"
+#include "../Renderers/PlaneRenderer.h"
 #include <unordered_set>
 #include <set>
 #include <optional>
@@ -43,8 +44,6 @@ public:
 
 	ContactInfo CheckContact(std::shared_ptr<MeshObject> objectA, std::shared_ptr<MeshObject> objectB)
 	{
-		Dispose();
-
 		ContactInfo contactInfo;
 		contactInfo.contact = false;
 		contactInfo.minkowskiTriangular = std::make_shared<MeshModel>();
@@ -287,6 +286,9 @@ public:
 		{
 			auto planeObj = std::make_unique<PlaneObject>(vulkanContext, intersectionsCenter,
 				contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+			auto planeRenderer = (PlaneRenderer*)planeObj->renderer.get();
+			planeRenderer->evenPlaneObjectUniform.color = Vector4f(1., 0., 0., 1.);
+			planeRenderer->UpdatePlaneUniformBuffer();
 			planeObj->scale = planeObj->scale * 0.5;
 			renderers.emplace(std::move(planeObj));
 

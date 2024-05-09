@@ -68,7 +68,7 @@ public:
 				size_t dest = indexes.at(tri * 3 + (side + 1) % 3);
 				triangle.vertices[side] = org;
 				triangle.edges[side] = Edge(tri, side);
-				edges.Insert(std::make_pair(org, dest), triangle.edges[side]);
+				edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
 			}
 		}
 
@@ -87,7 +87,7 @@ public:
 			triangle.vertices[side] = org;
 			triangle.edges[side] = Edge(tri, side);
 
-			auto pair = edges.Insert(std::make_pair(org, dest), triangle.edges[side]);
+			auto pair = edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
 			if (!pair.second) {
 				throw std::exception(":(");
 			}
@@ -108,7 +108,7 @@ public:
 		for (auto& edge : triangle.edges) {
 			auto org = Origin(edge);
 			auto dest = Destination(edge);
-			edges.Erase({ org, dest });
+			edges.erase({ org, dest });
 		}
 	}
 
@@ -128,7 +128,7 @@ public:
 	{
 		size_t org = Origin(edge);
 		size_t dest = Destination(edge);
-		if (auto it = edges.Find(std::make_pair(dest, org)); it != edges.end()) {
+		if (auto it = edges.find(std::make_pair(dest, org)); it != edges.end()) {
 			return it->second;
 		}
 		return std::nullopt;

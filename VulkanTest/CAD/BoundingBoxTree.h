@@ -45,6 +45,8 @@ public:
 
 	std::vector<ContactInfo> ComposePairs()
 	{
+		meshContactAlgorithms.Dispose();
+
 		std::vector<ContactInfo> result;
 		if (rootBoundingBoxIndex == -1) return result;
 
