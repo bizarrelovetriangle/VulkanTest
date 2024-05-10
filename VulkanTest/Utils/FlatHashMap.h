@@ -170,6 +170,7 @@ public:
 
 		if (tableBlockIndex == -1) {
 			tableBlockIndex = nextFreeTableBlock();
+			tableBlocks[tableBlockIndex] = TableBlock();
 
 			if (firstTableBlock != -1) {
 				tableBlocks[lastTableBlock].next = tableBlockIndex;
@@ -237,8 +238,6 @@ public:
 				tableBlocks[tableBlockIndex].dataIndex = nextPairDataIndex;
 			}
 
-			pairDatas[dataIndex].prev = -1;
-			pairDatas[dataIndex].next = -1;
 			pairDataFreeBuckets.push_back(dataIndex);
 		}
 
@@ -262,8 +261,6 @@ public:
 				lastTableBlock = prevBlockIndex;
 			}
 
-			tableBlocks[tableBlockIndex].prev = -1;
-			tableBlocks[tableBlockIndex].next = -1;
 			tableBlockFreeBuckets.push_back(tableBlockIndex);
 
 			auto hash = Hasher{}(it->first);
