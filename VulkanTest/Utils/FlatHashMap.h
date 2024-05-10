@@ -1,28 +1,23 @@
 
-// add operator--
+
+// add DataBlock::prev
+// Remove TableBlock list
 
 namespace
 {
 	constexpr size_t tableSize = 10000;
 };
 
-class TableBlock
-{
-public:
-	int32_t dataIndex = -1;
-	int32_t next = -1;
-	int32_t prev = -1;
-};
-
 template <class Pair>
-class PairData
+class DataBlock
 {
 public:
-	PairData() {}
-	PairData(const Pair& pair) : pair(pair) {}
+	DataBlock() {}
+	DataBlock(const Pair& pair) : pair(pair) {}
 	Pair pair;
-	int32_t next = -1;
+	int32_t hash = -1;
 	int32_t prev = -1;
+	int32_t next = -1;
 };
 
 template <class FlatHashMap>
@@ -31,42 +26,32 @@ class ConstIterator
 public:
 	using Pair = FlatHashMap::Pair;
 
-	ConstIterator(const FlatHashMap& flatHashMap, int32_t tableBlockIndex, int32_t dataIndex)
-		: flatHashMap(flatHashMap), tableBlockIndex(tableBlockIndex), dataIndex(dataIndex)
+	ConstIterator(const FlatHashMap& flatHashMap, int32_t dataBlockIndex)
+		: flatHashMap(flatHashMap), dataBlockIndex(dataBlockIndex)
 	{}
 
 	bool operator==(const ConstIterator& it) const
 	{
-		return tableBlockIndex == it.tableBlockIndex && dataIndex == it.dataIndex;
+		return dataBlockIndex == it.dataBlockIndex;
 	}
 
 	bool operator!=(const ConstIterator& it) const
 	{
-		return dataIndex != it.dataIndex;
+		return dataBlockIndex != it.dataBlockIndex;
 	}
 
 	ConstIterator& operator++()
 	{
-		if (tableBlockIndex == -1) {
+		if (dataBlockIndex == -1) {
 			throw std::exception();
 		}
 
-		dataIndex = flatHashMap.pairDatas[dataIndex].next;
-
-		if (dataIndex == -1) {
-			tableBlockIndex = flatHashMap.tableBlocks[tableBlockIndex].next;
-
-			if (tableBlockIndex == -1) {
-				return *this;
-			}
-
-			dataIndex = flatHashMap.tableBlocks[tableBlockIndex].dataIndex;
-		}
+		dataBlockIndex = flatHashMap.dataBlocks[dataBlockIndex].next;
 	}
 
 	const Pair& operator*()
 	{
-		return flatHashMap.pairDatas[dataIndex].pair;
+		return flatHashMap.dataBlocks[dataBlockIndex].pair;
 	}
 
 	const Pair* operator->()
@@ -75,8 +60,7 @@ public:
 	}
 
 public:
-	int32_t tableBlockIndex = -1;
-	int32_t dataIndex = -1;
+	int32_t dataBlockIndex = -1;
 	const FlatHashMap& flatHashMap;
 };
 
@@ -88,34 +72,22 @@ public:
 	using Mybase::Mybase;
 
 	Iterator(const Mybase& constIt)
-		: Iterator(constIt.flatHashMap, constIt.tableBlockIndex, constIt.dataIndex)
+		: Iterator(constIt.flatHashMap, constIt.dataBlockIndex)
 	{
 	}
 
 	Iterator& operator++()
 	{
-		if (ConstIterator<FlatHashMap>::tableBlockIndex == -1) {
+		if (Mybase::dataBlockIndex == -1) {
 			throw std::exception();
 		}
 
-		ConstIterator<FlatHashMap>::dataIndex = ConstIterator<FlatHashMap>::flatHashMap.pairDatas[ConstIterator<FlatHashMap>::dataIndex].next;
-
-		if (ConstIterator<FlatHashMap>::dataIndex == -1) {
-			ConstIterator<FlatHashMap>::tableBlockIndex = ConstIterator<FlatHashMap>::flatHashMap.tableBlocks[ConstIterator<FlatHashMap>::tableBlockIndex].next;
-
-			if (ConstIterator<FlatHashMap>::tableBlockIndex == -1) {
-				return *this;
-			}
-
-			ConstIterator<FlatHashMap>::dataIndex = ConstIterator<FlatHashMap>::flatHashMap.tableBlocks[ConstIterator<FlatHashMap>::tableBlockIndex].dataIndex;
-		}
-
-		return *this;
+		Mybase::dataBlockIndex = Mybase::flatHashMap.dataBlocks[Mybase::dataBlockIndex].next;
 	}
 
 	FlatHashMap::Pair& operator*()
 	{
-		const FlatHashMap::Pair* pair = &ConstIterator<FlatHashMap>::flatHashMap.pairDatas[ConstIterator<FlatHashMap>::dataIndex].pair;
+		const FlatHashMap::Pair* pair = &Mybase::flatHashMap.dataBlocks[Mybase::dataBlockIndex].pair;
 		return *const_cast<FlatHashMap::Pair*>(pair);
 	}
 
@@ -136,15 +108,12 @@ public:
 
 	ConstIterator begin() const
 	{
-		if (firstTableBlock == -1) {
-			return end();
-		}
-		return ConstIterator(*this, firstTableBlock, tableBlocks[firstTableBlock].dataIndex);
+		return ConstIterator(*this, firstDataBlock);
 	}
 
 	ConstIterator end() const
 	{
-		return ConstIterator(*this, -1, -1);
+		return ConstIterator(*this, -1);
 	}
 
 	Iterator begin()
@@ -166,41 +135,44 @@ public:
 	{
 		auto hash = Hasher{}(key);
 		int32_t tableIndex = hash % tableSize;
-		int32_t tableBlockIndex = table[tableIndex];
 
-		if (tableBlockIndex == -1) {
-			tableBlockIndex = nextFreeTableBlock();
-			tableBlocks[tableBlockIndex] = TableBlock();
+		int32_t reserved = nextFreeDataBlock();
+		int32_t current = -1;
+		for (int32_t* indirectIndex = &table[tableIndex]; ; indirectIndex = &dataBlocks[*indirectIndex].next) {
+			if (*indirectIndex == -1 || dataBlocks[*indirectIndex].hash != tableIndex) {
+				dataBlocks[reserved] = DataBlock<Pair>({ key, value });
+				dataBlocks[reserved].hash = tableIndex;
+				dataBlocks[reserved].next = *indirectIndex;
+				dataBlocks[reserved].prev = current;
 
-			if (firstTableBlock != -1) {
-				tableBlocks[lastTableBlock].next = tableBlockIndex;
-				tableBlocks[tableBlockIndex].prev = lastTableBlock;
-				lastTableBlock = tableBlockIndex;
-			}
-			else {
-				firstTableBlock = tableBlockIndex;
-				lastTableBlock = tableBlockIndex;
-			}
+				if (*indirectIndex != -1) {
+					dataBlocks[*indirectIndex].prev = reserved;
+				}
+				else {
+					if (firstDataBlock == -1) {
+						firstDataBlock = reserved;
+						lastDataBlock = reserved;
+					}
+					else {
+						if (current == -1) {
+							dataBlocks[lastDataBlock].next = reserved;
+							dataBlocks[reserved].prev = lastDataBlock;
+						}
+						lastDataBlock = reserved;
+					}
+				}
 
-			table[tableIndex] = tableBlockIndex;
-		}
-
-		int32_t reserved = nextFreePairData();
-		int32_t prev = -1;
-		for (int32_t* indirectIndex = &tableBlocks[tableBlockIndex].dataIndex; ; indirectIndex = &pairDatas[*indirectIndex].next) {
-			if (*indirectIndex == -1) {
 				*indirectIndex = reserved;
-				pairDatas[*indirectIndex] = PairData<Pair>({ key, value });
-				pairDatas[*indirectIndex].prev = prev;
-				return { Iterator(*this, tableBlockIndex, *indirectIndex), true };
+
+				return { Iterator(*this, *indirectIndex), true };
 			}
 
-			if (pairDatas[*indirectIndex].pair.first == key) {
-				pairDataFreeBuckets.push_back(reserved);
-				return { Iterator(*this, tableBlockIndex, *indirectIndex), false };
+			if (dataBlocks[*indirectIndex].pair.first == key) {
+				dataBlocksFreeBuckets.push_back(reserved);
+				return { Iterator(*this, *indirectIndex), false };
 			}
 
-			prev = *indirectIndex;
+			current = *indirectIndex;
 		}
 	}
 
@@ -216,78 +188,47 @@ public:
 			return end();
 		}
 
-		auto next = it;
-		++next;
+		int32_t dataBlockIndex = it.dataBlockIndex;
+		int32_t prevBlockIndex = dataBlocks[dataBlockIndex].prev;
+		int32_t nextBlockIndex = dataBlocks[dataBlockIndex].next;
 
-		int32_t tableBlockIndex = it.tableBlockIndex;
-		int32_t dataIndex = it.dataIndex;
-
-		{
-			int32_t prevPairDataIndex = pairDatas[dataIndex].prev;
-			int32_t nextPairDataIndex = pairDatas[dataIndex].next;
-
-			if (prevPairDataIndex != -1) {
-				pairDatas[prevPairDataIndex].next = nextPairDataIndex;
-			}
-
-			if (nextPairDataIndex != -1) {
-				pairDatas[nextPairDataIndex].prev = prevPairDataIndex;
-			}
-
-			if (tableBlocks[tableBlockIndex].dataIndex == dataIndex) {
-				tableBlocks[tableBlockIndex].dataIndex = nextPairDataIndex;
-			}
-
-			pairDataFreeBuckets.push_back(dataIndex);
+		if (firstDataBlock == dataBlockIndex) {
+			firstDataBlock = nextBlockIndex;
+		}
+		else {
+			dataBlocks[prevBlockIndex].next = nextBlockIndex;
 		}
 
-		if (tableBlocks[tableBlockIndex].dataIndex == -1) {
-			int32_t prevBlockIndex = tableBlocks[tableBlockIndex].prev;
-			int32_t nextBlockIndex = tableBlocks[tableBlockIndex].next;
-
-			if (prevBlockIndex != -1) {
-				tableBlocks[prevBlockIndex].next = nextBlockIndex;
-			}
-
-			if (nextBlockIndex != -1) {
-				tableBlocks[nextBlockIndex].prev = prevBlockIndex;
-			}
-
-			if (firstTableBlock == tableBlockIndex) {
-				firstTableBlock = nextBlockIndex;
-			}
-
-			if (lastTableBlock == tableBlockIndex) {
-				lastTableBlock = prevBlockIndex;
-			}
-
-			tableBlockFreeBuckets.push_back(tableBlockIndex);
-
-			auto hash = Hasher{}(it->first);
-			int32_t tableIndex = hash % tableSize;
-			table[tableIndex] = -1;
+		if (lastDataBlock == dataBlockIndex) {
+			lastDataBlock = prevBlockIndex;
+		}
+		else {
+			dataBlocks[nextBlockIndex].prev = prevBlockIndex;
 		}
 
-		return next;
+		int32_t tableIndex = dataBlocks[dataBlockIndex].hash;
+		if (table[tableIndex] == dataBlockIndex) {
+			table[tableIndex] = nextBlockIndex != -1 && dataBlocks[nextBlockIndex].hash == dataBlocks[dataBlockIndex].hash
+				? nextBlockIndex
+				: -1;
+		}
+
+		dataBlocksFreeBuckets.push_back(dataBlockIndex);
+		return Iterator(*this, nextBlockIndex);
 	}
 
 	ConstIterator find(const Key& key) const
 	{
 		auto hash = Hasher{}(key);
 		int32_t tableIndex = hash % tableSize;
-		int32_t tableBlockIndex = table[tableIndex];
 
-		if (tableBlockIndex == -1) {
-			return end();
-		}
-
-		for (int32_t dataIndex = tableBlocks[tableBlockIndex].dataIndex; ; dataIndex = pairDatas[dataIndex].next) {
-			if (dataIndex == -1) {
+		for (int32_t dataBlockIndex = table[tableIndex]; ; dataBlockIndex = dataBlocks[dataBlockIndex].next) {
+			if (dataBlockIndex == -1 || dataBlocks[dataBlockIndex].hash != tableIndex) {
 				return end();
 			}
-			
-			if (pairDatas[dataIndex].pair.first == key) {
-				return ConstIterator(*this, tableBlockIndex, dataIndex);
+
+			if (dataBlocks[dataBlockIndex].pair.first == key) {
+				return ConstIterator(*this, dataBlockIndex);
 			}
 		}
 	}
@@ -304,41 +245,26 @@ public:
 
 	size_t size() const
 	{
-		return pairDatas.size() - pairDataFreeBuckets.size();
+		return dataBlocks.size() - dataBlocksFreeBuckets.size();
 	}
 
 public:
-	int32_t nextFreeTableBlock()
+	int32_t nextFreeDataBlock()
 	{
-		if (!tableBlockFreeBuckets.empty()) {
-			auto bucket = tableBlockFreeBuckets.back();
-			tableBlockFreeBuckets.pop_back();
+		if (!dataBlocksFreeBuckets.empty()) {
+			auto bucket = dataBlocksFreeBuckets.back();
+			dataBlocksFreeBuckets.pop_back();
 			return bucket;
 		}
 
-		tableBlocks.push_back({});
-		return tableBlocks.size() - 1;
-	}
-
-	int32_t nextFreePairData()
-	{
-		if (!pairDataFreeBuckets.empty()) {
-			auto bucket = pairDataFreeBuckets.back();
-			pairDataFreeBuckets.pop_back();
-			return bucket;
-		}
-
-		pairDatas.push_back({});
-		return pairDatas.size() - 1;
+		dataBlocks.push_back({});
+		return dataBlocks.size() - 1;
 	}
 
 	std::vector<int32_t> table;
 
-	int32_t firstTableBlock = -1;
-	int32_t lastTableBlock = -1;
-	std::vector<int32_t> tableBlockFreeBuckets;
-	std::vector<TableBlock> tableBlocks;
-
-	std::vector<PairData<Pair>> pairDatas;
-	std::vector<int32_t> pairDataFreeBuckets;
+	int32_t firstDataBlock = -1;
+	int32_t lastDataBlock = -1;
+	std::vector<DataBlock<Pair>> dataBlocks;
+	std::vector<int32_t> dataBlocksFreeBuckets;
 };

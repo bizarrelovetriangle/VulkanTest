@@ -171,7 +171,6 @@
     <ClCompile Include="Renderers\Interfaces\VertexedRenderer.cpp" />
     <ClCompile Include="CAD\GeometryCreator.cpp" />
     <ClCompile Include="Utils\FlatHashMap.h" />
-    <ClCompile Include="Utils\FlatHashMap2.h" />
     <ClCompile Include="Vulkan\DescriptorSets.cpp" />
     <ClCompile Include="Vulkan\CommandBufferDispatcher.cpp" />
     <ClCompile Include="Vulkan\Data\DeviceMemory\DeviceMemory.cpp" />
