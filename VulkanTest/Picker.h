@@ -20,10 +20,11 @@ public:
 	void Update(const BoundingBoxTree& boundingBoxTree)
 	{
 		auto viewToWorld = camera->worldToView.Inverse();
-		auto segmentA = Vector3f(viewToWorld * Vector4f(Vector3f::Zero(), 1.));
-		auto segmentB = Vector3f(viewToWorld * Vector4f(mouseDirection * 1000, 1.));
+		auto line = std::make_pair(
+			Vector3f(viewToWorld * Vector4f(Vector3f::Zero(), 1.)),
+			Vector3f(viewToWorld * Vector4f(mouseDirection * 1000, 1.)));
 
-		pointer->position = segmentA;
+		pointer->position = line.first;
 		focusedPos = std::nullopt;
 		focusedObj = nullptr;
 
@@ -43,19 +44,26 @@ public:
 
 			auto& currentBox = boundingBoxTree.boundingBoxes[currentBoxIndex];
 
-			//if (!currentBox.Intersect(segmentA, segmentB)) {
-			//	continue;
-			//}
+			if (!currentBox.Intersect(line)) {
+				continue;
+			}
 
 			if (currentBox.sceneObject) {
 				if (!currentBox.sceneObject->interactive) continue;
 
+				auto modelToWorld = currentBox.sceneObject->ComposeMatrix();
+				auto worldToModel = modelToWorld.Inverse();
+
+				auto modelSpaceLine = std::make_pair<Vector3f, Vector3f>(
+					worldToModel * Vector4f(line.first, 1.),
+					worldToModel * Vector4f(line.second, 1.));
+
 				std::pair<float, Vector3f> pos;
-				if (currentBox.sceneObject->Intersect(segmentA, segmentB, &pos))
+				if (currentBox.sceneObject->mesh->Intersect(modelSpaceLine, &pos))
 				{
 					if (pos.first < nearestPos.first)
 					{
-						nearestPos = pos;
+						nearestPos = std::make_pair(pos.first, modelToWorld * Vector4f(pos.second, 1.));
 						obj = currentBox.sceneObject;
 					}
 				}

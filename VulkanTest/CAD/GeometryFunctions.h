@@ -8,17 +8,17 @@
 class GeometryFunctions
 {
 public:
-	static bool SegmentTriangleIntersetion(const Vector3f& segmentA, const Vector3f& segmentB,
+	static bool SegmentTriangleIntersetion(const std::pair<Vector3f, Vector3f>& line,
 		const Vector3f& triangleA, const Vector3f& triangleB, const Vector3f& triangleC,
 		Vector3f& intersectPoint, float* dist = nullptr)
 	{
 		auto triNorm = (triangleB - triangleA).Cross(triangleC - triangleA).Normalized();
 
-		if (triNorm.Dot(segmentB - segmentA) > 0.)
+		if (triNorm.Dot(line.second - line.first) > 0.)
 			return false;
 
 		Plane plane(triangleA, triNorm);
-		if (plane.Intersect(segmentA, segmentB, &intersectPoint))
+		if (plane.Intersect(line.first, line.second, &intersectPoint))
 		{
 			Vector3f a_b_point_vector = (triangleB - triangleA).Cross(intersectPoint - triangleA);
 			Vector3f b_c_point_vector = (triangleC - triangleB).Cross(intersectPoint - triangleB);
@@ -30,7 +30,7 @@ public:
 				triNorm.Dot(c_a_point_vector) > 0;
 
 			if (inside && dist) {
-				*dist = (intersectPoint - segmentA).Length();
+				*dist = (intersectPoint - line.first).Length();
 			}
 
 			return inside;

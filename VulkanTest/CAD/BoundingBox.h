@@ -18,6 +18,7 @@ public:
 	std::array<Vector3f, 8> GetPoints() const;
 
 	bool Intersect(const BoundingBox& box) const;
+	bool Intersect(const std::pair<Vector3f, Vector3f>& line) const;
 	bool Exceed(const BoundingBox& exceededBox) const;
 	static BoundingBox Union(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB);
 	void Reset(const BoundingBox& boundingBoxA, const BoundingBox& boundingBoxB);

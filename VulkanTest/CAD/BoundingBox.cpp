@@ -1,5 +1,6 @@
 #include "BoundingBox.h"
 #include "MeshModel.h"
+#include "GeometryCreator.h"
 
 namespace
 {
@@ -75,6 +76,11 @@ bool BoundingBox::Intersect(const BoundingBox& box) const
 		bb.x < box.aa.x || bb.y < box.aa.y || bb.z < box.aa.z ||
 		box.bb.x < aa.x || box.bb.y < aa.y || box.bb.z < aa.z;
 	return !apart;
+}
+
+bool BoundingBox::Intersect(const std::pair<Vector3f, Vector3f>& line) const
+{
+	return GeometryCreator::CreateBoxByTwoPoints(aa, bb)->Intersect(line);
 }
 
 bool BoundingBox::Exceed(const BoundingBox& exceededBox) const

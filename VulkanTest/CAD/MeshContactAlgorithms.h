@@ -14,6 +14,7 @@
 #include "GeometryFunctions.h"
 #include "GeometryCreator.h"
 #include <numeric>
+#include <unordered_map>
 
 struct ContactInfo
 {
