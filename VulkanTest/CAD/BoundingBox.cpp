@@ -71,11 +71,10 @@ std::array<Vector3f, 8> BoundingBox::GetPoints() const
 
 bool BoundingBox::Intersect(const BoundingBox& box) const
 {
-	auto less = [](auto& a, auto& b) { return a.x < b.x && a.y < b.y && a.z < b.z; };
-	auto greater = [](auto& a, auto& b){ return a.x > b.x && a.y > b.y && a.z > b.z; };
-	return less(aa, box.aa)
-		? greater(bb, box.aa)
-		: less(aa, box.bb) && greater(bb, box.bb);
+	bool apart =
+		bb.x < box.aa.x || bb.y < box.aa.y || bb.z < box.aa.z ||
+		box.bb.x < aa.x || box.bb.y < aa.y || box.bb.z < aa.z;
+	return !apart;
 }
 
 bool BoundingBox::Exceed(const BoundingBox& exceededBox) const

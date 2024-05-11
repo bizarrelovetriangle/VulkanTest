@@ -103,8 +103,9 @@ public:
 		return result;
 	}
 
-	// BoundingBoxTree merge tree nodes and check collisions
+	// Fix BoundingBox::Intersect
 	// Test the Picker with BoundingBoxes
+	// BoundingBoxTree merge tree nodes and check collisions
 	// 
 	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
 	// How to deal with triangle normals. Geometrical shader
