@@ -182,7 +182,7 @@ public:
 			contactInfo.minkowskiTriangular->points.push_back(minkowskiDiff.diff);
 			contactInfo.minkowskiOrgPointPairs.push_back(minkowskiDiff.pointPair);
 
-			std::unordered_set<std::pair<uint32_t, uint32_t>, KeyHasher> contour;
+			std::set<std::pair<uint32_t, uint32_t>> contour;
 			std::vector<uint32_t> deleteFaces;
 
 			for (auto it = distances.begin(); it != distances.end();) {

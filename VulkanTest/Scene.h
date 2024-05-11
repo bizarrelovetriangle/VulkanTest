@@ -43,6 +43,7 @@ public:
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
+			//if (serializedObject.name != "Icosphere" && serializedObject.name != "Torus") continue;
 			auto object = deserializer.Deserialize(serializedObject);
 			object->convexSegments = Desegmentator::ConvexSegments(*object->mesh);
 			objects.push_back(std::move(object));
@@ -79,7 +80,7 @@ public:
 			boundingBoxTree->UpdateTree(objects);
 			auto contactInfos = boundingBoxTree->ComposePairs();
 
-			picker.Update(objects);
+			picker.Update(*boundingBoxTree);
 			//camera.rotatePoint = picker.pickedPos;
 			vulkanContext.DrawFrame(objects, camera);
 		}

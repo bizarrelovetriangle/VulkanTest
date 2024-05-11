@@ -3,6 +3,7 @@
 #include "Objects/Interfaces/MeshObject.h"
 #include "Camera.h"
 #include "CAD/GeometryCreator.h"
+#include "CAD/BoundingBoxTree.h"
 
 class Picker
 {
@@ -16,7 +17,7 @@ public:
 		pointer->interactive = false;
 	}
 
-	void Update(const std::vector<std::shared_ptr<Object>>& objects)
+	void Update(const BoundingBoxTree& boundingBoxTree)
 	{
 		auto viewToWorld = camera->worldToView.Inverse();
 		auto segmentA = Vector3f(viewToWorld * Vector4f(Vector3f::Zero(), 1.));
@@ -26,47 +27,49 @@ public:
 		focusedPos = std::nullopt;
 		focusedObj = nullptr;
 
-		float minDist = (std::numeric_limits<float>::max)();
-		Vector3f pos;
+		std::pair<float, Vector3f> nearestPos = { (std::numeric_limits<float>::max)(), {} };
 		std::shared_ptr<Object> obj;
 
-		for (auto& object : objects)
+		std::vector<int64_t> boxes{ boundingBoxTree.rootBoundingBoxIndex };
+
+		while (!boxes.empty())
 		{
-			if (!object->interactive) continue;
+			auto currentBoxIndex = boxes.back();
+			boxes.pop_back();
 
-			auto meshObject = std::dynamic_pointer_cast<MeshObject>(object);
-			if (meshObject)
-			{
-				auto objMatrix = object->ComposeMatrix();
-				auto& mesh = *meshObject->mesh;
-				auto& triangleBV = mesh.triangleBitVector;
-				for (int i = 0; i < mesh.triangles.size(); ++i)
+			if (currentBoxIndex == -1) {
+				continue;
+			}
+
+			auto& currentBox = boundingBoxTree.boundingBoxes[currentBoxIndex];
+
+			//if (!currentBox.Intersect(segmentA, segmentB)) {
+			//	continue;
+			//}
+
+			if (currentBox.sceneObject) {
+				if (!currentBox.sceneObject->interactive) continue;
+
+				std::pair<float, Vector3f> pos;
+				if (currentBox.sceneObject->Intersect(segmentA, segmentB, &pos))
 				{
-					if (!triangleBV[i]) continue;
-					auto points = mesh.TrianglePoints(i);
-					for (auto& point : points)
-						point = Vector3f(objMatrix * Vector4f(point, 1.));
-
-					float ratio = 0.;
-					Vector3f intersectPoint;
-					if (GeometryFunctions::SegmentTriangleIntersetion(
-						segmentA, segmentB, points[0], points[1], points[2], intersectPoint, &ratio))
+					if (pos.first < nearestPos.first)
 					{
-						if (ratio < minDist)
-						{
-							minDist = ratio;
-							pos = intersectPoint;
-							obj = object;
-						}
+						nearestPos = pos;
+						obj = currentBox.sceneObject;
 					}
 				}
 			}
+			else {
+				boxes.push_back(currentBox.children.first);
+				boxes.push_back(currentBox.children.second);
+			}
 		}
 
-		if (minDist != (std::numeric_limits<float>::max)())
+		if (nearestPos.first != (std::numeric_limits<float>::max)())
 		{
-			pointer->position = pos;
-			focusedPos = pos;
+			pointer->position = nearestPos.second;
+			focusedPos = nearestPos.second;
 			focusedObj = obj;
 		}
 	}

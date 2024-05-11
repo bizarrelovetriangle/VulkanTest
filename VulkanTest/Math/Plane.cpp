@@ -50,11 +50,13 @@ bool Plane::Intersect(const Vector3f& segmentA, const Vector3f& segmentB, Vector
 		return false;
 
 	float r = a / (a - b);
-	if (ratio)
+	if (ratio) {
 		*ratio = r;
+	}
 
-	if (intersectPoint)
+	if (intersectPoint) {
 		*intersectPoint = segmentB * r + segmentA * (1 - r);
+	}
 }
 
 Matrix4 Plane::getMatrix() const

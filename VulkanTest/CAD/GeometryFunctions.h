@@ -3,13 +3,14 @@
 #include "../Math/Plane.h"
 #include "MeshModel.h"
 #include <map>
+#include <set>
 
 class GeometryFunctions
 {
 public:
 	static bool SegmentTriangleIntersetion(const Vector3f& segmentA, const Vector3f& segmentB,
 		const Vector3f& triangleA, const Vector3f& triangleB, const Vector3f& triangleC,
-		Vector3f& intersectPoint, float* ratio = nullptr)
+		Vector3f& intersectPoint, float* dist = nullptr)
 	{
 		auto triNorm = (triangleB - triangleA).Cross(triangleC - triangleA).Normalized();
 
@@ -17,7 +18,7 @@ public:
 			return false;
 
 		Plane plane(triangleA, triNorm);
-		if (plane.Intersect(segmentA, segmentB, &intersectPoint, ratio))
+		if (plane.Intersect(segmentA, segmentB, &intersectPoint))
 		{
 			Vector3f a_b_point_vector = (triangleB - triangleA).Cross(intersectPoint - triangleA);
 			Vector3f b_c_point_vector = (triangleC - triangleB).Cross(intersectPoint - triangleB);
@@ -27,6 +28,11 @@ public:
 				triNorm.Dot(a_b_point_vector) > 0 &&
 				triNorm.Dot(b_c_point_vector) > 0 &&
 				triNorm.Dot(c_a_point_vector) > 0;
+
+			if (inside && dist) {
+				*dist = (intersectPoint - segmentA).Length();
+			}
+
 			return inside;
 		}
 	}
@@ -89,7 +95,7 @@ public:
 		return (normal * planeDist).Normalized();
 	}
 
-	static bool ContourIsCycled(const std::unordered_set<std::pair<uint32_t, uint32_t>, KeyHasher>& contour)
+	static bool ContourIsCycled(const std::set<std::pair<uint32_t, uint32_t>>& contour)
 	{
 		if (contour.size() == 0) {
 			return true;
