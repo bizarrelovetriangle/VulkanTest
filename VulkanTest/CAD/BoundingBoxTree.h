@@ -214,8 +214,10 @@ public:
 
 			float unionBoxVolume = BoundingBox::Union(potentSiblingBox, newBoundingBox).GetVolume();
 			float volumeToStayHere = prevExpantionVolume + unionBoxVolume;
-			type potentialSibling = std::make_pair(volumeToStayHere, index);
-			bestSibling = (std::min)(bestSibling, potentialSibling);
+
+			if (bestSibling.first > volumeToStayHere) {
+				bestSibling = std::make_pair(volumeToStayHere, index);
+			}
 
 			if (potentSiblingBox.sceneObject)
 			{

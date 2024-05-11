@@ -11,7 +11,14 @@ Matrix4::Matrix4(const Vector4f& i, const Vector4f& j, const Vector4f& k, const 
 
 Vector4f Matrix4::operator*(const Vector4f& vec) const
 {
-	return i * vec.x + j * vec.y + k * vec.z + l * vec.w;
+	//return i * vec.x + j * vec.y + k * vec.z + l * vec.w;
+
+	return {
+		i.x * vec.x + j.x * vec.y + k.x * vec.z + l.x * vec.w,
+		i.y * vec.x + j.y * vec.y + k.y * vec.z + l.y * vec.w,
+		i.z * vec.x + j.z * vec.y + k.z * vec.z + l.z * vec.w,
+		i.w * vec.x + j.w * vec.y + k.w * vec.z + l.w * vec.w,
+	};
 }
 
 Matrix4 Matrix4::operator*(const Matrix4& mat) const

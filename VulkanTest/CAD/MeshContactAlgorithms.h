@@ -324,9 +324,14 @@ private:
 	uint32_t FarthestPoint(const Vector3f& direction, const std::vector<Vector3f>& points)
 	{
 		auto farthest = std::make_pair(-(std::numeric_limits<float>::max)(), uint32_t(0));
-		for (uint32_t i = 0; i < points.size(); ++i) {
-			auto pair = std::make_pair(direction.Dot(points[i]), i);
-			farthest = (std::max)(farthest, pair);
+		uint32_t size = points.size();
+		for (uint32_t i = 0; i < size; ++i) {
+			auto& point = points[i];
+			float dist = direction.Dot(point);
+
+			if (farthest.first < dist) {
+				farthest = std::make_pair(dist, i);
+			}
 		}
 		return farthest.second;
 	}

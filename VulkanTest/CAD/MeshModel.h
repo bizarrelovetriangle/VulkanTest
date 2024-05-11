@@ -13,7 +13,7 @@ struct KeyHasher
 {
 	size_t operator()(const std::pair<uint32_t, uint32_t>& pair) const
 	{
-		return std::hash<uint32_t>{}(pair.first) ^ std::hash<uint32_t>{}(pair.second);
+		return pair.first ^ pair.second;
 	}
 };
 
@@ -68,11 +68,30 @@ public:
 				size_t dest = indexes.at(tri * 3 + (side + 1) % 3);
 				triangle.vertices[side] = org;
 				triangle.edges[side] = Edge(tri, side);
-				edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
 			}
 		}
 
 		localBoundingBox = BoundingBox(*this);
+	}
+
+	MeshModel(const MeshModel& meshModel)
+	{
+		markedTris = meshModel.markedTris;
+		triangleBitVector = meshModel.triangleBitVector;
+		triangles = meshModel.triangles;
+		points = meshModel.points;
+		//*edges = *meshModel.edges;
+		localBoundingBox = meshModel.localBoundingBox;
+	}
+
+	MeshModel& operator=(const MeshModel& meshModel)
+	{
+		markedTris = meshModel.markedTris;
+		triangleBitVector = meshModel.triangleBitVector;
+		triangles = meshModel.triangles;
+		points = meshModel.points;
+		//*edges = *meshModel.edges;
+		localBoundingBox = meshModel.localBoundingBox;
 	}
 
 	uint32_t AddTriangle(std::array<uint32_t, 3> indexes)
@@ -87,9 +106,11 @@ public:
 			triangle.vertices[side] = org;
 			triangle.edges[side] = Edge(tri, side);
 
-			auto pair = edges.emplace(std::make_pair(org, dest), triangle.edges[side]);
-			if (!pair.second) {
-				throw std::exception(":(");
+			if (edges) {
+				auto pair = edges->emplace(std::make_pair(org, dest), triangle.edges[side]);
+				if (!pair.second) {
+					throw std::exception(":(");
+				}
 			}
 		}
 
@@ -108,7 +129,10 @@ public:
 		for (auto& edge : triangle.edges) {
 			auto org = Origin(edge);
 			auto dest = Destination(edge);
-			edges.erase({ org, dest });
+
+			if (edges) {
+				edges->erase({ org, dest });
+			}
 		}
 	}
 
@@ -126,9 +150,10 @@ public:
 
 	std::optional<Edge> CombinedEdge(const Edge& edge) const
 	{
+		ConstructEdges();
 		size_t org = Origin(edge);
 		size_t dest = Destination(edge);
-		if (auto it = edges.find(std::make_pair(dest, org)); it != edges.end()) {
+		if (auto it = edges->find(std::make_pair(dest, org)); it != edges->end()) {
 			return it->second;
 		}
 		return std::nullopt;
@@ -187,14 +212,34 @@ public:
 		*this = packed;
 	}
 
+	void ConstructEdges() const
+	{
+		if (edges) {
+			return;
+		}
+
+		edges = std::make_unique<FlatHashMap<std::pair<uint32_t, uint32_t>, Edge, KeyHasher>>();
+
+		for (auto& triangle : triangles) {
+			for (auto& edge : triangle.edges) {
+				size_t org = Origin(edge);
+				size_t dest = Destination(edge);
+				auto pair = edges->emplace(std::make_pair(org, dest), edge);
+				if (!pair.second) {
+					throw std::exception(":(");
+				}
+			}
+		}
+	}
+
 //private:
-	std::vector<bool> markedTris;
-	std::vector<bool> triangleBitVector;
+	std::vector<uint32_t> markedTris;
+	std::vector<uint32_t> triangleBitVector;
 	std::vector<Triangle> triangles;
 	std::vector<Vector3f> points;
 
-	// implement in vector
-	FlatHashMap<std::pair<uint32_t, uint32_t>, Edge, KeyHasher> edges;
+
+	mutable std::unique_ptr<FlatHashMap<std::pair<uint32_t, uint32_t>, Edge, KeyHasher>> edges;
 
 	BoundingBox localBoundingBox;
 };
