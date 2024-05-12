@@ -29,12 +29,17 @@ float Plane::Distance(const Vector3f& point) const
 std::vector<Vector3f> Plane::MeshIntersections(const MeshModel& mesh) const
 {
 	std::vector<Vector3f> result;
-	mesh.ConstructEdges();
-	for (auto& [points, _] : *mesh.edges) {
-		if (points.first < points.second) {
-			Vector3f intersection;
-			if (Intersect(mesh.points[points.first], mesh.points[points.second], &intersection)) {
-				result.push_back(intersection);
+
+	for (auto& triangle : mesh.triangles) {
+		for (auto& edge : triangle.edges) {
+			auto org = mesh.Origin(edge);
+			auto dest = mesh.Destination(edge);
+
+			if (org < dest) {
+				Vector3f intersection;
+				if (Intersect(mesh.points[org], mesh.points[dest], &intersection)) {
+					result.push_back(intersection);
+				}
 			}
 		}
 	}
