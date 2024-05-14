@@ -38,13 +38,13 @@ public:
 	}
 
 	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
-	T Dot(const Vector3<T>& vec) const
+	inline T Dot(const Vector3<T>& vec) const noexcept
 	{
 		return x * vec.x + y * vec.y + z * vec.z;
 	}
 
 	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
-	Vector3<T> Cross(const Vector3<T>& vec) const
+	inline Vector3<T> Cross(const Vector3<T>& vec) const noexcept
 	{
 		return Vector3<T>(
 			z * vec.y - y * vec.z,
@@ -52,69 +52,69 @@ public:
 			y * vec.x - x * vec.y);
 	}
 
-	Vector3<T> operator-() const
+	inline Vector3<T> operator-() const noexcept
 	{
 		return Vector3<T>(-x, -y, -z);
 	}
 
-	Vector3<T> operator-(const Vector3<T>& v) const
+	inline Vector3<T> operator-(const Vector3<T>& v) const noexcept
 	{
 		return Vector3<T>(x - v.x, y - v.y, z - v.z);
 	}
 	
-	Vector3<T> operator+(const Vector3<T>& v) const
+	inline Vector3<T> operator+(const Vector3<T>& v) const noexcept
 	{
 		return Vector3<T>(x + v.x, y + v.y, z + v.z);
 	}
 
-	void operator-=(const Vector3<T>& v)
+	inline void operator-=(const Vector3<T>& v) noexcept
 	{
 		x -= v.x;
 		y -= v.y;
 		z -= v.z;
 	}
 
-	void operator+=(const Vector3<T>& v)
+	inline void operator+=(const Vector3<T>& v) noexcept
 	{
 		x += v.x;
 		y += v.y;
 		z += v.z;
 	}
 
-	Vector3<T> operator*(T s) const
+	inline Vector3<T> operator*(T s) const noexcept
 	{
 		return Vector3<T>(x * s, y * s, z * s);
 	}
 
-	Vector3<T> operator/(T s) const
+	inline Vector3<T> operator/(T s) const noexcept
 	{
 		return Vector3<T>(x / s, y / s, z / s);
 	}
 
-	Vector3<T> Normalized() const
+	inline Vector3<T> Normalized() const noexcept
 	{
 		float length = Length();
 		if (length == 0) return Vector3<T>(1., 0., 0.);
 		return *this / Length();
 	}
 
-	T Length() const
+	inline T Length() const noexcept
 	{
 		return std::sqrt(Length2());
 	}
 
-	T Length2() const
+	inline T Length2() const noexcept
 	{
 		return std::pow(x, 2) + std::pow(y, 2) + std::pow(z, 2);
 	}
 
-	friend bool operator==(const Vector3<T>& vecA, const Vector3<T>& vecB)
+	inline friend bool operator==(const Vector3<T>& vecA, const Vector3<T>& vecB) noexcept
 	{
 		return vecA.x == vecB.x && vecA.y == vecB.y && vecA.z == vecB.z;
 	}
 
 	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
-	std::pair<Vector3<T>, Vector3<T>> twoPerpendiculars() const
+	inline std::pair<Vector3<T>, Vector3<T>> twoPerpendiculars() const noexcept
 	{
 		Vector3f zPlus(0., 0., 1.);
 		Vector3f yPlus(0., 1., 0.);
@@ -126,7 +126,7 @@ public:
 		return std::make_pair(i, k);
 	}
 
-	static Vector3<T> FromGLTF(const Vector3<T>& vec)
+	inline static Vector3<T> FromGLTF(const Vector3<T>& vec) noexcept
 	{
 		return Vector3<T>(vec.x, vec.y, -vec.z);
 	}

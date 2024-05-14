@@ -60,18 +60,20 @@ bool MeshModel::Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<f
 		*nearestPos = { (std::numeric_limits<float>::max)(), {} };
 	}
 
+	auto lineDir = (line.second - line.first).Normalized();
+
 	bool success = false;
+
+	float dist = 0.;
+	Vector3f intersectPoint;
 
 	for (int i = 0; i < triangles.size(); ++i)
 	{
 		if (!triangleBitVector[i]) continue;
 		auto points = TrianglePoints(i);
 
-		float dist = 0.;
-		Vector3f intersectPoint;
-
 		if (GeometryFunctions::SegmentTriangleIntersetion(
-			line, points[0], points[1], points[2], intersectPoint, &dist))
+			line, lineDir, points[0], points[1], points[2], intersectPoint, &dist))
 		{
 			if (!nearestPos) {
 				return true;
@@ -146,9 +148,13 @@ uint32_t MeshModel::Destination(const Edge& edge) const
 std::optional<MeshModel::Edge> MeshModel::CombinedEdge(const MeshModel::Edge& edge) const
 {
 	ConstructEdges();
-	size_t org = Origin(edge);
-	size_t dest = Destination(edge);
-	if (auto it = edges->find(std::make_pair(dest, org)); it != edges->end()) {
+
+	auto& triangleVerts = triangles.at(edge.Triangle()).vertices;
+	auto pair = std::make_pair(
+		triangleVerts.at((edge.Side() + 1) % 3),
+		triangleVerts.at(edge.Side()));
+
+	if (auto it = edges->find(pair); it != edges->end()) {
 		return it->second;
 	}
 	return std::nullopt;

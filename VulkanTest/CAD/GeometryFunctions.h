@@ -8,16 +8,16 @@
 class GeometryFunctions
 {
 public:
-	static bool SegmentTriangleIntersetion(const std::pair<Vector3f, Vector3f>& line,
+	static bool SegmentTriangleIntersetion(const std::pair<Vector3f, Vector3f>& line, const Vector3f& lineDir,
 		const Vector3f& triangleA, const Vector3f& triangleB, const Vector3f& triangleC,
-		Vector3f& intersectPoint, float* dist = nullptr)
+		Vector3f& intersectPoint, float* dist = nullptr) noexcept
 	{
-		auto triNorm = (triangleB - triangleA).Cross(triangleC - triangleA).Normalized();
+		auto triNormDir = (triangleB - triangleA).Cross(triangleC - triangleA);
 
-		if (triNorm.Dot(line.second - line.first) > 0.)
+		if (triNormDir.Dot(line.second - line.first) > 0.)
 			return false;
 
-		Plane plane(triangleA, triNorm);
+		Plane plane(triangleA, triNormDir);
 		if (plane.Intersect(line.first, line.second, &intersectPoint))
 		{
 			Vector3f a_b_point_vector = (triangleB - triangleA).Cross(intersectPoint - triangleA);
@@ -25,9 +25,9 @@ public:
 			Vector3f c_a_point_vector = (triangleA - triangleC).Cross(intersectPoint - triangleC);
 
 			bool inside =
-				triNorm.Dot(a_b_point_vector) > 0 &&
-				triNorm.Dot(b_c_point_vector) > 0 &&
-				triNorm.Dot(c_a_point_vector) > 0;
+				triNormDir.Dot(a_b_point_vector) > 0 &&
+				triNormDir.Dot(b_c_point_vector) > 0 &&
+				triNormDir.Dot(c_a_point_vector) > 0;
 
 			if (inside && dist) {
 				*dist = (intersectPoint - line.first).Length();
@@ -36,7 +36,39 @@ public:
 			return inside;
 		}
 	}
-	
+
+	// https://stackoverflow.com/a/42752998/9516090
+	static bool SegmentTriangleIntersetion2(
+		const std::pair<Vector3f, Vector3f>& line, const Vector3f& lineDir,
+		const Vector3f& A, const Vector3f& B, const Vector3f& C,
+		Vector3f& intersectPoint, float* dist = nullptr) noexcept
+	{
+		float ratio;
+		float baryB;
+		float baryC;
+		Vector3f triNorm;
+
+		Vector3f edgeB = B - A;
+		Vector3f edgeC = C - A;
+		triNorm = edgeB.Cross(edgeC);
+		float det = -lineDir.Dot(triNorm);
+		float invdet = 1.0 / det;
+		Vector3f AO = line.first - A;
+		Vector3f DAO = AO.Cross(lineDir);
+		baryB = edgeC.Dot(DAO) * invdet;
+		baryC = -edgeB.Dot(DAO) * invdet;
+		ratio = AO.Dot(triNorm) * invdet;
+
+		if (std::abs(det) >= 1e-6 && ratio >= 0.0 && baryB >= 0.0 && baryC >= 0.0 && (baryB + baryC) <= 1.0) {
+			intersectPoint = line.first + lineDir * ratio;
+			*dist = ratio;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 	static bool PointInsideTriangularPyramid(const Vector3f& point, const MeshModel& mesh, const std::vector<uint32_t> triIndexes)
 	{
 		auto& meshPoints = mesh.points;

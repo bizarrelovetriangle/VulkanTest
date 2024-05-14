@@ -2,7 +2,7 @@
 #include "..\..\VulkanContext.h"
 #include "..\DeviceController.h"
 #include <string>
-#include "../../Dependencies/stb_image.h"
+#include "../../Dependencies/tiny_gltf/stb_image.h"
 #include "../../Math/Vector2.h"
 #include "../CommandBufferDispatcher.h"
 #include "../QueueFamilies.h"

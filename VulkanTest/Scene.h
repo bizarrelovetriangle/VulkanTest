@@ -39,7 +39,7 @@ public:
 		vulkanContext.Init(window);
 
 		Deserializer deserializer(vulkanContext);
-		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\untitled.gltf");
+		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\Zombie_Schoolgirl_01.gltf");
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
@@ -78,7 +78,7 @@ public:
 			glfwPollEvents();
 
 			boundingBoxTree->UpdateTree(objects);
-			auto contactInfos = boundingBoxTree->ComposePairs();
+			//auto contactInfos = boundingBoxTree->ComposePairs();
 
 			picker.Update(*boundingBoxTree);
 			//camera.rotatePoint = picker.pickedPos;

@@ -103,6 +103,7 @@ public:
 		return result;
 	}
 
+	// BindingSets allocation
 	// Fix BoundingBox::Intersect
 	// Test the Picker with BoundingBoxes
 	// BoundingBoxTree merge tree nodes and check collisions
@@ -267,6 +268,7 @@ public:
 
 	void UpdateBoundingBoxObject(BoundingBox& boundingBox, std::shared_ptr<MeshObject> refObject = nullptr)
 	{
+		return;
 		auto& boundingBoxObject = boundingBox.renderBoundingBoxObject;
 
 		if (!boundingBoxObject) {
@@ -291,6 +293,7 @@ public:
 
 	void RemoveBoundingBoxObjects(MeshModel& mesh)
 	{
+		return;
 		int64_t boundingBox = mesh.localBoundingBox.parent;
 		auto& object = boundingBoxes[boundingBox].renderBoundingBoxObject;
 		object->Dispose();

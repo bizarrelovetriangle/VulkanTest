@@ -213,7 +213,6 @@
     <ClInclude Include="Vulkan\DescriptorSets.h" />
     <ClInclude Include="Utils\ShaderCompiler.h" />
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h" />
-    <ClInclude Include="Dependencies\stb_image.h" />
     <ClInclude Include="Vulkan\Data\DeviceMemory\DeviceMemory.h" />
     <ClInclude Include="Vulkan\Data\ImageData.h" />
     <ClInclude Include="Math\Matrix4.h" />

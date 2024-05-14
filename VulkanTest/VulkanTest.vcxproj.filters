@@ -182,9 +182,6 @@
     <ClInclude Include="Vulkan\Data\DeviceMemory\DeviceMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Dependencies\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vulkan\CommandBufferDispatcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
