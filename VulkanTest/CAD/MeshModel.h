@@ -4,6 +4,7 @@
 #include "../Math/Vector3.h"
 #include "BoundingBox.h"
 #include <optional>
+#include <unordered_map>
 #include "../Utils/FlatHashMap.h"
 
 struct KeyHasher
@@ -11,6 +12,11 @@ struct KeyHasher
 	size_t operator()(const std::pair<uint32_t, uint32_t>& pair) const
 	{
 		return pair.first ^ pair.second;
+	}
+
+	size_t operator()(const size_t& v) const
+	{
+		return v;
 	}
 };
 
@@ -81,7 +87,7 @@ public:
 	std::vector<Vector3f> points;
 
 
-	mutable std::unique_ptr<FlatHashMap<std::pair<uint32_t, uint32_t>, Edge, KeyHasher>> edges;
+	mutable std::unique_ptr<FlatHashMap<size_t, Edge>> edges;
 
 	BoundingBox localBoundingBox;
 };

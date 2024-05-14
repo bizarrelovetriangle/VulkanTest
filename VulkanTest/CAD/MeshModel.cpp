@@ -8,6 +8,13 @@
 #include "BoundingBox.h"
 #include "GeometryFunctions.h"
 
+namespace
+{
+	inline size_t HashPair(const uint32_t& a, const uint32_t& b) noexcept {
+		return a << 16 | b;
+	}
+}
+
 MeshModel::MeshModel()
 {}
 
@@ -104,7 +111,7 @@ uint32_t MeshModel::AddTriangle(std::array<uint32_t, 3> indexes)
 		triangle.edges[side] = Edge(tri, side);
 
 		if (edges) {
-			auto pair = edges->emplace(std::make_pair(org, dest), triangle.edges[side]);
+			auto pair = edges->emplace(HashPair(org, dest), triangle.edges[side]);
 			if (!pair.second) {
 				throw std::exception(":(");
 			}
@@ -128,7 +135,7 @@ void MeshModel::DeleteTriangle(uint32_t tri)
 		auto dest = Destination(edge);
 
 		if (edges) {
-			edges->erase({ org, dest });
+			edges->erase(HashPair(org, dest));
 		}
 	}
 }
@@ -150,7 +157,7 @@ std::optional<MeshModel::Edge> MeshModel::CombinedEdge(const MeshModel::Edge& ed
 	ConstructEdges();
 
 	auto& triangleVerts = triangles.at(edge.Triangle()).vertices;
-	auto pair = std::make_pair(
+	auto pair = HashPair(
 		triangleVerts.at((edge.Side() + 1) % 3),
 		triangleVerts.at(edge.Side()));
 
@@ -218,13 +225,13 @@ void MeshModel::ConstructEdges() const
 		return;
 	}
 
-	edges = std::make_unique<FlatHashMap<std::pair<uint32_t, uint32_t>, Edge, KeyHasher>>();
+	edges = std::make_unique<FlatHashMap<size_t, Edge>>();
 
 	for (auto& triangle : triangles) {
 		for (auto& edge : triangle.edges) {
 			size_t org = Origin(edge);
 			size_t dest = Destination(edge);
-			auto pair = edges->emplace(std::make_pair(org, dest), edge);
+			auto pair = edges->emplace(HashPair(org, dest), edge);
 			if (!pair.second) {
 				throw std::exception(":(");
 			}
