@@ -107,6 +107,7 @@ public:
 	// Fix BoundingBox::Intersect
 	// Test the Picker with BoundingBoxes
 	// BoundingBoxTree merge tree nodes and check collisions
+	// TextureObjext normal map
 	// 
 	// UpdateVertexBuffer - optimize by just copying buffers with no interleafing. 
 	// How to deal with triangle normals. Geometrical shader
@@ -163,9 +164,8 @@ public:
 
 	void RemoveFromTree(MeshModel& mesh, std::shared_ptr<MeshObject> object)
 	{
-		RemoveBoundingBoxObjects(mesh);
-
 		int64_t boundingBox = mesh.localBoundingBox.parent;
+		RemoveBoundingBoxObjects(boundingBoxes[boundingBox]);
 		mesh.localBoundingBox.parent = -1;
 		freeBuckets.push_back(boundingBox);
 
@@ -185,9 +185,7 @@ public:
 			ParentsRefToThis(parentBoundingBox) = siblingBoundingBox;
 		}
 
-		auto& parentObject = boundingBoxes[parentBoundingBox].renderBoundingBoxObject;
-		parentObject->Dispose();
-		boundingBoxObjects.erase(parentObject);
+		RemoveBoundingBoxObjects(boundingBoxes[parentBoundingBox]);
 		freeBuckets.push_back(parentBoundingBox);
 
 		int64_t parent = boundingBoxes[siblingBoundingBox].parent;
@@ -291,11 +289,10 @@ public:
 		}
 	}
 
-	void RemoveBoundingBoxObjects(MeshModel& mesh)
+	void RemoveBoundingBoxObjects(BoundingBox& boundingBox)
 	{
 		return;
-		int64_t boundingBox = mesh.localBoundingBox.parent;
-		auto& object = boundingBoxes[boundingBox].renderBoundingBoxObject;
+		auto& object = boundingBox.renderBoundingBoxObject;
 		object->Dispose();
 		boundingBoxObjects.erase(object);
 	}
