@@ -234,9 +234,9 @@ public:
 		}
 
 		contactInfo.bestMinkowskiTriangle = nearestTri;
-		contactInfo.normal = contactInfo.minkowskiTriangular->TriangleNormal(nearestTri);
-		auto& triangle = contactInfo.minkowskiTriangular->triangles[nearestTri];
-		contactInfo.penetration = contactInfo.normal.Dot(contactInfo.minkowskiTriangular->points[triangle.vertices.front()]);
+		auto& triangle = contactInfo.minkowskiTriangular->triangles[contactInfo.bestMinkowskiTriangle];
+		auto triNorm = contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle);
+		contactInfo.penetration = triNorm.Dot(contactInfo.minkowskiTriangular->points[triangle.vertices.front()]);
 
 		for (uint32_t tri = 0; tri < contactInfo.minkowskiTriangular->triangleBitVector.size(); ++tri)
 			if (contactInfo.minkowskiTriangular->triangleBitVector[tri])
@@ -272,33 +272,35 @@ public:
 			referenceIsObjectA = true;
 		}
 
-		auto penetrationDirection = contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle);
-		if (referenceIsObjectA) penetrationDirection = -penetrationDirection;
+		// we substracting second object from first one. So the normal initialy from the second to the first object
+		contactInfo.normal = referenceIsObjectA
+			? contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle)
+			: -contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle);
 
 		auto& arbitraryRefPoint = referenceIsObjectA
 			? meshA.points[orgPoints[triVerts[0]].first]
 			: meshB.points[orgPoints[triVerts[0]].second];
-		Plane referencePlane(arbitraryRefPoint, -penetrationDirection);
+		Plane referencePlane(arbitraryRefPoint, contactInfo.normal);
 
 		auto& incidentMesh = !referenceIsObjectA ? meshA : meshB;
 		auto intersections = referencePlane.MeshIntersections(incidentMesh);
 		auto intersectionsCenter = std::accumulate(intersections.begin(), intersections.end(), Vector3f()) / intersections.size();
-		
+
+		contactInfo.contactPoint = intersectionsCenter - contactInfo.normal * contactInfo.penetration;
+
 		{
-			auto planeObj = std::make_unique<PlaneObject>(vulkanContext, intersectionsCenter,
-				contactInfo.minkowskiTriangular->TriangleNormal(contactInfo.bestMinkowskiTriangle));
+			auto planeObj = std::make_unique<PlaneObject>(vulkanContext, intersectionsCenter, contactInfo.normal);
 			auto planeRenderer = (PlaneRenderer*)planeObj->renderer.get();
 			planeRenderer->evenPlaneObjectUniform.color = Vector4f(1., 0., 0., 1.);
 			planeRenderer->UpdatePlaneUniformBuffer();
 			planeObj->scale = planeObj->scale * 0.5;
 			renderers.emplace(std::move(planeObj));
 
-			auto arrow = std::make_unique<ArrowObject>(vulkanContext, intersectionsCenter, penetrationDirection);
+			// arrow of anti penetration force
+			auto arrow = std::make_unique<ArrowObject>(vulkanContext, contactInfo.contactPoint, contactInfo.normal);
 			arrow->scale = arrow->scale * contactInfo.penetration;
 			renderers.emplace(std::move(arrow));
 		}
-
-		contactInfo.contactPoint = intersectionsCenter;
 	}
 
 	void Render(RenderVisitor& renderVisitor)
