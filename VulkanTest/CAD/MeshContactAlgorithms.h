@@ -43,7 +43,8 @@ public:
 	{
 	}
 
-	ContactInfo CheckContact(std::shared_ptr<MeshObject> objectA, std::shared_ptr<MeshObject> objectB)
+	ContactInfo CheckContact(std::shared_ptr<MeshObject> objectA, std::shared_ptr<MeshObject> objectB,
+		std::shared_ptr<MeshModel> objectMeshA, std::shared_ptr<MeshModel> objectMeshB)
 	{
 		ContactInfo contactInfo;
 		contactInfo.contact = false;
@@ -53,12 +54,12 @@ public:
 		//objectA - icosphere, objectB - sphere
 		// todo: get rid of it. I need reversed matrix for this
 		auto modelA = objectA->ComposeMatrix();
-		auto meshA = MeshModel(*objectA->mesh);
+		auto meshA = MeshModel(*objectMeshA);
 		for (auto& point : meshA.points)
 			point = modelA * Vector4f(point, 1.);
 
 		auto modelB = objectB->ComposeMatrix();
-		auto meshB = MeshModel(*objectB->mesh);
+		auto meshB = MeshModel(*objectMeshB);
 		for (auto& point : meshB.points)
 			point = modelB * Vector4f(point, 1.);
 
