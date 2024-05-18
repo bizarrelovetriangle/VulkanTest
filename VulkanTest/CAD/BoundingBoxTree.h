@@ -7,6 +7,11 @@
 #include <set>
 #include <unordered_set>
 
+namespace
+{
+	const bool visibleBoundingBoxes = false;
+};
+
 class BoundingBoxTree : public Object
 {
 public:
@@ -56,6 +61,7 @@ public:
 		};
 
 		std::vector<TraverseInfo> traverseQueue{ { boundingBoxes[rootBoundingBoxIndex].children, true } };
+		std::set<std::pair<std::shared_ptr<MeshObject>, std::shared_ptr<MeshObject>>> collidedObjects;
 
 		while (!traverseQueue.empty())
 		{
@@ -66,10 +72,24 @@ public:
 			if (first != -1 && second != -1 && boundingBoxes[first].Intersect(boundingBoxes[second])) {
 				if (boundingBoxes[first].sceneObject && boundingBoxes[second].sceneObject) {
 					if (boundingBoxes[first].sceneObject != boundingBoxes[second].sceneObject) {
-						auto contactInfo = meshContactAlgorithms.CheckContact(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject);
-						if (contactInfo.contact)
-							result.push_back(contactInfo);
+						bool collided = collidedObjects.contains(
+							std::make_pair(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject));
+
+						if (!collided) {
+							auto contactInfo = meshContactAlgorithms.CheckContact(
+								boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject,
+								boundingBoxes[first].sceneMesh, boundingBoxes[second].sceneMesh);
+
+							if (contactInfo.contact) {
+								// There is no typo. We are adding the symmetry
+								collidedObjects.emplace(boundingBoxes[first].sceneObject, boundingBoxes[second].sceneObject);
+								collidedObjects.emplace(boundingBoxes[second].sceneObject, boundingBoxes[first].sceneObject);
+
+								result.push_back(contactInfo);
+							}
+						}
 					}
+
 					continue;
 				}
 
@@ -267,7 +287,10 @@ public:
 
 	void UpdateBoundingBoxObject(BoundingBox& boundingBox, std::shared_ptr<MeshObject> refObject = nullptr)
 	{
-		return;
+		if (!visibleBoundingBoxes) {
+			return;
+		}
+
 		auto& boundingBoxObject = boundingBox.renderBoundingBoxObject;
 
 		if (!boundingBoxObject) {
@@ -292,7 +315,10 @@ public:
 
 	void RemoveBoundingBoxObjects(BoundingBox& boundingBox)
 	{
-		return;
+		if (!visibleBoundingBoxes) {
+			return;
+		}
+
 		auto& object = boundingBox.renderBoundingBoxObject;
 		object->Dispose();
 		boundingBoxObjects.erase(object);
