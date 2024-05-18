@@ -43,7 +43,8 @@ public:
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
-			//if (serializedObject.name != "Icosphere" && serializedObject.name != "Torus") continue;
+			//if (serializedObject.name != "Zombie_Schoolgirl_01_Body.001") continue;
+			//if (serializedObject.name != "Zombie_Schoolgirl_01_Skirt") continue;
 			auto object = deserializer.Deserialize(serializedObject);
 			object->convexSegments = Desegmentator::ConvexSegments(*object->mesh);
 			objects.push_back(std::move(object));

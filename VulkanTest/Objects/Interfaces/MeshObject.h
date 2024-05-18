@@ -22,6 +22,6 @@ public:
 		vertexedRendered.UpdateVertexBuffer(*mesh);
 	}
 
-	std::unique_ptr<MeshModel> mesh;
-	std::vector<MeshModel> convexSegments;
+	std::shared_ptr<MeshModel> mesh;
+	std::vector<std::shared_ptr<MeshModel>> convexSegments;
 };

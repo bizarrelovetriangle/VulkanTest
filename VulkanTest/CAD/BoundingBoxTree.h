@@ -24,14 +24,14 @@ public:
 			if (auto meshObject = std::dynamic_pointer_cast<MeshObject>(object); meshObject && !meshObject->convexSegments.empty())
 			{
 				for (auto& mesh : meshObject->convexSegments) {
-					UpdateBoundingBoxObject(mesh.localBoundingBox, meshObject);
+					UpdateBoundingBoxObject(mesh->localBoundingBox, meshObject);
 
-					if (mesh.localBoundingBox.parent == -1) {
+					if (mesh->localBoundingBox.parent == -1) {
 						AddToTree(mesh, meshObject);
 					}
 					else {
-						auto& orgBoundingBox = boundingBoxes[mesh.localBoundingBox.parent];
-						auto boundingBox = BoundingBox(mesh.localBoundingBox, meshObject->ComposeMatrix());
+						auto& orgBoundingBox = boundingBoxes[mesh->localBoundingBox.parent];
+						auto boundingBox = BoundingBox(mesh->localBoundingBox, meshObject->ComposeMatrix());
 
 						if (boundingBox.Exceed(orgBoundingBox)) {
 							RemoveFromTree(mesh, meshObject);
@@ -121,12 +121,13 @@ public:
 	// Add one element BufferData::Flush override
 	// Create uniform class
 
-	void AddToTree(MeshModel& mesh, std::shared_ptr<MeshObject> object)
+	void AddToTree(std::shared_ptr<MeshModel>& mesh, std::shared_ptr<MeshObject>& object)
 	{
 		size_t newBoundingBox = NextFree();
-		boundingBoxes[newBoundingBox] = BoundingBox(mesh.localBoundingBox, object->ComposeMatrix(), 0.3);
+		boundingBoxes[newBoundingBox] = BoundingBox(mesh->localBoundingBox, object->ComposeMatrix(), 0.3);
 		boundingBoxes[newBoundingBox].sceneObject = object;
-		mesh.localBoundingBox.parent = newBoundingBox;
+		boundingBoxes[newBoundingBox].sceneMesh = mesh;
+		mesh->localBoundingBox.parent = newBoundingBox;
 		UpdateBoundingBoxObject(boundingBoxes[newBoundingBox]);
 
 		if (rootBoundingBoxIndex == -1) {
@@ -162,11 +163,11 @@ public:
 		}
 	}
 
-	void RemoveFromTree(MeshModel& mesh, std::shared_ptr<MeshObject> object)
+	void RemoveFromTree(std::shared_ptr<MeshModel>& mesh, std::shared_ptr<MeshObject>& object)
 	{
-		int64_t boundingBox = mesh.localBoundingBox.parent;
+		int64_t boundingBox = mesh->localBoundingBox.parent;
 		RemoveBoundingBoxObjects(boundingBoxes[boundingBox]);
-		mesh.localBoundingBox.parent = -1;
+		mesh->localBoundingBox.parent = -1;
 		freeBuckets.push_back(boundingBox);
 
 		if (boundingBox == rootBoundingBoxIndex) {

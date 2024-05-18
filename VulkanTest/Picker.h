@@ -59,7 +59,7 @@ public:
 					worldToModel * Vector4f(line.second, 1.));
 
 				std::pair<float, Vector3f> pos;
-				if (currentBox.sceneObject->mesh->Intersect(modelSpaceLine, &pos))
+				if (currentBox.sceneMesh->Intersect(modelSpaceLine, &pos))
 				{
 					if (pos.first < nearestPos.first)
 					{

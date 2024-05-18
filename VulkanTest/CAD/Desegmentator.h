@@ -6,9 +6,9 @@
 class Desegmentator
 {
 public:
-	static std::vector<MeshModel> ConvexSegments(MeshModel mesh)
+	static std::vector<std::shared_ptr<MeshModel>> ConvexSegments(MeshModel mesh)
 	{
-		std::vector<MeshModel> result;
+		std::vector<std::shared_ptr<MeshModel>> result;
 
 		while (true) {
 			uint32_t seedFace = 0;
@@ -20,7 +20,7 @@ public:
 
 			std::unordered_set<uint32_t> candidateTriangles{ seedFace };
 
-			while (!candidateTriangles.empty()) {
+			while (!candidateTriangles.empty() && orgTriangles.size() < 500000) {
 				uint32_t face = *candidateTriangles.begin();
 				candidateTriangles.erase(candidateTriangles.begin());
 
@@ -41,20 +41,20 @@ public:
 				mesh.DeleteTriangle(face);
 			}
 
-			MeshModel segment;
+			auto segment = std::make_shared<MeshModel>();
 
 			std::unordered_map<uint32_t, uint32_t> vertexMap;
 			for (auto orgVert : orgVertices) {
-				vertexMap.emplace(orgVert, segment.points.size());
-				segment.points.push_back(mesh.points[orgVert]);
+				vertexMap.emplace(orgVert, segment->points.size());
+				segment->points.push_back(mesh.points[orgVert]);
 			}
 
 			for (auto orgTri : orgTriangles) {
 				auto orgTriVerteces = mesh.triangles[orgTri].vertices;
-				segment.AddTriangle({ vertexMap[orgTriVerteces[0]], vertexMap[orgTriVerteces[1]], vertexMap[orgTriVerteces[2]] });
+				segment->AddTriangle({ vertexMap[orgTriVerteces[0]], vertexMap[orgTriVerteces[1]], vertexMap[orgTriVerteces[2]] });
 			}
 
-			segment.localBoundingBox = BoundingBox(segment);
+			segment->localBoundingBox = BoundingBox(*segment);
 			result.push_back(std::move(segment));
 		}
 

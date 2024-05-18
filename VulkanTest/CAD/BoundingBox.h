@@ -29,6 +29,7 @@ public:
 	int64_t parent = -1;
 	std::pair<int64_t, int64_t> children = std::make_pair(-1, -1);
 	std::shared_ptr<MeshObject> sceneObject;
+	std::shared_ptr<MeshModel> sceneMesh;
 
 	std::shared_ptr<BoundingBoxObject> renderBoundingBoxObject;
 };
