@@ -69,7 +69,7 @@ public:
 		}
 	}
 
-	static bool PointInsideTriangularPyramid(const Vector3f& point, const MeshModel& mesh, const std::vector<uint32_t> triIndexes)
+	static bool PointInsideTriangularPyramid(const Vector3f& point, const MeshModel& mesh, std::initializer_list<uint32_t> triIndexes)
 	{
 		auto& meshPoints = mesh.points;
 		for (uint32_t triIndex : triIndexes)

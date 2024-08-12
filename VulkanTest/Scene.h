@@ -40,10 +40,11 @@ public:
 
 		Deserializer deserializer(vulkanContext);
 		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\Zombie_Schoolgirl_01.gltf");
+		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\untitled.gltf");
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
-			//if (serializedObject.name != "Zombie_Schoolgirl_01_Body.001") continue;
+			//if (serializedObject.name != "Zombie_Schoolgirl_01_Body.001" && serializedObject.name != "Zombie_Schoolgirl_01_Skirt") continue;
 			//if (serializedObject.name != "Zombie_Schoolgirl_01_Skirt") continue;
 			auto object = deserializer.Deserialize(serializedObject);
 			object->convexSegments = Desegmentator::ConvexSegments(*object->mesh);
@@ -79,7 +80,7 @@ public:
 			glfwPollEvents();
 
 			boundingBoxTree->UpdateTree(objects);
-			//auto contactInfos = boundingBoxTree->ComposePairs();
+			auto contactInfos = boundingBoxTree->ComposePairs();
 
 			picker.Update(*boundingBoxTree);
 			//camera.rotatePoint = picker.pickedPos;

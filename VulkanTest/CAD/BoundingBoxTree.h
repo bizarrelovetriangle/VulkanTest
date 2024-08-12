@@ -221,8 +221,7 @@ public:
 	int64_t FindBestSibling(BoundingBox& newBoundingBox)
 	{
 		using type = std::pair<float, int64_t>;
-		auto less = [](type& a, type& b) { return a.first > b.first; };
-		std::priority_queue<type, std::vector<type>, decltype(less)> pq(less);
+		std::priority_queue<type, std::vector<type>, std::greater<type>> pq;
 		pq.push(std::make_pair(0., rootBoundingBoxIndex));
 		type bestSibling = std::make_pair((std::numeric_limits<float>::max)(), -1);
 
@@ -236,7 +235,7 @@ public:
 			float unionBoxVolume = BoundingBox::Union(potentSiblingBox, newBoundingBox).GetVolume();
 			float volumeToStayHere = prevExpantionVolume + unionBoxVolume;
 
-			if (bestSibling.first > volumeToStayHere) {
+			if (volumeToStayHere < bestSibling.first) {
 				bestSibling = std::make_pair(volumeToStayHere, index);
 			}
 
@@ -249,8 +248,8 @@ public:
 
 			if (currentExpantionVolume > bestSibling.first) continue;
 
-			pq.push(std::make_pair(currentExpantionVolume, potentSiblingBox.children.first));
-			pq.push(std::make_pair(currentExpantionVolume, potentSiblingBox.children.second));
+			pq.emplace(currentExpantionVolume, potentSiblingBox.children.first);
+			pq.emplace(currentExpantionVolume, potentSiblingBox.children.second);
 		}
 
 		return bestSibling.second;

@@ -119,8 +119,8 @@ private:
 		}
 	}
 
-	template <class T>
-	std::vector<T> ReadBuffer(int accessorId)
+	template <class Out>
+	std::vector<Out> ReadBuffer(int accessorId)
 	{
 		auto& accessor = glTFModel.accessors[accessorId];
 		auto& bufferView = glTFModel.bufferViews[accessor.bufferView];
@@ -141,53 +141,46 @@ private:
 			std::memcpy(data.data() + dataOffset, buffer.data.data() + bufferOffset, elementSize);
 		}
 
-		return TypeMarshal<T>(accessor.componentType, accessor.type, data);
+		return ConvertBuffer<Out>(accessor.componentType, accessor.type, data);
 	}
 
-	template <class O>
-	std::vector<O> TypeMarshal(size_t componentType, size_t componentCount, const std::vector<std::byte>& buffer)
-	{
-		if (componentCount == TINYGLTF_TYPE_SCALAR)
-			return InnerTypeMarshal<Scalar, O>(componentType, buffer);
-		if (componentCount == TINYGLTF_TYPE_VEC2)
-			return InnerTypeMarshal<Vector2, O>(componentType, buffer);
-		if (componentCount == TINYGLTF_TYPE_VEC3)
-			return InnerTypeMarshal<Vector3, O>(componentType, buffer);
-		if (componentCount == TINYGLTF_TYPE_VEC4)
-			return InnerTypeMarshal<Vector4, O>(componentType, buffer);
-		throw std::exception("gosh");
-	}
-
-	template <template<class> class I, class O>
-	std::vector<O> InnerTypeMarshal(size_t componentType, const std::vector<std::byte>& buffer)
+	template <class Out>
+	std::vector<Out> ConvertBuffer(size_t componentType, size_t componentCount, const std::vector<std::byte>& buffer)
 	{
 		if (componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT)
-			return Helper<I<uint16_t>, O>(buffer);
+			return ConvertBuffer<uint16_t, Out>(componentCount, buffer);
 		if (componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT)
-			return Helper<I<uint32_t>, O>(buffer);
+			return ConvertBuffer<uint32_t, Out>(componentCount, buffer);
 		if (componentType == TINYGLTF_COMPONENT_TYPE_FLOAT)
-			return Helper<I<float>, O>(buffer);
+			return ConvertBuffer<float, Out>(componentCount, buffer);
 		if (componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE)
-			return Helper<I<double>, O>(buffer);
+			return ConvertBuffer<double, Out>(componentCount, buffer);
 		throw std::exception("gosh");
 	}
 
-	template <class I, class O>
-	std::vector<O> Helper(const std::vector<std::byte>& buffer)
+	template <class InV, class Out>
+	std::vector<Out> ConvertBuffer(size_t componentCount, const std::vector<std::byte>& buffer)
 	{
-		std::vector<I> bufferData(buffer.size() / sizeof(I));
+		if (componentCount == TINYGLTF_TYPE_SCALAR)
+			return ConvertBuffer<InV, Out>(buffer);
+		if (componentCount == TINYGLTF_TYPE_VEC2)
+			return ConvertBuffer<Vector2<InV>, Out>(buffer);
+		if (componentCount == TINYGLTF_TYPE_VEC3)
+			return ConvertBuffer<Vector3<InV>, Out>(buffer);
+		if (componentCount == TINYGLTF_TYPE_VEC4)
+			return ConvertBuffer<Vector4<InV>, Out>(buffer);
+		throw std::exception("gosh");
+	}
+
+	template <class In, class Out>
+	std::vector<Out> ConvertBuffer(const std::vector<std::byte>& buffer)
+	{
+		std::vector<In> bufferData(buffer.size() / sizeof(In));
 		std::memcpy(bufferData.data(), buffer.data(), buffer.size());
-		if constexpr (std::is_convertible_v<I, O>)
-			return std::vector<O>(std::begin(bufferData), std::end(bufferData));
+		if constexpr (std::is_convertible_v<In, Out>)
+			return std::vector<Out>(std::begin(bufferData), std::end(bufferData));
 		throw std::exception("gosh");
 	}
-
-	template<class T>
-	struct Scalar
-	{
-		T value;
-		operator T() const { return value; }
-	};
 
 	template <class T>
 	std::optional<T> GetVector(const std::vector<double> list)

@@ -216,7 +216,7 @@ void MeshModel::Pack()
 	}
 
 	packed.localBoundingBox = BoundingBox(packed);
-	*this = packed;
+	*this = std::move(packed);
 }
 
 void MeshModel::ConstructEdges() const

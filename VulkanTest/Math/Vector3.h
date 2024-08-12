@@ -37,13 +37,13 @@ public:
 	{
 	}
 
-	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
+	template <class Dummy = T, std::enable_if_t<std::is_same_v<Dummy, float>, bool> = true>
 	inline T Dot(const Vector3<T>& vec) const noexcept
 	{
 		return x * vec.x + y * vec.y + z * vec.z;
 	}
 
-	template <class Dummy = bool, std::enable_if_t<std::is_same_v<T, float>, Dummy> = true>
+	template <class Dummy = T, std::enable_if_t<std::is_same_v<Dummy, float>, bool> = true>
 	inline Vector3<T> Cross(const Vector3<T>& vec) const noexcept
 	{
 		return Vector3<T>(

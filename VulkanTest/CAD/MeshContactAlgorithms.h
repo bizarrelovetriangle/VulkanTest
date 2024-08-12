@@ -187,12 +187,14 @@ public:
 			std::set<std::pair<uint32_t, uint32_t>> contour;
 			std::vector<uint32_t> deleteFaces;
 
-			for (auto it = distances.begin(); it != distances.end();) {
+			for (auto it = distances.begin(); it != distances.end();)
+			{
 				uint32_t tri = it->first;
 				auto next = std::next(it);
-
 				auto triPoints = contactInfo.minkowskiTriangular->TrianglePoints(tri);
-				if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], minkowskiDiff.diff) > 0.) {
+
+				if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], minkowskiDiff.diff) > 0.)
+				{
 					auto& triangle = contactInfo.minkowskiTriangular->triangles[tri];
 					for (auto& edge : triangle.edges) {
 						auto org = contactInfo.minkowskiTriangular->Origin(edge);
