@@ -196,9 +196,11 @@ public:
 				if (GeometryFunctions::TrianglePlanePointDist(triPoints[0], triPoints[1], triPoints[2], minkowskiDiff.diff) > 0.)
 				{
 					auto& triangle = contactInfo.minkowskiTriangular->triangles[tri];
-					for (auto& edge : triangle.edges) {
-						auto org = contactInfo.minkowskiTriangular->Origin(edge);
-						auto dest = contactInfo.minkowskiTriangular->Destination(edge);
+
+					for (int i = 0; i < 3; ++i)
+					{
+						auto& org = triangle.vertices[i];
+						auto& dest = triangle.vertices[(i + 1) % 3];
 
 						if (auto it = contour.find(std::make_pair(dest, org)); it != contour.end()) {
 							contour.erase(it);
@@ -327,11 +329,11 @@ private:
 		return MinkowskiDiff{ meshA.points[antagonistA] - meshB.points[antagonistB], { antagonistA, antagonistB } };
 	}
 
-	uint32_t FarthestPoint(const Vector3f& direction, const std::vector<Vector3f>& points)
+	size_t FarthestPoint(const Vector3f& direction, const std::vector<Vector3f>& points)
 	{
-		auto farthest = std::make_pair(-(std::numeric_limits<float>::max)(), uint32_t(0));
-		uint32_t size = points.size();
-		for (uint32_t i = 0; i < size; ++i) {
+		auto farthest = std::make_pair(-(std::numeric_limits<float>::max)(), size_t(0));
+		size_t size = points.size();
+		for (size_t i = 0; i < size; ++i) {
 			auto& point = points[i];
 			float dist = direction.Dot(point);
 

@@ -1,4 +1,3 @@
-#include "BoundingBox.h"
 #include "MeshModel.h"
 #include "GeometryCreator.h"
 

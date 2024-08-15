@@ -27,13 +27,11 @@ MeshModel::MeshModel(const std::vector<uint32_t>& indexes, const std::vector<Vec
 
 	for (size_t tri = 0; tri < indexes.size() / 3; ++tri) {
 		auto& triangle = triangles.at(tri);
-		triangle.index = tri;
 
 		for (int side = 0; side < 3; ++side) {
 			size_t org = indexes.at(tri * 3 + side);
 			size_t dest = indexes.at(tri * 3 + (side + 1) % 3);
 			triangle.vertices[side] = org;
-			triangle.edges[side] = Edge(tri, side);
 		}
 	}
 
@@ -102,16 +100,14 @@ uint32_t MeshModel::AddTriangle(std::array<uint32_t, 3> indexes)
 {
 	uint32_t tri = triangles.size();
 	Triangle triangle;
-	triangle.index = tri;
 
 	for (int side = 0; side < 3; ++side) {
 		size_t org = indexes.at(side);
 		size_t dest = indexes.at((side + 1) % 3);
 		triangle.vertices[side] = org;
-		triangle.edges[side] = Edge(tri, side);
 
 		if (edges) {
-			auto pair = edges->emplace(HashPair(org, dest), triangle.edges[side]);
+			auto pair = edges->emplace(HashPair(org, dest), Edge(tri, side));
 			if (!pair.second) {
 				throw std::exception(":(");
 			}
@@ -129,12 +125,13 @@ void MeshModel::DeleteTriangle(uint32_t tri)
 	triangleBitVector[tri] = false;
 	markedTris[tri] = false;
 
-	auto& triangle = triangles[tri];
-	for (auto& edge : triangle.edges) {
-		auto org = Origin(edge);
-		auto dest = Destination(edge);
-
-		if (edges) {
+	if (edges)
+	{
+		auto& triangle = triangles[tri];
+		for (int i = 0; i < 3; ++i)
+		{
+			auto& org = triangle.vertices[i];
+			auto& dest = triangle.vertices[(i + 1) % 3];
 			edges->erase(HashPair(org, dest));
 		}
 	}
@@ -193,7 +190,8 @@ void MeshModel::Pack()
 	std::unordered_set<uint32_t> orgVertices;
 	std::vector<uint32_t> orgTriangles;
 
-	for (uint32_t tri = 0; tri < triangleBitVector.size(); ++tri) {
+	for (uint32_t tri = 0; tri < triangleBitVector.size(); ++tri)
+	{
 		if (!triangleBitVector[tri]) continue;
 		auto triVerteces = triangles[tri].vertices;
 		orgTriangles.push_back(tri);
@@ -227,11 +225,21 @@ void MeshModel::ConstructEdges() const
 
 	edges = std::make_unique<FlatHashMap<size_t, Edge>>();
 
-	for (auto& triangle : triangles) {
-		for (auto& edge : triangle.edges) {
-			size_t org = Origin(edge);
-			size_t dest = Destination(edge);
-			auto pair = edges->emplace(HashPair(org, dest), edge);
+	for (uint32_t tri = 0; tri < triangleBitVector.size(); ++tri)
+	{
+		if (!triangleBitVector[tri])
+		{
+			continue;
+		}
+
+		auto& triangle = triangles[tri];
+
+		for (size_t side = 0; side < 3; ++side)
+		{
+			auto& org = triangle.vertices[side];
+			auto& dest = triangle.vertices[(side + 1) % 3];
+
+			auto pair = edges->emplace(HashPair(org, dest), Edge(tri, side));
 			if (!pair.second) {
 				throw std::exception(":(");
 			}

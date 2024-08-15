@@ -122,9 +122,9 @@ public:
 
 	static Vector3f TrianglePointDir(const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& point)
 	{
-		auto normal = (b - a).Cross(c - a).Normalized();
-		float planeDist = normal.Dot(point - a);
-		return (normal * planeDist).Normalized();
+		auto dir = (b - a).Cross(c - a);
+		float planeDist = dir.Dot(point - a);
+		return dir * planeDist;
 	}
 
 	static bool ContourIsCycled(const std::set<std::pair<uint32_t, uint32_t>>& contour)

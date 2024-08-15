@@ -48,8 +48,6 @@ public:
 	struct Triangle
 	{
 		std::array<uint32_t, 3> vertices;
-		std::array<Edge, 3> edges;
-		uint32_t index;
 	};
 
 	MeshModel();
@@ -81,8 +79,8 @@ public:
 	void ConstructEdges() const;
 
 //private:
-	std::vector<uint32_t> markedTris;
-	std::vector<uint32_t> triangleBitVector;
+	std::vector<uint8_t> markedTris;
+	std::vector<uint8_t> triangleBitVector;
 	std::vector<Triangle> triangles;
 	std::vector<Vector3f> points;
 

@@ -30,8 +30,10 @@ public:
 				orgVertices.emplace(triVerteces[1]);
 				orgVertices.emplace(triVerteces[2]);
 
-				for (auto& edge : mesh.triangles[face].edges) {
-					if (auto combEdge = mesh.CombinedEdge(edge); combEdge) {
+
+				for (size_t side = 0; side < 3; ++side)
+				{
+					if (auto combEdge = mesh.CombinedEdge(MeshModel::Edge(face, side)); combEdge) {
 						if (!orgTriangles.contains(combEdge->Triangle())) {
 							candidateTriangles.emplace(combEdge->Triangle());
 						}
