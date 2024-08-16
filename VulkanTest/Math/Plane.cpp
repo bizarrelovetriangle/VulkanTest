@@ -71,6 +71,7 @@ bool Plane::Intersect(const Vector3f& segmentA, const Vector3f& segmentB, Vector
 	if (intersectPoint) {
 		*intersectPoint = segmentB * r + segmentA * (1 - r);
 	}
+	return true;
 }
 
 Matrix4 Plane::getMatrix() const

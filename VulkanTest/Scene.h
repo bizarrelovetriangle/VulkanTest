@@ -39,8 +39,8 @@ public:
 		vulkanContext.Init(window);
 
 		Deserializer deserializer(vulkanContext);
-		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\witch\\witch.gltf");
-		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\Zombie_Schoolgirl_01.gltf");
+		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\witch\\witch.gltf");
+		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\Zombie_Schoolgirl_01.gltf");
 		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\untitled.gltf");
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
@@ -50,7 +50,6 @@ public:
 			auto object = deserializer.Deserialize(serializedObject);
 			object->convexSegments = Desegmentator::ConvexSegments(*object->mesh);
 			objects.push_back(std::move(object));
-			break;
 		}
 
 		auto plane = std::make_shared<PlaneObject>(vulkanContext,

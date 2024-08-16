@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "CAD/GeometryCreator.h"
 #include "CAD/BoundingBoxTree.h"
+#include <iostream>
 
 class Picker
 {
@@ -14,7 +15,8 @@ public:
 		auto pointerRenderer = std::make_unique<SimpleVertexedRenderer>(vulkanContext);
 		auto mesh = GeometryCreator::CreateIcosphere(0.1, 2);
 		pointer = std::make_shared<MeshObject>(std::move(mesh), std::move(pointerRenderer));
-		pointer->interactive = false;
+		pointer->name = "pointer";
+		pointer->interactive = true;
 	}
 
 	void Update(const BoundingBoxTree& boundingBoxTree)
@@ -106,7 +108,7 @@ public:
 		auto projToView = camera->viewToProj.Inverse();
 		auto vec4 = projToView * Vector4f(mousePos.x, mousePos.y, 1, 1);
 		mouseDirection = Vector3f(vec4).Normalized();
-		//pointer->position = camera->view.Inverse() * Vector4f(mouseDirection * 5, 1);
+		//pointer->position = camera->worldToView.Inverse() * Vector4f(mouseDirection * 5, 1);
 	}
 
 	void UpdatePicked()

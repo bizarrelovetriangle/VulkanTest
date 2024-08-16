@@ -8,7 +8,8 @@
 class GeometryFunctions
 {
 public:
-	static bool SegmentTriangleIntersetion(const std::pair<Vector3f, Vector3f>& line, const Vector3f& lineDir,
+	static bool SegmentTriangleIntersetion(
+		const std::pair<Vector3f, Vector3f>& line, const Vector3f& lineDir,
 		const Vector3f& triangleA, const Vector3f& triangleB, const Vector3f& triangleC,
 		Vector3f& intersectPoint, float* dist = nullptr) noexcept
 	{
@@ -35,6 +36,8 @@ public:
 
 			return inside;
 		}
+
+		return false;
 	}
 
 	// https://stackoverflow.com/a/42752998/9516090
