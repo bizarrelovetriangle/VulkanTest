@@ -49,6 +49,7 @@ public:
 
 	Vector3f scale = Vector3f(1., 1., 1.);
 
+	bool visible = true;
 	bool interactive = true;
 
 	std::unique_ptr<Renderer> renderer;

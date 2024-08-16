@@ -37,6 +37,7 @@ std::vector<Vector3f> Plane::MeshIntersections(const MeshModel& mesh) const
 			continue;
 		}
 
+		Vector3f intersection;
 		auto& triangle = mesh.triangles[tri];
 
 		for (int i = 0; i < 3; ++i)
@@ -45,7 +46,6 @@ std::vector<Vector3f> Plane::MeshIntersections(const MeshModel& mesh) const
 			auto& dest = triangle.vertices[(i + 1) % 3];
 
 			if (org < dest) {
-				Vector3f intersection;
 				if (Intersect(mesh.points[org], mesh.points[dest], &intersection)) {
 					result.push_back(intersection);
 				}

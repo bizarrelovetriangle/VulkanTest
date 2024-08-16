@@ -241,7 +241,7 @@ void MeshModel::ConstructEdges() const
 
 			auto pair = edges->emplace(HashPair(org, dest), Edge(tri, side));
 			if (!pair.second) {
-				throw std::exception(":(");
+				//throw std::exception(":(");
 			}
 		}
 	}

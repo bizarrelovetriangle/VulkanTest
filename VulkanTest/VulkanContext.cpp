@@ -130,7 +130,9 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
 
     for (auto& object : objects)
     {
-        object->Render(renderVisitor);
+        if (object->visible) {
+            object->Render(renderVisitor);
+        }
     }
 
     commandBuffer->commandBuffer.endRenderPass();

@@ -24,7 +24,7 @@ public:
 		}
 		else if (!serializedObject.indexes.empty())
 		{
-			renderer = std::make_unique<LinedRenderer>(vulkanContext_);
+			renderer = std::make_unique<SimpleVertexedRenderer>(vulkanContext_);
 		}
 
 		renderer->propertiesUniform.baseColor = serializedObject.baseColor;
