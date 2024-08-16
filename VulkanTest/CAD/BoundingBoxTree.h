@@ -144,7 +144,9 @@ public:
 	void AddToTree(std::shared_ptr<MeshModel>& mesh, std::shared_ptr<MeshObject>& object)
 	{
 		size_t newBoundingBox = NextFree();
+		auto prevRender = boundingBoxes[newBoundingBox].renderBoundingBoxObject;
 		boundingBoxes[newBoundingBox] = BoundingBox(mesh->localBoundingBox, object->ComposeMatrix(), 0.3);
+		boundingBoxes[newBoundingBox].renderBoundingBoxObject = prevRender;
 		boundingBoxes[newBoundingBox].sceneObject = object;
 		boundingBoxes[newBoundingBox].sceneMesh = mesh;
 		mesh->localBoundingBox.parent = newBoundingBox;
@@ -158,7 +160,9 @@ public:
 		int64_t sibling = FindBestSibling(boundingBoxes[newBoundingBox]);
 
 		size_t newParent = NextFree();
+		auto prevUnionRender = boundingBoxes[newBoundingBox].renderBoundingBoxObject;
 		boundingBoxes[newParent] = BoundingBox::Union(boundingBoxes[sibling], boundingBoxes[newBoundingBox]);
+		boundingBoxes[newParent].renderBoundingBoxObject = prevUnionRender;
 		boundingBoxes[newParent].children.first = newBoundingBox;
 		boundingBoxes[newParent].children.second = sibling;
 		boundingBoxes[newParent].parent = boundingBoxes[sibling].parent;
@@ -302,6 +306,7 @@ public:
 			}
 		}
 		else {
+			boundingBoxObject->visible = true;
 			boundingBoxObject->UpdateBoundingBox(boundingBox);
 		}
 
@@ -319,14 +324,19 @@ public:
 		}
 
 		auto& object = boundingBox.renderBoundingBoxObject;
-		object->Dispose();
-		boundingBoxObjects.erase(object);
+		object->visible = false;
+		//object->Dispose();
+		//boundingBoxObjects.erase(object);
 	}
 
 	virtual void Render(RenderVisitor& renderVisitor) override
 	{
 		for (auto& boundingBoxObject : boundingBoxObjects)
+		{
+			if (boundingBoxObject->visible) {
 			boundingBoxObject->Render(renderVisitor);
+			}
+		}
 		meshContactAlgorithms.Render(renderVisitor);
 	}
 
