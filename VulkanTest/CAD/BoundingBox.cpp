@@ -79,7 +79,7 @@ bool BoundingBox::Intersect(const BoundingBox& box) const
 
 bool BoundingBox::Intersect(const std::pair<Vector3f, Vector3f>& line) const
 {
-	return GeometryCreator::CreateBoxByTwoPoints(aa, bb)->Intersect(line);
+	return GeometryCreator::CreateBoxByTwoPoints(aa, bb)->Intersect(line, nullptr, true);
 }
 
 bool BoundingBox::Exceed(const BoundingBox& exceededBox) const

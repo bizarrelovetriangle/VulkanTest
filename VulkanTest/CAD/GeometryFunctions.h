@@ -11,11 +11,11 @@ public:
 	static bool SegmentTriangleIntersetion(
 		const std::pair<Vector3f, Vector3f>& line, const Vector3f& lineDir,
 		const Vector3f& triangleA, const Vector3f& triangleB, const Vector3f& triangleC,
-		Vector3f& intersectPoint, float* dist = nullptr) noexcept
+		Vector3f& intersectPoint, float* dist = nullptr, bool bothSides = false) noexcept
 	{
 		auto triNormDir = (triangleB - triangleA).Cross(triangleC - triangleA);
 
-		if (triNormDir.Dot(line.second - line.first) > 0.)
+		if (!bothSides && triNormDir.Dot(line.second - line.first) > 0.)
 			return false;
 
 		Plane plane(triangleA, triNormDir);

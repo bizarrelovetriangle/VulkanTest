@@ -58,7 +58,7 @@ public:
 
 	MeshModel& operator=(const MeshModel& meshModel);
 
-	bool Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<float, Vector3f>* nearestPos = nullptr) const;
+	bool Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<float, Vector3f>* nearestPos = nullptr, bool bothSides = false) const;
 
 	uint32_t AddTriangle(std::array<uint32_t, 3> indexes);
 

@@ -59,7 +59,7 @@ MeshModel& MeshModel::operator=(const MeshModel& meshModel)
 	return *this;
 }
 
-bool MeshModel::Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<float, Vector3f>* nearestPos) const
+bool MeshModel::Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<float, Vector3f>* nearestPos, bool bothSides) const
 {
 	if (nearestPos) {
 		*nearestPos = { (std::numeric_limits<float>::max)(), {} };
@@ -77,8 +77,9 @@ bool MeshModel::Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<f
 		if (!triangleBitVector[i]) continue;
 		auto points = TrianglePoints(i);
 
+		float* distPtr = nearestPos ? &dist : nullptr;
 		if (GeometryFunctions::SegmentTriangleIntersetion(
-			line, lineDir, points[0], points[1], points[2], intersectPoint, &dist))
+			line, lineDir, points[0], points[1], points[2], intersectPoint, distPtr, bothSides))
 		{
 			if (!nearestPos) {
 				return true;
