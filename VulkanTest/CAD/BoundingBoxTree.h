@@ -9,7 +9,7 @@
 
 namespace
 {
-	const bool visibleBoundingBoxes = false;
+	const bool visibleBoundingBoxes = true;
 };
 
 class BoundingBoxTree : public Object
@@ -18,6 +18,7 @@ public:
 	BoundingBoxTree(VulkanContext& vulkanContext)
 		: vulkanContext(vulkanContext), meshContactAlgorithms(vulkanContext)
 	{
+		interactive = false;
 	}
 
 	void UpdateTree(std::vector<std::shared_ptr<Object>>& objects)
@@ -37,7 +38,7 @@ public:
 					else {
 						auto& orgBoundingBox = boundingBoxes[mesh->localBoundingBox.parent];
 						auto boundingBox = BoundingBox(mesh->localBoundingBox, meshObject->ComposeMatrix());
-
+						
 						if (boundingBox.Exceed(orgBoundingBox)) {
 							RemoveFromTree(mesh, meshObject);
 							AddToTree(mesh, meshObject);
@@ -145,7 +146,7 @@ public:
 	{
 		size_t newBoundingBox = NextFree();
 		auto prevRender = boundingBoxes[newBoundingBox].renderBoundingBoxObject;
-		boundingBoxes[newBoundingBox] = BoundingBox(mesh->localBoundingBox, object->ComposeMatrix(), 0.3);
+		boundingBoxes[newBoundingBox] = BoundingBox(mesh->localBoundingBox, object->ComposeMatrix(), 0.1);
 		boundingBoxes[newBoundingBox].renderBoundingBoxObject = prevRender;
 		boundingBoxes[newBoundingBox].sceneObject = object;
 		boundingBoxes[newBoundingBox].sceneMesh = mesh;
@@ -160,7 +161,7 @@ public:
 		int64_t sibling = FindBestSibling(boundingBoxes[newBoundingBox]);
 
 		size_t newParent = NextFree();
-		auto prevUnionRender = boundingBoxes[newBoundingBox].renderBoundingBoxObject;
+		auto prevUnionRender = boundingBoxes[newParent].renderBoundingBoxObject;
 		boundingBoxes[newParent] = BoundingBox::Union(boundingBoxes[sibling], boundingBoxes[newBoundingBox]);
 		boundingBoxes[newParent].renderBoundingBoxObject = prevUnionRender;
 		boundingBoxes[newParent].children.first = newBoundingBox;

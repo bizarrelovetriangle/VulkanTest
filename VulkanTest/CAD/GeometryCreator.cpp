@@ -60,7 +60,7 @@ std::unique_ptr<MeshModel> GeometryCreator::CreateIcosphere(float radius, int su
 
 		std::swap(icosphere, icosphereTemp);
 	}
-
+	icosphere->localBoundingBox = BoundingBox(*icosphere);
 	return icosphere;
 }
 
