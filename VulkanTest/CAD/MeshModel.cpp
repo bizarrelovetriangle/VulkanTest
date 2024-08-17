@@ -69,7 +69,7 @@ bool MeshModel::Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<f
 
 	bool success = false;
 
-	float dist = 0.;
+	float dist2 = 0.;
 	Vector3f intersectPoint;
 
 	for (int i = 0; i < triangles.size(); ++i)
@@ -77,19 +77,19 @@ bool MeshModel::Intersect(const std::pair<Vector3f, Vector3f>& line, std::pair<f
 		if (!triangleBitVector[i]) continue;
 		auto points = TrianglePoints(i);
 
-		float* distPtr = nearestPos ? &dist : nullptr;
+		float* dist2Ptr = nearestPos ? &dist2 : nullptr;
 		if (GeometryFunctions::SegmentTriangleIntersetion(
-			line, lineDir, points[0], points[1], points[2], intersectPoint, distPtr, bothSides))
+			line, lineDir, points[0], points[1], points[2], intersectPoint, dist2Ptr, bothSides))
 		{
 			if (!nearestPos) {
 				return true;
 			}
 
 			success = true;
-			if (dist < nearestPos->first)
+			if (dist2 < nearestPos->first)
 			{
 				auto pos = Vector4f(intersectPoint, 1.);
-				*nearestPos = { dist, pos };
+				*nearestPos = { dist2, pos };
 			}
 		}
 	}

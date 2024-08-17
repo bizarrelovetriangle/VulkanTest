@@ -63,9 +63,11 @@ public:
 				std::pair<float, Vector3f> pos;
 				if (currentBox.sceneMesh->Intersect(modelSpaceLine, &pos))
 				{
-					if (pos.first < nearestPos.first)
+					auto worldPos = modelToWorld * Vector4f(pos.second, 1.);
+					float dist2 = (line.first - worldPos).Length2();
+					if (dist2 < nearestPos.first)
 					{
-						nearestPos = std::make_pair(pos.first, modelToWorld * Vector4f(pos.second, 1.));
+						nearestPos = std::make_pair(dist2, modelToWorld * Vector4f(pos.second, 1.));
 						obj = currentBox.sceneObject;
 					}
 				}

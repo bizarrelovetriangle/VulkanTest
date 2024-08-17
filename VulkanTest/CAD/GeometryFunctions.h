@@ -11,7 +11,7 @@ public:
 	static bool SegmentTriangleIntersetion(
 		const std::pair<Vector3f, Vector3f>& line, const Vector3f& lineDir,
 		const Vector3f& triangleA, const Vector3f& triangleB, const Vector3f& triangleC,
-		Vector3f& intersectPoint, float* dist = nullptr, bool bothSides = false) noexcept
+		Vector3f& intersectPoint, float* dist2 = nullptr, bool bothSides = false) noexcept
 	{
 		auto triNormDir = (triangleB - triangleA).Cross(triangleC - triangleA);
 
@@ -30,8 +30,8 @@ public:
 				triNormDir.Dot(b_c_point_vector) > 0 &&
 				triNormDir.Dot(c_a_point_vector) > 0;
 
-			if (inside && dist) {
-				*dist = (intersectPoint - line.first).Length();
+			if (inside && dist2) {
+				*dist2 = (intersectPoint - line.first).Length2();
 			}
 
 			return inside;
