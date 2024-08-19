@@ -152,6 +152,7 @@
     <ClCompile Include="CAD\BoundingBoxTree.h" />
     <ClCompile Include="CAD\BoundingBox.cpp" />
     <ClCompile Include="CAD\BoundingBox.h" />
+    <ClCompile Include="Scenes\FluidScene.h" />
     <ClCompile Include="pch\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -189,6 +190,7 @@
     <ClCompile Include="VulkanContext.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
     <ClInclude Include="CAD\Desegmentator.h" />
     <ClInclude Include="CAD\GeometryFunctions.h" />
     <ClInclude Include="CAD\MeshContactAlgorithms.h" />
@@ -208,6 +210,7 @@
     <ClInclude Include="Objects\Primitives\PlaneObject.h" />
     <ClInclude Include="Renderers\TexturedRenderer.h" />
     <ClInclude Include="Renderers\Interfaces\VertexedRenderer.h" />
+    <ClInclude Include="Scenes\Scene.h" />
     <ClInclude Include="Utils\Deserializer.h" />
     <ClInclude Include="CAD\GeometryCreator.h" />
     <ClInclude Include="Vulkan\DescriptorSets.h" />
@@ -222,7 +225,7 @@
     <ClInclude Include="RenderVisitor.h" />
     <ClInclude Include="VulkanContext.h" />
     <ClInclude Include="Renderers\Interfaces\Renderer.h" />
-    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Scenes\RigidScene.h" />
     <ClInclude Include="Utils\GLTFReader.h" />
     <ClInclude Include="Dependencies\tiny_gltf\json.hpp" />
     <ClInclude Include="Dependencies\tiny_gltf\stb_image.h" />

@@ -1,6 +1,11 @@
 #pragma once
-#include "../Objects/Interfaces/Object.h"
+#include "../Objects/Interfaces/MeshObject.h"
 #include "../Renderers/LinedRenderer.h"
+
+#include "Renderers/ColoredRenderer.h"
+#include "Renderers/TexturedRenderer.h"
+#include "Renderers/SimpleVertexedRenderer.h"
+#include "Renderers/PlaneRenderer.h"
 
 class Deserializer
 {

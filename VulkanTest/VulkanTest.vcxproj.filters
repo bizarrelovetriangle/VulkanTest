@@ -114,6 +114,9 @@
     <ClCompile Include="Utils\FlatHashMap.h">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scenes\FluidScene.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">
@@ -170,7 +173,7 @@
     <ClInclude Include="Math\Vector4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
+    <ClInclude Include="Scenes\RigidScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderVisitor.h">
@@ -255,6 +258,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CAD\Desegmentator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

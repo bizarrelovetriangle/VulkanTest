@@ -1,7 +1,7 @@
-#include "Scene.h"
+#include "Application.h"
 
 int main()
 {
-	Scene scene;
-	scene.Run();
+	Application app;
+	app.Run();
 }
