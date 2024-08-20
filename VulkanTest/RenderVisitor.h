@@ -15,10 +15,10 @@ class RenderVisitor
 public:
 	RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex);
 
-	void Visit(Renderer& Renderer);
-	void Visit(VertexedRenderer& Renderer);
+	void Visit(Renderer& renderer);
+	void Visit(VertexedRenderer& renderer);
 
-private:
+//private:
 	VulkanContext& vulkanContext;
 	vk::CommandBuffer& commandBuffer;
 	size_t imageIndex;

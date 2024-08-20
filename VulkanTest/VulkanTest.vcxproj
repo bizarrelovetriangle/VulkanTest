@@ -152,6 +152,8 @@
     <ClCompile Include="CAD\BoundingBoxTree.h" />
     <ClCompile Include="CAD\BoundingBox.cpp" />
     <ClCompile Include="CAD\BoundingBox.h" />
+    <ClCompile Include="Objects\FluidObject.cpp" />
+    <ClCompile Include="Renderers\FluidRenderer.cpp" />
     <ClCompile Include="Scenes\FluidScene.h" />
     <ClCompile Include="pch\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -195,6 +197,7 @@
     <ClInclude Include="CAD\GeometryFunctions.h" />
     <ClInclude Include="CAD\MeshContactAlgorithms.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Objects\FluidObject.h" />
     <ClInclude Include="Objects\Interfaces\MeshObject.h" />
     <ClInclude Include="Objects\Interfaces\Object.h" />
     <ClInclude Include="Objects\Primitives\ArrowObject.h" />
@@ -204,6 +207,7 @@
     <ClInclude Include="Math\Plane.h" />
     <ClInclude Include="Picker.h" />
     <ClInclude Include="Renderers\ColoredRenderer.h" />
+    <ClInclude Include="Renderers\FluidRenderer.h" />
     <ClInclude Include="Renderers\PlaneRenderer.h" />
     <ClInclude Include="Renderers\LinedRenderer.h" />
     <ClInclude Include="Renderers\SimpleVertexedRenderer.h" />
@@ -243,6 +247,8 @@
   <ItemGroup>
     <None Include="Resources\Shaders\colored.frag" />
     <None Include="Resources\Shaders\colored.vert" />
+    <None Include="Resources\Shaders\fluid.frag" />
+    <None Include="Resources\Shaders\fluid.vert" />
     <None Include="Resources\Shaders\lined.frag" />
     <None Include="Resources\Shaders\lined.vert" />
     <None Include="Resources\Shaders\Primitives\EvenPlane.frag" />

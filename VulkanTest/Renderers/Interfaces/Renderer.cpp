@@ -15,6 +15,7 @@
 #include "../LinedRenderer.h"
 #include "../../Camera.h"
 #include "../../Vulkan/DeviceController.h"
+#include "../FluidRenderer.h"
 
 RendererShared::RendererShared(VulkanContext& vulkanContext)
 	: vulkanContext(vulkanContext)
@@ -115,3 +116,4 @@ template Shared<LinedRenderer>;
 template Shared<ColoredRenderer>;
 template Shared<TexturedRenderer>;
 template Shared<PlaneRenderer>;
+template Shared<FluidRenderer>;

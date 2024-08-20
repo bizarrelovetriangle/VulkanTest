@@ -35,7 +35,7 @@ public:
 
 		vulkanContext.Init(window);
 
-		scene = std::make_unique<RigidScene>(vulkanContext, objects);
+		scene = std::make_unique<FluidScene>(vulkanContext, objects);
 
 		boundingBoxTree = std::make_shared<BoundingBoxTree>(vulkanContext);
 		objects.push_back(boundingBoxTree);

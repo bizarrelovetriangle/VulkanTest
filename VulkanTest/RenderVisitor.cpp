@@ -38,5 +38,3 @@ void RenderVisitor::Visit(VertexedRenderer& renderer)
 
 	commandBuffer.draw(renderer.vertexBuffer->count, 1, 0, 0);
 }
-
-

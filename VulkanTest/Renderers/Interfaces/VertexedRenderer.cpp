@@ -51,7 +51,7 @@ void VertexedRenderer::UpdateVertexBuffer(const MeshModel& mesh)
 		vertexBuffer->FlushData(vertexSpan);
 	}
 	else {
-		vertexBuffer = BufferData::Create<VertexData>(
+		vertexBuffer = BufferData::Create(
 			vulkanContext, vertexDatas, MemoryType::Universal, vk::BufferUsageFlagBits::eVertexBuffer);
 	}
 }

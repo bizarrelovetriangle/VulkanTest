@@ -10,16 +10,16 @@
 #include "../VulkanContext.h"
 #include "../Utils/ShaderCompiler.h"
 
-Pipeline::Pipeline(VulkanContext& vulkanContext, RendererShared& RendererShared, bool lined)
+Pipeline::Pipeline(VulkanContext& vulkanContext, RendererShared& rendererShared, bool lined)
 	: vulkanContext(vulkanContext)
 {
 	auto& device = vulkanContext.deviceController->device;
 
-	auto vertexSpirv = ShaderCompiler::CompileShader(RendererShared.vertexShader,
+	auto vertexSpirv = ShaderCompiler::CompileShader(rendererShared.vertexShader,
 		vk::ShaderStageFlagBits::eVertex, false);
 	vertShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, vertexSpirv));
 
-	auto fragmentSpirv = ShaderCompiler::CompileShader(RendererShared.fragmentShader,
+	auto fragmentSpirv = ShaderCompiler::CompileShader(rendererShared.fragmentShader,
 		vk::ShaderStageFlagBits::eFragment, false);
 	fragShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, fragmentSpirv));
 
@@ -30,11 +30,11 @@ Pipeline::Pipeline(VulkanContext& vulkanContext, RendererShared& RendererShared,
 
 	shaderStages = { vertShaderStageInfo, fragShaderStageInfo };
 
-	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, RendererShared.descriptorSetLayout, {});
+	vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, rendererShared.descriptorSetLayout, {});
 	pipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
 
 	vk::PipelineVertexInputStateCreateInfo vertexInputInfo(
-		{}, RendererShared.vertexDataBindings, RendererShared.vertexDataAttributes);;
+		{}, rendererShared.vertexDataBindings, rendererShared.vertexDataAttributes);;
 	auto inputAssembly = lined
 		? vk::PipelineInputAssemblyStateCreateInfo({}, vk::PrimitiveTopology::eLineList, false)
 		: vk::PipelineInputAssemblyStateCreateInfo({}, vk::PrimitiveTopology::eTriangleList, false);

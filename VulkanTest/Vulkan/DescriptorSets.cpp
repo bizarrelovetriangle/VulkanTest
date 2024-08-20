@@ -14,7 +14,8 @@ DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLa
 
 	std::vector<vk::DescriptorPoolSize> descriptorPoolSizes
 	{
-		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, count * 4),
+		vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, count),
+		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, count * 5),
 		vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, count)
 	};
 
@@ -31,9 +32,21 @@ void DescriptorSets::UpdateUniformDescriptor(BufferData& uniform, uint32_t bindi
 	for (size_t i = 0; i < descriptorSets.size(); ++i)
 	{
 		vk::DescriptorBufferInfo descriptorBufferInfo(
-			uniform.buffer, 0, uniform.count);
+			uniform.buffer, 0, uniform.size);
 		vk::WriteDescriptorSet writeDescriptorSet(
 			descriptorSets[i], binding, 0, vk::DescriptorType::eUniformBuffer, {}, descriptorBufferInfo, {});
+		vulkanContext.deviceController->device.updateDescriptorSets(writeDescriptorSet, {});
+	}
+}
+
+void DescriptorSets::UpdateStorageDescriptor(BufferData& storate, uint32_t binding)
+{
+	for (size_t i = 0; i < descriptorSets.size(); ++i)
+	{
+		vk::DescriptorBufferInfo descriptorBufferInfo(
+			storate.buffer, 0, storate.size);
+		vk::WriteDescriptorSet writeDescriptorSet(
+			descriptorSets[i], binding, 0, vk::DescriptorType::eStorageBuffer, {}, descriptorBufferInfo, {});
 		vulkanContext.deviceController->device.updateDescriptorSets(writeDescriptorSet, {});
 	}
 }

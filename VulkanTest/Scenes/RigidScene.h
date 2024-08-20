@@ -9,6 +9,8 @@
 #include "../CAD/GeometryCreator.h"
 #include "../Renderers/SimpleVertexedRenderer.h"
 
+class VulkanContext;
+
 class RigidScene : public Scene
 {
 public:

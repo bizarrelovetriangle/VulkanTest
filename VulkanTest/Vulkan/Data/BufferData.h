@@ -7,16 +7,47 @@
 #include "../../VulkanContext.h"
 #include "../DeviceController.h"
 
+template <class T>
+concept IsCollection = requires(T t)
+{
+	t.begin();
+};
+
 class BufferData
 {
 public:
+	template <class T> requires(!IsCollection<T>)
+		static std::unique_ptr<BufferData> Create(VulkanContext& vulkanContext,
+			T& data, MemoryType memoryType, vk::BufferUsageFlags usage, size_t reservedSize = 0)
+	{
+		return BufferData::Create(vulkanContext, std::span<T>(&data, &data + 1), memoryType, usage, reservedSize);
+	}
+
+	template <class T> requires(!IsCollection<T>)
+		void FlushData(T& data)
+	{
+		BufferData::FlushData(std::span<T>(&data, &data + 1));
+	}
+
 	template <class T>
 	static std::unique_ptr<BufferData> Create(VulkanContext& vulkanContext,
-		std::span<T> data, MemoryType memoryType, vk::BufferUsageFlags usage, size_t reserveCount = 0)
+		std::vector<T>& data, MemoryType memoryType, vk::BufferUsageFlags usage, size_t reservedSize = 0)
 	{
-		if (reserveCount == 0) reserveCount = data.size();
-		auto bufferData = std::make_unique<BufferData>(vulkanContext, reserveCount * sizeof(T), memoryType, usage);
-		bufferData->reservedCount = reserveCount;
+		return BufferData::Create(vulkanContext, std::span(data), memoryType, usage, reservedSize);
+	}
+
+	template <class T>
+	void FlushData(std::vector<T>& data)
+	{
+		BufferData::FlushData(std::span(data));
+	}
+
+	template <class T>
+	static std::unique_ptr<BufferData> Create(VulkanContext& vulkanContext,
+		std::span<T> data, MemoryType memoryType, vk::BufferUsageFlags usage, size_t reservedSize = 0)
+	{
+		if (reservedSize == 0) reservedSize = data.size() * sizeof(T);
+		auto bufferData = std::make_unique<BufferData>(vulkanContext, reservedSize, memoryType, usage);
 		bufferData->FlushData<T>(data);
 		return bufferData;
 	}
@@ -24,7 +55,9 @@ public:
 	template <class T>
 	void FlushData(std::span<T> data)
 	{
-		if (data.size() > reservedCount)
+		auto dataSize = data.size() * sizeof(T);
+
+		if (dataSize > reservedSize)
 		{
 			auto extended = Create<T>(vulkanContext, data, deviceMemory.memoryType, usage, data.size() * 1.5);
 			std::swap(*this, *extended);
@@ -32,6 +65,7 @@ public:
 			return;
 		}
 
+		size = dataSize;
 		count = data.size();
 
 		if (deviceMemory.memoryType == MemoryType::Universal || deviceMemory.memoryType == MemoryType::HostLocal)
@@ -56,14 +90,14 @@ public:
 	}
 
 	BufferData(VulkanContext& vulkanContext,
-		size_t size, MemoryType memoryType, vk::BufferUsageFlags usage)
-		: vulkanContext(vulkanContext), deviceMemory(vulkanContext, memoryType), usage(usage)
+		size_t reservedSize, MemoryType memoryType, vk::BufferUsageFlags usage)
+		: vulkanContext(vulkanContext), deviceMemory(vulkanContext, memoryType), usage(usage), reservedSize(reservedSize)
 	{
 		auto& device = vulkanContext.deviceController->device;
 
 		if (memoryType == MemoryType::DeviceLocal) usage |= vk::BufferUsageFlagBits::eTransferDst;
 
-		vk::BufferCreateInfo bufferInfo({}, size, usage, vk::SharingMode::eExclusive);
+		vk::BufferCreateInfo bufferInfo({}, reservedSize, usage, vk::SharingMode::eExclusive);
 		buffer = device.createBuffer(bufferInfo);
 
 		auto memoryRequirements = device.getBufferMemoryRequirements(buffer);
@@ -76,7 +110,8 @@ public:
 		deviceMemory = bufferData.deviceMemory;
 		buffer = bufferData.buffer;
 		usage = bufferData.usage;
-		reservedCount = bufferData.reservedCount;
+		size = bufferData.size;
+		reservedSize = bufferData.reservedSize;
 		count = bufferData.count;
 		return *this;
 	}
@@ -93,7 +128,9 @@ public:
 
 public:
 	size_t count = 0;
-	size_t reservedCount = 0;
+
+	size_t size = 0;
+	size_t reservedSize = 0;
 	vk::Buffer buffer;
 
 private:

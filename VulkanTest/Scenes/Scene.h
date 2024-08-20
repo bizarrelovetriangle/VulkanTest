@@ -1,5 +1,7 @@
 #pragma once
-#include "../VulkanContext.h"
+
+class VulkanContext;
+class Object;
 
 class Scene
 {

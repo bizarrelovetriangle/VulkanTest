@@ -11,6 +11,7 @@ class DescriptorSets
 public:
 	DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout);
 	void UpdateUniformDescriptor(BufferData& uniform, uint32_t binding);
+	void UpdateStorageDescriptor(BufferData& storate, uint32_t binding);
 	void UpdateImageDescriptor(ImageData& imageMemory, uint32_t binding);
 	void Dispose();
 

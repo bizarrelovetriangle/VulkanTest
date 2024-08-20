@@ -117,6 +117,12 @@
     <ClCompile Include="Scenes\FluidScene.h">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Objects\FluidObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderers\FluidRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vulkan\DeviceController.h">
@@ -266,6 +272,12 @@
     <ClInclude Include="Scenes\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Objects\FluidObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderers\FluidRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\textured.frag" />
@@ -278,5 +290,7 @@
     <None Include="Resources\Shaders\Primitives\EvenPlane.vert" />
     <None Include="Resources\Shaders\lined.vert" />
     <None Include="Resources\Shaders\lined.frag" />
+    <None Include="Resources\Shaders\fluid.vert" />
+    <None Include="Resources\Shaders\fluid.frag" />
   </ItemGroup>
 </Project>

@@ -10,9 +10,8 @@
 PlaneRenderer::PlaneRenderer(VulkanContext& vulkanContext)
 	: VertexedRenderer(vulkanContext)
 {
-	std::span<PlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
-	evenPlaneObjectUniformBuffer = BufferData::Create<PlaneObjectUniform>(
-		vulkanContext, uniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+	evenPlaneObjectUniformBuffer = BufferData::Create(
+		vulkanContext, evenPlaneObjectUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 
 	shared = Shared<PlaneRenderer>::getInstance(vulkanContext);
 	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
@@ -26,8 +25,7 @@ PlaneRenderer::~PlaneRenderer() = default;
 
 void PlaneRenderer::UpdatePlaneUniformBuffer()
 {
-	std::span<PlaneObjectUniform> uniformSpan(&evenPlaneObjectUniform, &evenPlaneObjectUniform + 1);
-	evenPlaneObjectUniformBuffer->FlushData(uniformSpan);
+	evenPlaneObjectUniformBuffer->FlushData(evenPlaneObjectUniform);
 }
 
 void PlaneRenderer::Dispose()
