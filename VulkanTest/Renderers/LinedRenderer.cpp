@@ -25,7 +25,7 @@ LinedRenderer::LinedRenderer(VulkanContext& vulkanContext, std::vector<Vector4f>
 	: VertexedRenderer(vulkanContext), colors(colors)
 {
 	shared = Shared<LinedRenderer>::getInstance(vulkanContext, true);
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
+	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout, DescriptorSetLayoutBinding());
 	descriptorSets->UpdateUniformDescriptor(*vulkanContext.commonUniformBuffer, 0);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 1);
 	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 2);

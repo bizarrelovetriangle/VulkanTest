@@ -5,20 +5,22 @@
 #include "Data/BufferData.h"
 #include "Data/ImageData.h"
 #include "../Renderers/Interfaces/Renderer.h"
+#include <ranges>
 
-DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout)
+DescriptorSets::DescriptorSets(VulkanContext& vulkanContext, vk::DescriptorSetLayout& descriptorSetLayout, const std::vector<vk::DescriptorSetLayoutBinding>& descriptorBindings)
 	: vulkanContext(vulkanContext), descriptorSetLayout(descriptorSetLayout)
 {
 	size_t count = vulkanContext.swapChain->frameCount;
 	auto& device = vulkanContext.deviceController->device;
 
-	std::vector<vk::DescriptorPoolSize> descriptorPoolSizes
+	std::unordered_map<vk::DescriptorType, size_t> map;
+	for (auto& descriptorBinding : descriptorBindings)
 	{
-		vk::DescriptorPoolSize(vk::DescriptorType::eStorageBuffer, count),
-		vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, count * 5),
-		vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, count)
-	};
+		map[descriptorBinding.descriptorType] += descriptorBinding.descriptorCount;
+	}
 
+	auto descriptorPoolSizes = std::vector(std::from_range,
+		std::ranges::views::transform(map, [count](auto& p) { return vk::DescriptorPoolSize(p.first, count * p.second); }));
 	vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo({}, count, descriptorPoolSizes);
 	descriptorPool = device.createDescriptorPool(descriptorPoolCreateInfo);
 

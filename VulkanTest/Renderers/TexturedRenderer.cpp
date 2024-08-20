@@ -39,7 +39,7 @@ TexturedRenderer::TexturedRenderer(VulkanContext& vulkanContext,
 	textureBuffer->TransitionLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
 	shared = Shared<TexturedRenderer>::getInstance(vulkanContext);
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
+	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout, DescriptorSetLayoutBinding());
 	descriptorSets->UpdateUniformDescriptor(*vulkanContext.commonUniformBuffer, 0);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 1);
 	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 2);

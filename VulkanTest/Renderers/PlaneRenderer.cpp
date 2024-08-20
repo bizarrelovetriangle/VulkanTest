@@ -14,7 +14,7 @@ PlaneRenderer::PlaneRenderer(VulkanContext& vulkanContext)
 		vulkanContext, evenPlaneObjectUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 
 	shared = Shared<PlaneRenderer>::getInstance(vulkanContext);
-	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout);
+	descriptorSets = std::make_unique<DescriptorSets>(vulkanContext, shared->descriptorSetLayout, DescriptorSetLayoutBinding());
 	descriptorSets->UpdateUniformDescriptor(*vulkanContext.commonUniformBuffer, 0);
 	descriptorSets->UpdateUniformDescriptor(*transformUniformBuffer, 1);
 	descriptorSets->UpdateUniformDescriptor(*propertiesUniformBuffer, 2);
