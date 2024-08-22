@@ -247,6 +247,7 @@
   <ItemGroup>
     <None Include="Resources\Shaders\colored.frag" />
     <None Include="Resources\Shaders\colored.vert" />
+    <None Include="Resources\Shaders\Compute\fluid.comp" />
     <None Include="Resources\Shaders\fluid.frag" />
     <None Include="Resources\Shaders\fluid.vert" />
     <None Include="Resources\Shaders\lined.frag" />

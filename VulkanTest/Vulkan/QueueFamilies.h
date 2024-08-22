@@ -19,6 +19,7 @@ public:
     uint32_t graphicQueueFamily;
     uint32_t presentQueueFamily;
     uint32_t transferQueueFamily;
+    uint32_t computeQueueFamily;
 
     std::unordered_map<uint32_t, vk::Queue> queueMap;
     std::vector<QueueFamily> queueFamilies;

@@ -51,6 +51,7 @@ public:
     std::unique_ptr<BufferData> commonUniformBuffer;
 
 private:
+    vk::Semaphore computeCompleteSemaphore;
     vk::Semaphore imageAvailableSemaphore;
     vk::Semaphore renderFinishedSemaphore;
     vk::Fence inFlightFence;

@@ -34,6 +34,7 @@
 #include <GLFW/glfw3native.h>
 #include "RenderVisitor.h"
 #include "Vulkan/Data/BufferData.h"
+#include "Objects/FluidObject.h"
 
 void VulkanContext::Init(GLFWwindow* window)
 {
@@ -46,12 +47,13 @@ void VulkanContext::Init(GLFWwindow* window)
     queueFamilies = std::make_shared<QueueFamilies>(deviceController->physicalDevice, surface);
 
     std::vector<uint32_t> queueFamilyIndexes =
-        { queueFamilies->graphicQueueFamily, queueFamilies->presentQueueFamily, queueFamilies->transferQueueFamily };
+        { queueFamilies->graphicQueueFamily, queueFamilies->presentQueueFamily, queueFamilies->transferQueueFamily, queueFamilies->computeQueueFamily };
     deviceController->createDevice(*queueFamilies, queueFamilyIndexes);
 
     queueFamilies->queueMap[queueFamilies->graphicQueueFamily] = deviceController->device.getQueue(queueFamilies->graphicQueueFamily, 0);
     queueFamilies->queueMap[queueFamilies->presentQueueFamily] = deviceController->device.getQueue(queueFamilies->presentQueueFamily, 0);
     queueFamilies->queueMap[queueFamilies->transferQueueFamily] = deviceController->device.getQueue(queueFamilies->transferQueueFamily, 0);
+    queueFamilies->queueMap[queueFamilies->computeQueueFamily] = deviceController->device.getQueue(queueFamilies->computeQueueFamily, 0);
 
     commandBufferDispatcher = std::make_shared<CommandBufferDispatcher>(*this);
 
@@ -62,6 +64,7 @@ void VulkanContext::Init(GLFWwindow* window)
         queueFamilies, swapChain, renderPass);
 
     vk::SemaphoreCreateInfo semaphoreInfo{};
+    computeCompleteSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
     imageAvailableSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
     renderFinishedSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
     vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
@@ -83,18 +86,26 @@ void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects, con
 
     uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
+    commandBufferDispatcher->InvokeSync(queueFamilies->computeQueueFamily, [&](vk::CommandBuffer& cb)
+        {
+            for (auto& object : objects)
+            {
+                if (auto fluidObject = std::dynamic_pointer_cast<FluidObject>(object))
+                {
+                    fluidObject->Run(cb, imageIndex);
+                }
+            }
+        }, {}, {}, { computeCompleteSemaphore });
+
     RecordCommandBuffer(imageIndex, objects, camera);
 
-    vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore };
-    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-    vk::Semaphore signalSemaphores[] = { renderFinishedSemaphore };
-
-    auto commandBuffers = { commandBuffer->commandBuffer };
-    vk::SubmitInfo submitInfo(waitSemaphores, waitStages, commandBuffer->commandBuffer, signalSemaphores);
+    vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore, computeCompleteSemaphore };
+    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eComputeShader };
+    vk::SubmitInfo submitInfo(waitSemaphores, waitStages, commandBuffer->commandBuffer, renderFinishedSemaphore);
     queueFamilies->queueMap.at(queueFamilies->graphicQueueFamily).submit(submitInfo, inFlightFence);
 
-    vk::PresentInfoKHR presentInfo(signalSemaphores, swapChain->swapChain, imageIndex);
-    queueFamilies->queueMap.at(queueFamilies->presentQueueFamily).presentKHR(presentInfo);
+    vk::PresentInfoKHR presentInfo(renderFinishedSemaphore, swapChain->swapChain, imageIndex);
+    auto _ = queueFamilies->queueMap.at(queueFamilies->presentQueueFamily).presentKHR(presentInfo);
 }
 
 void VulkanContext::RecordCommandBuffer(size_t imageIndex,
@@ -106,9 +117,9 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
     commonUniformBuffer->FlushData(commonUniformSpan);
 
     commandBuffer->commandBuffer.reset();
-    vk::CommandBufferBeginInfo beginInfo;
+    vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
     commandBuffer->commandBuffer.begin(beginInfo);
-        
+
     vk::Rect2D renderArea({ 0, 0 }, swapChain->swapChainExtent);
 
     vk::ClearColorValue clearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
@@ -141,7 +152,7 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
 
 void VulkanContext::Await()
 {
-    vkDeviceWaitIdle(deviceController->device);
+    deviceController->device.waitIdle();
 }
 
 void VulkanContext::Dispose()
@@ -153,11 +164,11 @@ void VulkanContext::Dispose()
     commandBuffer->Dispose();
     renderPass->Dispose();
 
-    vkDestroySemaphore(deviceController->device, imageAvailableSemaphore, nullptr);
-    vkDestroySemaphore(deviceController->device, renderFinishedSemaphore, nullptr);
-    vkDestroyFence(deviceController->device, inFlightFence, nullptr);
-
-    vkDestroySurfaceKHR(vulkanAuxiliary->instance, surface, nullptr);
+    deviceController->device.destroySemaphore(imageAvailableSemaphore);
+    deviceController->device.destroySemaphore(renderFinishedSemaphore);
+    deviceController->device.destroySemaphore(computeCompleteSemaphore);
+    deviceController->device.destroyFence(inFlightFence);
+    vulkanAuxiliary->instance.destroySurfaceKHR(surface);
 
     deviceController->Dispose();
     vulkanAuxiliary->Dispose();

@@ -9,6 +9,7 @@
 #include "../Vulkan/DescriptorSets.h"
 #include "../Vulkan/Data/BufferData.h"
 #include "../Renderers/FluidRenderer.h"
+#include "../Utils/ShaderCompiler.h"
 
 struct FluidUniform
 {
@@ -48,13 +49,51 @@ public:
 		fluidUniformBuffer = BufferData::Create(
 			vulkanContext, fluidUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
 
-		auto ico = GeometryCreator::CreateIcosphere(0.2, 1);
+		auto icosphere = GeometryCreator::CreateIcosphere(0.2, 1);
 		auto fluidRenderer = std::make_unique<FluidRenderer>(vulkanContext);
-		fluidRenderer->UpdateVertexBuffer(*ico);
+		fluidRenderer->UpdateVertexBuffer(*icosphere);
 		fluidRenderer->descriptorSets->UpdateStorageDescriptor(*particlesUniformBuffer, 3);
 		fluidRenderer->descriptorSets->UpdateUniformDescriptor(*fluidUniformBuffer, 4);
 
 		renderer = std::move(fluidRenderer);
+
+
+
+
+		auto& device = vulkanContext.deviceController->device;
+
+		auto computeSpirv = ShaderCompiler::CompileShader("E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp",
+			vk::ShaderStageFlagBits::eCompute, false);
+		computeShaderModule = device.createShaderModule(vk::ShaderModuleCreateInfo({}, computeSpirv));
+
+		vk::PipelineShaderStageCreateInfo vertShaderStageInfo(
+			{}, vk::ShaderStageFlagBits::eCompute, computeShaderModule, "main");
+
+		auto descriptorBindings = std::vector{
+			vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eStorageBuffer, 1, vk::ShaderStageFlagBits::eAll),
+			vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eAll),
+		};
+
+		vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreate({}, descriptorBindings);
+		computeDescriptorSetLayout = device.createDescriptorSetLayout(descriptorSetLayoutCreate);
+
+		vk::PipelineLayoutCreateInfo pipelineLayoutInfo({}, computeDescriptorSetLayout, {});
+		computePipelineLayout = device.createPipelineLayout(pipelineLayoutInfo);
+
+		vk::ComputePipelineCreateInfo pipeliceCreateInfo({}, { vertShaderStageInfo }, computePipelineLayout);
+
+		computePipeline = device.createComputePipeline(nullptr, pipeliceCreateInfo).value;
+
+		computeDescriptorSet = std::make_unique<DescriptorSets>(vulkanContext, computeDescriptorSetLayout, descriptorBindings);
+		computeDescriptorSet->UpdateStorageDescriptor(*particlesUniformBuffer, 0);
+		computeDescriptorSet->UpdateUniformDescriptor(*fluidUniformBuffer, 1);
+	}
+
+	void Run(vk::CommandBuffer& cb, int imageIndex)
+	{
+		cb.bindPipeline(vk::PipelineBindPoint::eCompute, computePipeline);
+		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, computePipelineLayout, 0, computeDescriptorSet->descriptorSets[imageIndex], {});
+		cb.dispatch(particles.size(), 1, 1);
 	}
 
 	virtual void Render(RenderVisitor& renderVisitor) override
@@ -82,6 +121,14 @@ public:
 	{
 		fluidUniformBuffer->Dispose();
 		particlesUniformBuffer->Dispose();
+
+		auto& device = vulkanContext.deviceController->device;
+		device.destroyPipeline(computePipeline);
+		device.destroyPipelineLayout(computePipelineLayout);
+		device.destroyDescriptorSetLayout(computeDescriptorSetLayout);
+		device.destroyShaderModule(computeShaderModule);
+		computeDescriptorSet->Dispose();
+
 		Object::Dispose();
 	}
 
@@ -92,4 +139,10 @@ public:
 
 	std::unique_ptr<BufferData> fluidUniformBuffer;
 	std::unique_ptr<BufferData> particlesUniformBuffer;
+
+	vk::Pipeline computePipeline;
+	vk::ShaderModule computeShaderModule;
+	vk::PipelineLayout computePipelineLayout;
+	std::unique_ptr<DescriptorSets> computeDescriptorSet;
+	vk::DescriptorSetLayout computeDescriptorSetLayout;
 };

@@ -55,6 +55,7 @@ public:
 
 			picker.Update(*boundingBoxTree);
 			//camera.rotatePoint = picker.pickedPos;
+			vulkanContext.commandBufferDispatcher->PullFences();
 			vulkanContext.DrawFrame(objects, camera);
 		}
 	}

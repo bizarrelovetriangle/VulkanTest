@@ -1,0 +1,25 @@
+#version 450
+
+struct Particle
+{
+	vec3 pos;
+	bool flag;
+};
+
+layout(binding = 0) buffer ParticlesUniform
+{
+	Particle particles[];
+} Particles;
+
+layout(binding = 1) uniform FluidUniform
+{
+	int particlesCount;
+} Fluid;
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+void main() 
+{
+    uint index = gl_GlobalInvocationID.x;
+    Particles.particles[index].pos.z += 0.001;
+}

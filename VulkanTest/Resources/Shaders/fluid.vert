@@ -38,6 +38,7 @@ void main()
 	mat4 modelToWorld = mat4(1.);
 	int val = gl_InstanceIndex;
 	modelToWorld[3].xyz = Particles.particles[val].pos;
+	Particles.particles[val].pos.z += 0.00001;
 
 	mat4 modelToView = Common.worldToView * modelToWorld;
 	vec3 viewPos = vec3(modelToView * vec4(pos, 1.));

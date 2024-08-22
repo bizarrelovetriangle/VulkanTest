@@ -14,26 +14,17 @@ CommandBuffer::CommandBuffer(VulkanContext& vulkanContext,
 	std::shared_ptr<RenderPass> renderPass)
 	: vulkanContext(vulkanContext), device(device), queueFamilies(queueFamilies), swapChain(swapChain), renderPass(renderPass)
 {
-	CreateCommandPool();
-	CreateCommandBuffer();
-}
-
-void CommandBuffer::Dispose()
-{
-	device.destroyCommandPool(commandPool);
-}
-
-void CommandBuffer::CreateCommandPool()
-{
 	vk::CommandPoolCreateInfo poolInfo(
 		vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
 		vulkanContext.queueFamilies->graphicQueueFamily);
 
 	commandPool = device.createCommandPool(poolInfo);
-}
 
-void CommandBuffer::CreateCommandBuffer()
-{
 	vk::CommandBufferAllocateInfo allocInfo(commandPool, vk::CommandBufferLevel::ePrimary, 1);
 	commandBuffer = device.allocateCommandBuffers(allocInfo).front();
+}
+
+void CommandBuffer::Dispose()
+{
+	device.destroyCommandPool(commandPool);
 }

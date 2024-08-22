@@ -17,10 +17,6 @@ public:
 		std::shared_ptr<RenderPass> renderPass);
 	void Dispose();
 
-private:
-	void CreateCommandPool();
-	void CreateCommandBuffer();
-
 public:
 	vk::CommandBuffer commandBuffer;
 	vk::CommandPool commandPool;

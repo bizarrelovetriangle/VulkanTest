@@ -26,9 +26,22 @@ QueueFamilies::QueueFamilies(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR&
 			[](auto& family) { return family.flags.contains(vk::QueueFlagBits::eTransfer); });
 	}
 
+	auto computeQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies), [&](auto& family)
+		{
+			auto pipelineQueue = family.index == graphicQueueFamily_->index || family.index == presentQueueFamily_->index;
+			return !pipelineQueue && family.flags.contains(vk::QueueFlagBits::eCompute);
+		});
+
+	if (computeQueueFamily_ == std::end(queueFamilies))
+	{
+		auto computeQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
+			[](auto& family) { return family.flags.contains(vk::QueueFlagBits::eCompute); });
+	}
+
 	graphicQueueFamily = graphicQueueFamily_->index;
 	presentQueueFamily = presentQueueFamily_->index;
 	transferQueueFamily = transferQueueFamily_->index;
+	computeQueueFamily = computeQueueFamily_->index;
 }
 
 void QueueFamilies::findQueueFamilies()
