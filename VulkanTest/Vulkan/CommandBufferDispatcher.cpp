@@ -22,11 +22,26 @@ void CommandBufferDispatcher::Dispose()
 
 		device.destroyCommandPool(commandStruct.commandPool);
 	}
+
+	for (auto& fence : freeFences)
+	{
+		device.destroyFence(fence);
+	}
+}
+
+void CommandBufferDispatcher::SubmitFence(vk::Fence fence, uint32_t queueFamily, vk::CommandBuffer commandBuffer)
+{
+	pendingCallbacks.emplace_back(fence, [this, fence, queueFamily, commandBuffer]()
+		{
+			auto& commandStruct = commandStructs.at(queueFamily);
+			commandStruct.commandBuffers.push_back(commandBuffer);
+			freeFences.push_back(fence);
+		});
 }
 
 void CommandBufferDispatcher::SubmitFence(vk::Fence fence, std::function<void()> callback)
 {
-	pendingCallbacks.emplace_back(fence, callback);
+	pendingCallbacks.emplace_back(fence, std::move(callback));
 }
 
 void CommandBufferDispatcher::PullFences()
@@ -37,12 +52,9 @@ void CommandBufferDispatcher::PullFences()
 	{
 		auto& [fence, callback] = *it;
 
-		// We can add the same fence two times and it will be allright
-		if (!fence || device.getFenceStatus(fence) == vk::Result::eSuccess)
+		if (device.getFenceStatus(fence) == vk::Result::eSuccess)
 		{
 			callback();
-			if (fence)
-				device.destroyFence(fence);
 			it = pendingCallbacks.erase(it);
 		}
 		else {
@@ -51,17 +63,27 @@ void CommandBufferDispatcher::PullFences()
 	}
 }
 
-void CommandBufferDispatcher::Invoke(uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> command)
+vk::Fence CommandBufferDispatcher::GetFence()
 {
-	auto device = vulkanContext.deviceController->device;
-	auto fence = InvokeSync(queueFamily, command);
-	auto _ = device.waitForFences(fence, true, UINT64_MAX);
+	vk::Fence fence;
+
+	if (!freeFences.empty())
+	{
+		fence = freeFences.back();
+		freeFences.pop_back();
+	}
+	else
+	{
+		vk::FenceCreateInfo fenceInfo;
+		fence = vulkanContext.deviceController->device.createFence(fenceInfo);
+	}
+
+	vulkanContext.deviceController->device.resetFences(fence);
+
+	return fence;
 }
 
-vk::Fence CommandBufferDispatcher::InvokeSync(
-	uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> command,
-	const std::vector<vk::Semaphore>& waitSemaphores, const std::vector<vk::PipelineStageFlags>& waitDstStageMask,
-	const std::vector<vk::Semaphore>& signalSemaphores)
+vk::CommandBuffer CommandBufferDispatcher::GetCommandBuffer(uint32_t queueFamily)
 {
 	auto device = vulkanContext.deviceController->device;
 
@@ -70,9 +92,8 @@ vk::Fence CommandBufferDispatcher::InvokeSync(
 		it.first->second.commandPool = device.createCommandPool(commandPoolInfo);
 	}
 
-	vk::CommandBuffer commandBuffer;
-
 	auto& commandStruct = commandStructs.at(queueFamily);
+	vk::CommandBuffer commandBuffer;
 
 	if (!commandStruct.commandBuffers.empty())
 	{
@@ -86,18 +107,38 @@ vk::Fence CommandBufferDispatcher::InvokeSync(
 	}
 
 	commandBuffer.reset();
+	return commandBuffer;
+}
+
+void CommandBufferDispatcher::Invoke(uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> command)
+{
+	auto commandBuffer = GetCommandBuffer(queueFamily);
+	auto fence = GetFence();
+
+	InvokeSync(queueFamily, command, commandBuffer, fence);
+	auto device = vulkanContext.deviceController->device;
+
+	auto _ = device.waitForFences(fence, true, UINT64_MAX);
+	freeFences.push_back(fence);
+	auto& commandStruct = commandStructs.at(queueFamily);
+	commandStruct.commandBuffers.push_back(commandBuffer);
+}
+
+void CommandBufferDispatcher::InvokeSync(
+	uint32_t queueFamily, std::function<void(vk::CommandBuffer&)> command,
+	vk::CommandBuffer& commandBuffer, vk::Fence& fence,
+	const std::vector<vk::Semaphore>& waitSemaphores, const std::vector<vk::PipelineStageFlags>& waitDstStageMask,
+	const std::vector<vk::Semaphore>& signalSemaphores)
+{
+	auto device = vulkanContext.deviceController->device;
+
 	vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 	commandBuffer.begin(beginInfo);
 	command(commandBuffer);
 	commandBuffer.end();
 
-	vk::FenceCreateInfo fenceInfo;
-	auto fence = device.createFence(fenceInfo);
 	vk::SubmitInfo submitInfo(waitSemaphores, waitDstStageMask, commandBuffer, signalSemaphores);
 	auto& queue = vulkanContext.queueFamilies->queueMap.at(queueFamily);
 	queue.submit(submitInfo, fence);
-
-	SubmitFence(fence, [&commandStruct, commandBuffer]() { commandStruct.commandBuffers.push_back(commandBuffer); });
-
-	return fence;
 }
+

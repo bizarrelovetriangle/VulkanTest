@@ -21,9 +21,6 @@
     <ClCompile Include="Vulkan\ValidationLayersInfo.h">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vulkan\CommandBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Vulkan\DeviceController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,9 +138,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\RenderPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vulkan\CommandBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\Data\BufferData.h">

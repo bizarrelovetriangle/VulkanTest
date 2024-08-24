@@ -21,8 +21,8 @@
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/SwapChain.h"
 #include "Vulkan/RenderPass.h"
-#include "Vulkan/CommandBuffer.h"
 #include "Utils/GLTFReader.h"
+
 #include "Vulkan/CommandBufferDispatcher.h"
 #include "Objects/Interfaces/Object.h"
 #include "Renderers/Interfaces/Renderer.h"
@@ -60,8 +60,6 @@ void VulkanContext::Init(GLFWwindow* window)
     swapChain = std::make_shared<SwapChain>(*this);
     renderPass = std::make_shared<RenderPass>(deviceController->device, swapChain->swapChainImageFormat);
     swapChain->CreateFramebuffers(renderPass->renderPass);
-    commandBuffer = std::make_shared<CommandBuffer>(*this, deviceController->device,
-        queueFamilies, swapChain, renderPass);
 
     vk::SemaphoreCreateInfo semaphoreInfo{};
     computeCompleteSemaphore = deviceController->device.createSemaphore(semaphoreInfo);
@@ -70,9 +68,8 @@ void VulkanContext::Init(GLFWwindow* window)
     vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
     inFlightFence = deviceController->device.createFence(fenceInfo);
 
-    std::span<CommonUniform> commonUniformSpan(&commonUniform, &commonUniform + 1);
-    commonUniformBuffer = BufferData::Create<CommonUniform>(
-        *this, commonUniformSpan, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+    commonUniformBuffer = BufferData::Create(*this, commonUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eUniformBuffer);
+    renderCommandBuffer = commandBufferDispatcher->GetCommandBuffer(queueFamilies->graphicQueueFamily);
 }
 
 VulkanContext::VulkanContext() = default;
@@ -81,45 +78,60 @@ VulkanContext::~VulkanContext() = default;
 
 void VulkanContext::DrawFrame(std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
 {
-    deviceController->device.waitForFences(inFlightFence, VK_TRUE, UINT64_MAX);
+    auto _ = deviceController->device.waitForFences(inFlightFence, VK_TRUE, UINT64_MAX);
     deviceController->device.resetFences(inFlightFence);
+
+    commonUniform.worldToView = camera.worldToView;
+    commonUniform.viewToProj = camera.viewToProj;
+    commonUniformBuffer->FlushData(commonUniform);
 
     uint32_t imageIndex = deviceController->device.acquireNextImageKHR(swapChain->swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE).value;
 
-    commandBufferDispatcher->InvokeSync(queueFamilies->computeQueueFamily, [&](vk::CommandBuffer& cb)
+    {
+        auto commandBuffer = commandBufferDispatcher->GetCommandBuffer(queueFamilies->computeQueueFamily);
+        auto fence = commandBufferDispatcher->GetFence();
+
+        vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        commandBuffer.begin(beginInfo);
+
+        for (auto& object : objects)
         {
-            for (auto& object : objects)
+            if (auto fluidObject = std::dynamic_pointer_cast<FluidObject>(object))
             {
-                if (auto fluidObject = std::dynamic_pointer_cast<FluidObject>(object))
-                {
-                    fluidObject->Run(cb, imageIndex);
-                }
+                fluidObject->Run(commandBuffer, imageIndex);
             }
-        }, {}, {}, { computeCompleteSemaphore });
+        }
 
-    RecordCommandBuffer(imageIndex, objects, camera);
+        commandBuffer.end();
 
-    vk::Semaphore waitSemaphores[] = { imageAvailableSemaphore, computeCompleteSemaphore };
-    vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eComputeShader };
-    vk::SubmitInfo submitInfo(waitSemaphores, waitStages, commandBuffer->commandBuffer, renderFinishedSemaphore);
-    queueFamilies->queueMap.at(queueFamilies->graphicQueueFamily).submit(submitInfo, inFlightFence);
+        vk::SubmitInfo submitInfo({}, {}, commandBuffer, computeCompleteSemaphore);
+        auto& queue = queueFamilies->queueMap.at(queueFamilies->computeQueueFamily);
+        queue.submit(submitInfo, fence);
+        commandBufferDispatcher->SubmitFence(fence, queueFamilies->computeQueueFamily, commandBuffer);
+    }
+
+    auto waitSemaphores = std::vector{ imageAvailableSemaphore, computeCompleteSemaphore };
+    auto waitStages = std::vector<vk::PipelineStageFlags>
+        { vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::PipelineStageFlagBits::eComputeShader };
+
+    {
+        vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
+        renderCommandBuffer.begin(beginInfo);
+        RecordCommandBuffer(imageIndex, renderCommandBuffer, objects, camera);
+        renderCommandBuffer.end();
+
+        vk::SubmitInfo submitInfo(waitSemaphores, waitStages, renderCommandBuffer, renderFinishedSemaphore);
+        auto& queue = queueFamilies->queueMap.at(queueFamilies->graphicQueueFamily);
+        queue.submit(submitInfo, inFlightFence);
+    }
 
     vk::PresentInfoKHR presentInfo(renderFinishedSemaphore, swapChain->swapChain, imageIndex);
-    auto _ = queueFamilies->queueMap.at(queueFamilies->presentQueueFamily).presentKHR(presentInfo);
+    _ = queueFamilies->queueMap.at(queueFamilies->presentQueueFamily).presentKHR(presentInfo);
 }
 
-void VulkanContext::RecordCommandBuffer(size_t imageIndex,
+void VulkanContext::RecordCommandBuffer(size_t imageIndex, vk::CommandBuffer& commandBuffer,
     const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera)
 {
-    commonUniform.worldToView = camera.worldToView;
-    commonUniform.viewToProj = camera.viewToProj;
-    std::span<CommonUniform> commonUniformSpan(&commonUniform, &commonUniform + 1);
-    commonUniformBuffer->FlushData(commonUniformSpan);
-
-    commandBuffer->commandBuffer.reset();
-    vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-    commandBuffer->commandBuffer.begin(beginInfo);
-
     vk::Rect2D renderArea({ 0, 0 }, swapChain->swapChainExtent);
 
     vk::ClearColorValue clearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
@@ -130,14 +142,14 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
         renderPass->renderPass, swapChain->swapChainFramebuffers[imageIndex],
         renderArea, clearColor);
 
-    commandBuffer->commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+    commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 
     auto viewport = swapChain->CreateViewport();
     auto scissors = swapChain->CreateScissors();
-    commandBuffer->commandBuffer.setViewport(0, 1, &viewport);
-    commandBuffer->commandBuffer.setScissor(0, 1, &scissors);
+    commandBuffer.setViewport(0, 1, &viewport);
+    commandBuffer.setScissor(0, 1, &scissors);
 
-    RenderVisitor renderVisitor(*this, *commandBuffer, imageIndex);
+    RenderVisitor renderVisitor(*this, commandBuffer, imageIndex);
 
     for (auto& object : objects)
     {
@@ -146,8 +158,7 @@ void VulkanContext::RecordCommandBuffer(size_t imageIndex,
         }
     }
 
-    commandBuffer->commandBuffer.endRenderPass();
-    commandBuffer->commandBuffer.end();
+    commandBuffer.endRenderPass();
 }
 
 void VulkanContext::Await()
@@ -161,7 +172,6 @@ void VulkanContext::Dispose()
 
     swapChain->Dispose();
     commandBufferDispatcher->Dispose();
-    commandBuffer->Dispose();
     renderPass->Dispose();
 
     deviceController->device.destroySemaphore(imageAvailableSemaphore);

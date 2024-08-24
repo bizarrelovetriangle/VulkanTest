@@ -180,7 +180,6 @@
     <ClCompile Include="Vulkan\Data\ImageData.cpp" />
     <ClCompile Include="Renderers\Interfaces\Renderer.cpp" />
     <ClCompile Include="RenderVisitor.cpp" />
-    <ClCompile Include="Vulkan\CommandBuffer.cpp" />
     <ClCompile Include="Vulkan\DeviceController.cpp" />
     <ClCompile Include="Vulkan\Pipeline.cpp" />
     <ClCompile Include="Vulkan\QueueFamilies.cpp" />
@@ -235,7 +234,6 @@
     <ClInclude Include="Dependencies\tiny_gltf\stb_image.h" />
     <ClInclude Include="Dependencies\tiny_gltf\stb_image_write.h" />
     <ClInclude Include="Dependencies\tiny_gltf\tiny_gltf.h" />
-    <ClInclude Include="Vulkan\CommandBuffer.h" />
     <ClInclude Include="Vulkan\DeviceController.h" />
     <ClInclude Include="Vulkan\Data\BufferData.h" />
     <ClInclude Include="Vulkan\Pipeline.h" />

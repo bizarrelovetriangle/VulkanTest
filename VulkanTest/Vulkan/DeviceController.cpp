@@ -14,7 +14,8 @@ DeviceController::DeviceController(vk::Instance& instance, ValidationLayersInfo&
 void DeviceController::createDevice(QueueFamilies& queueFamilies, std::vector<uint32_t> queueFamilyIndexes)
 {
 	std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-	queueFamilyIndexes.erase(std::unique(std::begin(queueFamilyIndexes), std::end(queueFamilyIndexes)), std::end(queueFamilyIndexes));
+	auto it = std::unique(std::begin(queueFamilyIndexes), std::end(queueFamilyIndexes));
+	queueFamilyIndexes.erase(it, std::end(queueFamilyIndexes));
 
 	for (auto index : queueFamilyIndexes) {
 		float queuePriority[] = { 1.0f };

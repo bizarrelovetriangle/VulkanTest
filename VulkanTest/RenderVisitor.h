@@ -1,5 +1,8 @@
 #pragma once
-class CommandBuffer;
+namespace vk
+{
+	class CommandBuffer;
+}
 class Renderer;
 class ColoredRenderer;
 class TexturedRenderer;
@@ -13,7 +16,7 @@ class Camera;
 class RenderVisitor
 {
 public:
-	RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex);
+	RenderVisitor(VulkanContext& vulkanContext, vk::CommandBuffer& commandBuffer, size_t imageIndex);
 
 	void Visit(Renderer& renderer);
 	void Visit(VertexedRenderer& renderer);

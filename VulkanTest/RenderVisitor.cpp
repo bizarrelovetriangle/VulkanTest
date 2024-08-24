@@ -5,7 +5,6 @@
 #include "Renderers/Interfaces/VertexedRenderer.h"
 #include "Renderers/TexturedRenderer.h"
 #include "Objects/Primitives/PlaneObject.h"
-#include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Pipeline.h"
 #include "Vulkan/DescriptorSets.h"
 #include "Vulkan/SwapChain.h"
@@ -14,8 +13,8 @@
 #include "Camera.h"
 #include "Renderers/PlaneRenderer.h"
 
-RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, CommandBuffer& commandBuffer, size_t imageIndex)
-	: vulkanContext(vulkanContext), commandBuffer(commandBuffer.commandBuffer), imageIndex(imageIndex)
+RenderVisitor::RenderVisitor(VulkanContext& vulkanContext, vk::CommandBuffer& commandBuffer, size_t imageIndex)
+	: vulkanContext(vulkanContext), commandBuffer(commandBuffer), imageIndex(imageIndex)
 {
 }
 

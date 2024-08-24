@@ -4,7 +4,6 @@
 #include "../CAD/GeometryCreator.h"
 
 #include "../VulkanContext.h"
-#include "../Vulkan/CommandBuffer.h"
 #include "../Vulkan/Pipeline.h"
 #include "../Vulkan/DescriptorSets.h"
 #include "../Vulkan/Data/BufferData.h"
@@ -104,17 +103,17 @@ public:
 		fluidRenderer->UpdateTransformUniformBuffer();
 
 		auto& pipeline = *fluidRenderer->shared->pipeline;
-		vulkanContext.commandBuffer->commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphicsPipeline);
+		renderVisitor.commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.graphicsPipeline);
 
-		vulkanContext.commandBuffer->commandBuffer.bindDescriptorSets(
+		renderVisitor.commandBuffer.bindDescriptorSets(
 			vk::PipelineBindPoint::eGraphics, pipeline.pipelineLayout, 0,
 			fluidRenderer->descriptorSets->descriptorSets[renderVisitor.imageIndex], {});
 
 		vk::Buffer vertexBuffers[] = { fluidRenderer->vertexBuffer->buffer };
 		vk::DeviceSize vertexOffsets[] = { 0 };
-		vulkanContext.commandBuffer->commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
+		renderVisitor.commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
 
-		vulkanContext.commandBuffer->commandBuffer.draw(fluidRenderer->vertexBuffer->count, fluidUniform.particlesCount, 0, 0);
+		renderVisitor.commandBuffer.draw(fluidRenderer->vertexBuffer->count, fluidUniform.particlesCount, 0, 0);
 	}
 
 	virtual void Dispose() override

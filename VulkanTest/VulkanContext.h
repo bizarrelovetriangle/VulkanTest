@@ -32,11 +32,10 @@ public:
    VulkanContext();
     ~VulkanContext();
     void DrawFrame(std::vector<std::shared_ptr<Object>>& objects, const Camera& camera);
-    void RecordCommandBuffer(size_t imageIndex, const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera);
+    void RecordCommandBuffer(size_t imageIndex, vk::CommandBuffer& commandBuffer, const std::vector<std::shared_ptr<Object>>& objects, const Camera& camera);
     void Await();
     void Dispose();
 
-    std::shared_ptr<CommandBuffer> commandBuffer;
     std::shared_ptr<DeviceController> deviceController;
 
     GLFWwindow* window = nullptr;
@@ -55,4 +54,6 @@ private:
     vk::Semaphore imageAvailableSemaphore;
     vk::Semaphore renderFinishedSemaphore;
     vk::Fence inFlightFence;
+
+    vk::CommandBuffer renderCommandBuffer;
 };
