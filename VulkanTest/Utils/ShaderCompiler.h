@@ -7,15 +7,20 @@
 #include <unordered_map>
 #include <filesystem>
 
+namespace
+{
+	const std::string cDefaultEntryPoint = "main";
+};
+
 class ShaderCompiler
 {
 public:
 	static std::vector<uint32_t> CompileShader(
-		const std::filesystem::path& path, vk::ShaderStageFlagBits shaderStage, bool optimize = false)
+		const std::filesystem::path& path, vk::ShaderStageFlagBits shaderStage, bool optimize = false, const std::string& entryPoint = cDefaultEntryPoint)
 	{
 		const std::filesystem::path rootSpirevPath = std::filesystem::current_path() / "spirv";
 		std::string optimizeFlag = optimize ? ".spirv_opt" : ".spirv";
-		auto spirvPath = rootSpirevPath / (path.relative_path().string() + optimizeFlag);
+		auto spirvPath = rootSpirevPath / (path.relative_path().string() + "_" + entryPoint + "_" + optimizeFlag);
 		bool outdated = true;
 
 		if (std::filesystem::exists(spirvPath))
@@ -25,7 +30,7 @@ public:
 			if (codeLastModified < spirvLastModified) outdated = false;
 		}
 
-		if (outdated) UpdateSpirv(path, spirvPath, shaderStage, optimize);
+		if (outdated) UpdateSpirv(path, spirvPath, shaderStage, optimize, entryPoint);
 
 		std::string spirvCode = ReadFile(spirvPath);
 		auto spirvData = (uint32_t*)spirvCode.c_str();
@@ -34,12 +39,19 @@ public:
 
 private:
 	static void UpdateSpirv(const std::filesystem::path& path, const std::filesystem::path& spirvPath,
-		vk::ShaderStageFlagBits shaderStage, bool optimize = false)
+		vk::ShaderStageFlagBits shaderStage, bool optimize = false, const std::string& entryPoint = cDefaultEntryPoint)
 	{
 		std::filesystem::create_directories(spirvPath.parent_path());
 
 		std::string code = ReadFile(path);
 		auto fileName = path.filename();
+
+		{
+			std::string entryPointDeclaration = std::format("void {}()", entryPoint);
+			std::string mainDeclaration = "void main()";
+			auto pos = code.find(entryPointDeclaration);
+			code.replace(pos, entryPointDeclaration.length(), mainDeclaration);
+		}
 
 		shaderc::Compiler compiler;
 		shaderc::CompileOptions options;
@@ -49,7 +61,7 @@ private:
 		if (optimize) options.SetOptimizationLevel(shaderc_optimization_level_performance);
 
 		shaderc_shader_kind shaderKind = shaderKindMap[shaderStage];
-		auto module = compiler.CompileGlslToSpv(code, shaderKind, fileName.string().c_str(), options);
+		auto module = compiler.CompileGlslToSpv(code, shaderKind, fileName.string().c_str(), entryPoint.c_str(), options);
 
 		if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 		{
@@ -57,7 +69,7 @@ private:
 			throw std::exception();
 		}
 
-		std::cout << fileName << " - successfully recompilled" << std::endl;
+		std::cout << fileName << " - successfully recompiled" << std::endl;
 
 		WriteFile(spirvPath, std::vector<uint32_t>(module.cbegin(), module.cend()));
 	}

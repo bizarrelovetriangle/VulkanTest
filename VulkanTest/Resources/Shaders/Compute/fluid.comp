@@ -3,22 +3,121 @@
 struct Particle
 {
 	vec3 pos;
-	bool flag;
+	bool valid;
+	int gridCellIndex;
 };
 
-layout(binding = 0) buffer ParticlesUniform
+struct GridCell
+{
+	int count;
+	int offset;
+};
+
+layout(binding = 0) buffer FluidUniform
+{
+	int particlesCount;
+	float gridCellSize;
+	ivec3 gridDimentions;
+	vec3 gridSize;
+} Fluid;
+
+layout(binding = 1) buffer ParticlesStorage
 {
 	Particle particles[];
 } Particles;
 
-layout(binding = 1) uniform FluidUniform
+layout(binding = 2) buffer ParticlesStorageCopy
 {
-	int particlesCount;
-} Fluid;
+	Particle particles[];
+} ParticlesCopy;
+
+layout(binding = 3) buffer GridStorage
+{
+	GridCell cells[];
+} Grid;
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-void main() 
+bool gridPosValidation(ivec3 particleGridPos, ivec3 gridDimention)
+{
+	if (particleGridPos.x < 0 || particleGridPos.x > gridDimention.x)
+	{
+		return false;
+	}
+	if (particleGridPos.y < 0 || particleGridPos.y > gridDimention.y)
+	{
+		return false;
+	}
+	if (particleGridPos.z < 0 || particleGridPos.z > gridDimention.z)
+	{
+		return false;
+	}
+	return true;
+}
+
+void determineGridCells()
+{
+    uint index = gl_GlobalInvocationID.x;
+
+	if (!Particles.particles[index].valid)
+	{
+		return;
+	}
+
+	vec3 shiftFromCenter = Fluid.gridDimentions * Fluid.gridCellSize / 2;
+	ivec3 partGridPos = ivec3((Particles.particles[index].pos + shiftFromCenter) / Fluid.gridCellSize);
+	
+	if (!gridPosValidation(partGridPos, Fluid.gridDimentions))
+	{
+		atomicAdd(Fluid.particlesCount, -1);
+		Particles.particles[index].valid = false;
+		return;
+	}
+	
+	int partGridIndex = partGridPos.x
+		+ partGridPos.y * Fluid.gridDimentions.x
+		+ partGridPos.z * Fluid.gridDimentions.x * Fluid.gridDimentions.y;
+	
+	Particles.particles[index].gridCellIndex = partGridIndex;
+	atomicAdd(Grid.cells[partGridIndex].count, 1);
+}
+
+void countGridCellsOffset()
+{
+	int currentOffset = 0;
+	for (int z = 0; z < Fluid.gridDimentions.z; ++z)
+	{
+		for (int y = 0; y < Fluid.gridDimentions.y; ++y)
+		{
+			for (int x = 0; x < Fluid.gridDimentions.x; ++x)
+			{
+				int gridIndex = x
+					+ y * Fluid.gridDimentions.x
+					+ z * Fluid.gridDimentions.x * Fluid.gridDimentions.y;
+				Grid.cells[gridIndex].offset = currentOffset;
+				currentOffset += Grid.cells[gridIndex].count;
+			}
+		}
+	}
+}
+
+void distributeByCells()
+{
+    uint index = gl_GlobalInvocationID.x;
+
+	if (!Particles.particles[index].valid)
+	{
+		return;
+	}
+
+	int gridCellIndex = Particles.particles[index].gridCellIndex;
+	int newParticleIndex = atomicAdd(Grid.cells[gridCellIndex].offset, 1);
+
+	//ParticlesCopy.particles[newParticleIndex] = Particles.particles[index];
+	ParticlesCopy.particles[index] = Particles.particles[index];
+}
+
+void moveParticles()
 {
     uint index = gl_GlobalInvocationID.x;
     Particles.particles[index].pos.z += 0.001;

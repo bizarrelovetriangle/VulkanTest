@@ -20,17 +20,21 @@ layout(binding = 1) uniform TransformUniform
 struct Particle
 {
 	vec3 pos;
-	bool flag;
+	bool valid;
+	int gridCellIndex;
 };
 
-layout(binding = 3) buffer ParticlesUniform
+layout(binding = 3) readonly buffer ParticlesUniform
 {
 	Particle particles[];
 } Particles;
 
-layout(binding = 4) uniform FluidUniform
+layout(binding = 4) readonly buffer FluidUniform
 {
 	int particlesCount;
+	float gridCellSize;
+	ivec3 gridDimentions;
+	vec3 gridSize;
 } Fluid;
 
 void main()
@@ -38,7 +42,6 @@ void main()
 	mat4 modelToWorld = mat4(1.);
 	int val = gl_InstanceIndex;
 	modelToWorld[3].xyz = Particles.particles[val].pos;
-	Particles.particles[val].pos.z += 0.00001;
 
 	mat4 modelToView = Common.worldToView * modelToWorld;
 	vec3 viewPos = vec3(modelToView * vec4(pos, 1.));
