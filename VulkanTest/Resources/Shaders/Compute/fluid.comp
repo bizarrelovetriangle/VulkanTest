@@ -40,15 +40,15 @@ layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 bool gridPosValidation(ivec3 particleGridPos, ivec3 gridDimention)
 {
-	if (particleGridPos.x < 0 || particleGridPos.x > gridDimention.x)
+	if (particleGridPos.x < 0 || particleGridPos.x >= gridDimention.x)
 	{
 		return false;
 	}
-	if (particleGridPos.y < 0 || particleGridPos.y > gridDimention.y)
+	if (particleGridPos.y < 0 || particleGridPos.y >= gridDimention.y)
 	{
 		return false;
 	}
-	if (particleGridPos.z < 0 || particleGridPos.z > gridDimention.z)
+	if (particleGridPos.z < 0 || particleGridPos.z >= gridDimention.z)
 	{
 		return false;
 	}
@@ -65,7 +65,8 @@ void determineGridCells()
 	}
 
 	vec3 shiftFromCenter = Fluid.gridDimentions * Fluid.gridCellSize / 2;
-	ivec3 partGridPos = ivec3((Particles.particles[index].pos + shiftFromCenter) / Fluid.gridCellSize);
+	vec3 particlePosInGrid = (ParticlesCopy.particles[index].pos + shiftFromCenter) / Fluid.gridCellSize;
+	ivec3 partGridPos = ivec3(floor(particlePosInGrid));
 	
 	if (!gridPosValidation(partGridPos, Fluid.gridDimentions))
 	{
@@ -114,11 +115,21 @@ void distributeByCells()
 	int newParticleIndex = atomicAdd(Grid.cells[gridCellIndex].offset, 1);
 
 	//ParticlesCopy.particles[newParticleIndex] = Particles.particles[index];
-	ParticlesCopy.particles[index] = Particles.particles[index];
+	//ParticlesCopy.particles[index] = Particles.particles[index];
 }
 
 void moveParticles()
 {
     uint index = gl_GlobalInvocationID.x;
-    Particles.particles[index].pos.z += 0.001;
+	
+	vec3 shiftFromCenter = Fluid.gridDimentions * Fluid.gridCellSize / 2;
+	vec3 particlePosInGrid = (ParticlesCopy.particles[index].pos + shiftFromCenter) / Fluid.gridCellSize;
+	ivec3 partGridPos = ivec3(floor(particlePosInGrid));
+
+	if (!gridPosValidation(partGridPos, Fluid.gridDimentions))
+	{
+		return;
+	}
+
+    ParticlesCopy.particles[index].pos.z -= 0.002;
 }

@@ -2,6 +2,7 @@
 #include "Interfaces/Object.h"
 #include "../Renderers/SimpleVertexedRenderer.h"
 #include "../CAD/GeometryCreator.h"
+#include "Primitives/BoundingBoxObject.h"
 
 #include "../VulkanContext.h"
 #include "../Vulkan/Pipeline.h"
@@ -128,7 +129,7 @@ public:
 
 		fluidUniform.particlesCount = particles.size();
 		fluidUniform.gridCellSize = 0.5;
-		fluidUniform.gridDimention = { 100, 100, 100 };
+		fluidUniform.gridDimention = { 10, 10, 10 };
 
 		fluidUniform.gridSize = fluidUniform.gridDimention * fluidUniform.gridCellSize;
 
@@ -146,10 +147,15 @@ public:
 		auto icosphere = GeometryCreator::CreateIcosphere(0.2, 1);
 		auto fluidRenderer = std::make_unique<FluidRenderer>(vulkanContext);
 		fluidRenderer->UpdateVertexBuffer(*icosphere);
-		fluidRenderer->descriptorSets->UpdateStorageDescriptor(*particlesStorageBuffer, 3);
+		fluidRenderer->descriptorSets->UpdateStorageDescriptor(*particlesStorageBufferCopy, 3);
 		fluidRenderer->descriptorSets->UpdateStorageDescriptor(*fluidUniformBuffer, 4);
 
 		renderer = std::move(fluidRenderer);
+
+		auto bb = BoundingBox();
+		bb.aa = -Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
+		bb.bb = Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
+		bbObject = std::make_unique<BoundingBoxObject>(vulkanContext, bb);
 
 		determineGridCellsProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "determineGridCells",
@@ -175,6 +181,8 @@ public:
 
 	virtual void Render(RenderVisitor& renderVisitor) override
 	{
+		bbObject->Render(renderVisitor);
+
 		auto fluidRenderer = (FluidRenderer*)renderer.get();
 
 		fluidRenderer->transformUniform.modelToWorld = ComposeMatrix();
@@ -201,6 +209,8 @@ public:
 		particlesStorageBufferCopy->Dispose();
 		gridStorageBuffer->Dispose();
 
+		bbObject->Dispose();
+
 		determineGridCellsProgram->Dispose();
 		countGridCellsOffsetProgram->Dispose();
 		distributeByCellsProgram->Dispose();
@@ -213,6 +223,8 @@ public:
 
 	std::vector<Particle> particles;
 	FluidUniform fluidUniform;
+
+	std::unique_ptr<BoundingBoxObject> bbObject;
 
 	std::unique_ptr<BufferData> fluidUniformBuffer;
 	std::unique_ptr<BufferData> particlesStorageBuffer;
