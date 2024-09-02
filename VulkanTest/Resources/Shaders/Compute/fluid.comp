@@ -38,21 +38,43 @@ layout(binding = 3) buffer GridStorage
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-bool gridPosValidation(ivec3 particleGridPos, ivec3 gridDimention)
+ivec3 particleGridPos(vec3 pos)
 {
-	if (particleGridPos.x < 0 || particleGridPos.x >= gridDimention.x)
+	vec3 shiftFromCenter = Fluid.gridDimentions * Fluid.gridCellSize / 2;
+	vec3 particlePosInGrid = (pos + shiftFromCenter) / Fluid.gridCellSize;
+	ivec3 partGridPos = ivec3(floor(particlePosInGrid));
+	return partGridPos;
+}
+
+int particleGridIndex(ivec3 partGridPos)
+{
+	int partGridIndex = partGridPos.x
+		+ partGridPos.y * Fluid.gridDimentions.x
+		+ partGridPos.z * Fluid.gridDimentions.x * Fluid.gridDimentions.y;
+	return partGridIndex;
+}
+
+bool gridPosValidation(ivec3 particleGridPos)
+{
+	if (particleGridPos.x < 0 || particleGridPos.x >= Fluid.gridDimentions.x)
 	{
 		return false;
 	}
-	if (particleGridPos.y < 0 || particleGridPos.y >= gridDimention.y)
+	if (particleGridPos.y < 0 || particleGridPos.y >= Fluid.gridDimentions.y)
 	{
 		return false;
 	}
-	if (particleGridPos.z < 0 || particleGridPos.z >= gridDimention.z)
+	if (particleGridPos.z < 0 || particleGridPos.z >= Fluid.gridDimentions.z)
 	{
 		return false;
 	}
 	return true;
+}
+
+void clearGrid()
+{
+    uint index = gl_GlobalInvocationID.x;
+	Grid.cells[index].count = 0;
 }
 
 void determineGridCells()
@@ -64,23 +86,13 @@ void determineGridCells()
 		return;
 	}
 
-	vec3 shiftFromCenter = Fluid.gridDimentions * Fluid.gridCellSize / 2;
-	vec3 particlePosInGrid = (ParticlesCopy.particles[index].pos + shiftFromCenter) / Fluid.gridCellSize;
-	ivec3 partGridPos = ivec3(floor(particlePosInGrid));
+	ivec3 partGridPos = particleGridPos(Particles.particles[index].pos);
 	
-	if (!gridPosValidation(partGridPos, Fluid.gridDimentions))
+	if (gridPosValidation(partGridPos))
 	{
-		atomicAdd(Fluid.particlesCount, -1);
-		Particles.particles[index].valid = false;
-		return;
+		int partGridIndex = particleGridIndex(partGridPos);
+		atomicAdd(Grid.cells[partGridIndex].count, 1);
 	}
-	
-	int partGridIndex = partGridPos.x
-		+ partGridPos.y * Fluid.gridDimentions.x
-		+ partGridPos.z * Fluid.gridDimentions.x * Fluid.gridDimentions.y;
-	
-	Particles.particles[index].gridCellIndex = partGridIndex;
-	atomicAdd(Grid.cells[partGridIndex].count, 1);
 }
 
 void countGridCellsOffset()
@@ -106,30 +118,40 @@ void distributeByCells()
 {
     uint index = gl_GlobalInvocationID.x;
 
-	if (!Particles.particles[index].valid)
+	if (!ParticlesCopy.particles[index].valid)
 	{
 		return;
 	}
 
-	int gridCellIndex = Particles.particles[index].gridCellIndex;
+	int gridCellIndex = ParticlesCopy.particles[index].gridCellIndex;
 	int newParticleIndex = atomicAdd(Grid.cells[gridCellIndex].offset, 1);
 
 	//ParticlesCopy.particles[newParticleIndex] = Particles.particles[index];
 	//ParticlesCopy.particles[index] = Particles.particles[index];
+
+	ivec3 partGridPos = particleGridPos(ParticlesCopy.particles[index].pos);
+
+	if (!gridPosValidation(partGridPos))
+	{
+		atomicAdd(Fluid.particlesCount, -1);
+		ParticlesCopy.particles[index].valid = false;
+	}
+
+	int partGridIndex = particleGridIndex(partGridPos);
+	
+	ParticlesCopy.particles[index].gridCellIndex = partGridIndex;
 }
 
 void moveParticles()
 {
     uint index = gl_GlobalInvocationID.x;
 	
-	vec3 shiftFromCenter = Fluid.gridDimentions * Fluid.gridCellSize / 2;
-	vec3 particlePosInGrid = (ParticlesCopy.particles[index].pos + shiftFromCenter) / Fluid.gridCellSize;
-	ivec3 partGridPos = ivec3(floor(particlePosInGrid));
+	ivec3 partGridPos = particleGridPos(ParticlesCopy.particles[index].pos);
 
-	if (!gridPosValidation(partGridPos, Fluid.gridDimentions))
+	if (!ParticlesCopy.particles[index].valid)
 	{
 		return;
 	}
 
-    ParticlesCopy.particles[index].pos.z -= 0.002;
+    ParticlesCopy.particles[index].pos.z += 0.002;
 }

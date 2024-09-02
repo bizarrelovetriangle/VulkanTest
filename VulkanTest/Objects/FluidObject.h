@@ -157,6 +157,9 @@ public:
 		bb.bb = Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
 		bbObject = std::make_unique<BoundingBoxObject>(vulkanContext, bb);
 
+		clearGridProgram = std::make_unique<ComputeProgram>(vulkanContext,
+			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "clearGrid",
+			fluidUniform, fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer);
 		determineGridCellsProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "determineGridCells",
 			fluidUniform, fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer);
@@ -173,9 +176,10 @@ public:
 
 	void Run(vk::CommandBuffer& cb, int imageIndex)
 	{
-		//determineGridCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
-		//countGridCellsOffsetProgram->Run(cb, imageIndex, 1);
-		//distributeByCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
+		clearGridProgram->Run(cb, imageIndex, fluidUniform.gridDimention.x * fluidUniform.gridDimention.y * fluidUniform.gridDimention.z);
+		determineGridCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
+		countGridCellsOffsetProgram->Run(cb, imageIndex, 1);
+		distributeByCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
 		moveParticlesProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
 	}
 
@@ -211,6 +215,7 @@ public:
 
 		bbObject->Dispose();
 
+		clearGridProgram->Dispose();
 		determineGridCellsProgram->Dispose();
 		countGridCellsOffsetProgram->Dispose();
 		distributeByCellsProgram->Dispose();
@@ -231,6 +236,7 @@ public:
 	std::unique_ptr<BufferData> particlesStorageBufferCopy;
 	std::unique_ptr<BufferData> gridStorageBuffer;
 
+	std::unique_ptr<ComputeProgram> clearGridProgram;
 	std::unique_ptr<ComputeProgram> determineGridCellsProgram;
 	std::unique_ptr<ComputeProgram> countGridCellsOffsetProgram;
 	std::unique_ptr<ComputeProgram> distributeByCellsProgram;
