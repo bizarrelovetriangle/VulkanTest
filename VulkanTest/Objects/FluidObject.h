@@ -11,6 +11,8 @@
 #include "../Renderers/FluidRenderer.h"
 #include "../Utils/ShaderCompiler.h"
 
+#undef MemoryBarrier;
+
 struct FluidUniform
 {
 	alignas(4) int particlesCount = 0;
@@ -138,9 +140,9 @@ public:
 		fluidUniformBuffer = BufferData::Create(
 			vulkanContext, fluidUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer);
 		particlesStorageBuffer = BufferData::Create(
-			vulkanContext, particles, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer);
+			vulkanContext, particles, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst);
 		particlesStorageBufferCopy = BufferData::Create(
-			vulkanContext, particles, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer);
+			vulkanContext, particles, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferSrc);
 		gridStorageBuffer = BufferData::Create(
 			vulkanContext, grid, MemoryType::DeviceLocal, vk::BufferUsageFlagBits::eStorageBuffer);
 
@@ -177,9 +179,51 @@ public:
 	void Run(vk::CommandBuffer& cb, int imageIndex)
 	{
 		clearGridProgram->Run(cb, imageIndex, fluidUniform.gridDimention.x * fluidUniform.gridDimention.y * fluidUniform.gridDimention.z);
+
+		{
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				gridStorageBuffer->buffer, 0, gridStorageBuffer->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
+
 		determineGridCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
+
+		{
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				gridStorageBuffer->buffer, 0, gridStorageBuffer->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
+
 		countGridCellsOffsetProgram->Run(cb, imageIndex, 1);
+
+		{
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				gridStorageBuffer->buffer, 0, gridStorageBuffer->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
+
+		vk::BufferCopy copyRegion(0, 0, particlesStorageBufferCopy->size);
+		cb.copyBuffer(particlesStorageBufferCopy->buffer, particlesStorageBuffer->buffer, copyRegion);
+
+		{
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				particlesStorageBuffer->buffer, 0, particlesStorageBuffer->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
+
 		distributeByCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
+
+		{
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				particlesStorageBufferCopy->buffer, 0, particlesStorageBufferCopy->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
+
 		moveParticlesProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
 	}
 

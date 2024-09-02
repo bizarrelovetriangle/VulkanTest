@@ -117,18 +117,8 @@ void countGridCellsOffset()
 void distributeByCells()
 {
     uint index = gl_GlobalInvocationID.x;
-
-	if (!ParticlesCopy.particles[index].valid)
-	{
-		return;
-	}
-
-	int gridCellIndex = ParticlesCopy.particles[index].gridCellIndex;
-	int newParticleIndex = atomicAdd(Grid.cells[gridCellIndex].offset, 1);
-
-	//ParticlesCopy.particles[newParticleIndex] = Particles.particles[index];
-	//ParticlesCopy.particles[index] = Particles.particles[index];
-
+	ParticlesCopy.particles[index] = Particles.particles[index];
+	
 	ivec3 partGridPos = particleGridPos(ParticlesCopy.particles[index].pos);
 
 	if (!gridPosValidation(partGridPos))
@@ -136,10 +126,6 @@ void distributeByCells()
 		atomicAdd(Fluid.particlesCount, -1);
 		ParticlesCopy.particles[index].valid = false;
 	}
-
-	int partGridIndex = particleGridIndex(partGridPos);
-	
-	ParticlesCopy.particles[index].gridCellIndex = partGridIndex;
 }
 
 void moveParticles()
