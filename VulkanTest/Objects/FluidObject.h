@@ -16,7 +16,6 @@
 struct FluidUniform
 {
 	alignas(4) int particlesCount = 0;
-
 	alignas(4) float gridCellSize = 0;
 	alignas(16) Vector3i gridDimention = {};
 	alignas(16) Vector3f gridSize = {};
@@ -35,16 +34,25 @@ struct GridCell
 	alignas(4) int offset = 0;
 };
 
+struct IndirectDispatch
+{
+	alignas(16) vk::DispatchIndirectCommand particlesCountDispatch{};
+	alignas(16) vk::DrawIndirectCommand particlesCountDraw{};
+};
+
 class ComputeProgram
 {
 public:
 	ComputeProgram(VulkanContext& vulkanContext, const std::string& shaderPath, const std::string& entryPoint,
-		FluidUniform& fluidUniform,
+		FluidUniform& fluidUniform, IndirectDispatch& indirectDispatch,
 		std::unique_ptr<BufferData>& fluidUniformBuffer, std::unique_ptr<BufferData>& particlesStorageBuffer,
-		std::unique_ptr<BufferData>& particlesStorageBufferCopy, std::unique_ptr<BufferData>& gridStorageBuffer)
+		std::unique_ptr<BufferData>& particlesStorageBufferCopy, std::unique_ptr<BufferData>& gridStorageBuffer,
+		std::unique_ptr<BufferData>& indirectDispatchBuffer)
 		: vulkanContext(vulkanContext),
-		fluidUniform(fluidUniform), fluidUniformBuffer(fluidUniformBuffer), particlesStorageBuffer(particlesStorageBuffer),
-		particlesStorageBufferCopy(particlesStorageBufferCopy), gridStorageBuffer(gridStorageBuffer)
+		fluidUniform(fluidUniform), indirectDispatch(indirectDispatch),
+		fluidUniformBuffer(fluidUniformBuffer), particlesStorageBuffer(particlesStorageBuffer),
+		particlesStorageBufferCopy(particlesStorageBufferCopy), gridStorageBuffer(gridStorageBuffer),
+		indirectDispatchBuffer(indirectDispatchBuffer)
 	{
 		auto& device = vulkanContext.deviceController->device;
 
@@ -77,11 +85,20 @@ public:
 		computeDescriptorSet->UpdateStorageDescriptor(*gridStorageBuffer, 3);
 	}
 
-	void Run(vk::CommandBuffer& cb, int imageIndex, int groupCountX)
+	void Run(vk::CommandBuffer& cb, int imageIndex, int groupCountX, bool particles = false)
 	{
 		cb.bindPipeline(vk::PipelineBindPoint::eCompute, computePipeline);
 		cb.bindDescriptorSets(vk::PipelineBindPoint::eCompute, computePipelineLayout, 0, computeDescriptorSet->descriptorSets[imageIndex], {});
-		cb.dispatch(groupCountX, 1, 1);
+
+		if (particles)
+		{
+			size_t offset = (std::size_t)&indirectDispatch.particlesCountDispatch - (std::size_t)&indirectDispatch;
+			cb.dispatchIndirect(indirectDispatchBuffer->buffer, offset);
+		}
+		else
+		{
+			cb.dispatch(groupCountX, 1, 1);
+		}
 	}
 
 	void Dispose()
@@ -103,6 +120,8 @@ public:
 	vk::DescriptorSetLayout computeDescriptorSetLayout;
 
 	FluidUniform& fluidUniform;
+	IndirectDispatch& indirectDispatch;
+	std::unique_ptr<BufferData>& indirectDispatchBuffer;
 	std::unique_ptr<BufferData>& fluidUniformBuffer;
 	std::unique_ptr<BufferData>& particlesStorageBuffer;
 	std::unique_ptr<BufferData>& particlesStorageBufferCopy;
@@ -132,13 +151,12 @@ public:
 		fluidUniform.particlesCount = particles.size();
 		fluidUniform.gridCellSize = 0.5;
 		fluidUniform.gridDimention = { 10, 10, 10 };
-
 		fluidUniform.gridSize = fluidUniform.gridDimention * fluidUniform.gridCellSize;
 
 		auto grid = std::vector<GridCell>(fluidUniform.gridDimention.x * fluidUniform.gridDimention.y * fluidUniform.gridDimention.z);
 
 		fluidUniformBuffer = BufferData::Create(
-			vulkanContext, fluidUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer);
+			vulkanContext, fluidUniform, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferSrc);
 		particlesStorageBuffer = BufferData::Create(
 			vulkanContext, particles, MemoryType::Universal, vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst);
 		particlesStorageBufferCopy = BufferData::Create(
@@ -152,6 +170,13 @@ public:
 		fluidRenderer->descriptorSets->UpdateStorageDescriptor(*particlesStorageBufferCopy, 3);
 		fluidRenderer->descriptorSets->UpdateStorageDescriptor(*fluidUniformBuffer, 4);
 
+		indirectDispatch.particlesCountDispatch = vk::DispatchIndirectCommand(fluidUniform.particlesCount, 1, 1);
+		indirectDispatch.particlesCountDraw.instanceCount = fluidUniform.particlesCount;
+		indirectDispatch.particlesCountDraw.vertexCount = fluidRenderer->vertexBuffer->count;
+		indirectDispatchBuffer = BufferData::Create(
+			vulkanContext, indirectDispatch, MemoryType::Universal,
+			vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eTransferDst);
+
 		renderer = std::move(fluidRenderer);
 
 		auto bb = BoundingBox();
@@ -161,23 +186,38 @@ public:
 
 		clearGridProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "clearGrid",
-			fluidUniform, fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer);
+			fluidUniform, indirectDispatch,
+			fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer, indirectDispatchBuffer);
 		determineGridCellsProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "determineGridCells",
-			fluidUniform, fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer);
+			fluidUniform, indirectDispatch,
+			fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer, indirectDispatchBuffer);
 		countGridCellsOffsetProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "countGridCellsOffset",
-			fluidUniform, fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer);
+			fluidUniform, indirectDispatch,
+			fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer, indirectDispatchBuffer);
 		distributeByCellsProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "distributeByCells",
-			fluidUniform, fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer);
+			fluidUniform, indirectDispatch,
+			fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer, indirectDispatchBuffer);
 		moveParticlesProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "moveParticles",
-			fluidUniform, fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer);
+			fluidUniform, indirectDispatch,
+			fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer, indirectDispatchBuffer);
 	}
 
 	void Run(vk::CommandBuffer& cb, int imageIndex)
 	{
+		{
+			vk::BufferCopy copyRegion(0, 0, particlesStorageBufferCopy->size);
+			cb.copyBuffer(particlesStorageBufferCopy->buffer, particlesStorageBuffer->buffer, copyRegion);
+
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				particlesStorageBuffer->buffer, 0, particlesStorageBuffer->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
+
 		clearGridProgram->Run(cb, imageIndex, fluidUniform.gridDimention.x * fluidUniform.gridDimention.y * fluidUniform.gridDimention.z);
 
 		{
@@ -187,7 +227,7 @@ public:
 			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
 		}
 
-		determineGridCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
+		determineGridCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount, true);
 
 		{
 			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
@@ -205,17 +245,30 @@ public:
 			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
 		}
 
-		vk::BufferCopy copyRegion(0, 0, particlesStorageBufferCopy->size);
-		cb.copyBuffer(particlesStorageBufferCopy->buffer, particlesStorageBuffer->buffer, copyRegion);
-
 		{
-			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead,
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
 				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
-				particlesStorageBuffer->buffer, 0, particlesStorageBuffer->size);
-			cb.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+				fluidUniformBuffer->buffer, 0, fluidUniformBuffer->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
 		}
 
-		distributeByCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
+		distributeByCellsProgram->Run(cb, imageIndex, fluidUniform.particlesCount, true);
+
+		{
+			size_t size = sizeof(fluidUniform.particlesCount);
+			size_t srcOffset = (std::size_t)&fluidUniform.particlesCount - (std::size_t)&fluidUniform;
+			size_t dstDispatchOffset = (std::size_t)&indirectDispatch.particlesCountDispatch.x - (std::size_t)&indirectDispatch;
+			size_t dstDrawOffset = (std::size_t)&indirectDispatch.particlesCountDraw.instanceCount - (std::size_t)&indirectDispatch;
+
+			vk::BufferCopy copyDispatchRegion(srcOffset, dstDispatchOffset, size);
+			vk::BufferCopy copyDrawRegion(srcOffset, dstDrawOffset, size);
+			cb.copyBuffer(fluidUniformBuffer->buffer, indirectDispatchBuffer->buffer, { copyDispatchRegion, copyDrawRegion });
+
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				indirectDispatchBuffer->buffer, 0, indirectDispatchBuffer->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
 
 		{
 			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
@@ -224,7 +277,7 @@ public:
 			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
 		}
 
-		moveParticlesProgram->Run(cb, imageIndex, fluidUniform.particlesCount);
+		moveParticlesProgram->Run(cb, imageIndex, fluidUniform.particlesCount, true);
 	}
 
 	virtual void Render(RenderVisitor& renderVisitor) override
@@ -247,11 +300,13 @@ public:
 		vk::DeviceSize vertexOffsets[] = { 0 };
 		renderVisitor.commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, vertexOffsets);
 
-		renderVisitor.commandBuffer.draw(fluidRenderer->vertexBuffer->count, fluidUniform.particlesCount, 0, 0);
+		size_t offset = (std::size_t)&indirectDispatch.particlesCountDraw - (std::size_t)&indirectDispatch;
+		renderVisitor.commandBuffer.drawIndirect(indirectDispatchBuffer->buffer, offset, 1, 0);
 	}
 
 	virtual void Dispose() override
 	{
+		indirectDispatchBuffer->Dispose();
 		fluidUniformBuffer->Dispose();
 		particlesStorageBuffer->Dispose();
 		particlesStorageBufferCopy->Dispose();
@@ -272,8 +327,11 @@ public:
 
 	std::vector<Particle> particles;
 	FluidUniform fluidUniform;
+	IndirectDispatch indirectDispatch;
 
 	std::unique_ptr<BoundingBoxObject> bbObject;
+
+	std::unique_ptr<BufferData> indirectDispatchBuffer;
 
 	std::unique_ptr<BufferData> fluidUniformBuffer;
 	std::unique_ptr<BufferData> particlesStorageBuffer;
