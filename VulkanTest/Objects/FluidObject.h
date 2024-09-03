@@ -34,6 +34,7 @@ struct GridCell
 {
 	alignas(4) int count = 0;
 	alignas(4) int offset = 0;
+	alignas(4) int offsetBucket = 0;
 };
 
 struct IndirectDispatch
@@ -226,6 +227,10 @@ public:
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "distributeByCells",
 			fluidUniform, indirectDispatch,
 			fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer, indirectDispatchBuffer);
+		accumulateVelocitiesProgram = std::make_unique<ComputeProgram>(vulkanContext,
+			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "accumulateVelocities",
+			fluidUniform, indirectDispatch,
+			fluidUniformBuffer, particlesStorageBuffer, particlesStorageBufferCopy, gridStorageBuffer, indirectDispatchBuffer);
 		moveParticlesProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "moveParticles",
 			fluidUniform, indirectDispatch,
@@ -303,6 +308,15 @@ public:
 			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
 		}
 
+		accumulateVelocitiesProgram->Run(cb, imageIndex, fluidUniform.particlesCount, true);
+
+		{
+			vk::BufferMemoryBarrier barrier(vk::AccessFlagBits::eShaderWrite, vk::AccessFlagBits::eShaderRead,
+				vulkanContext.queueFamilies->computeQueueFamily, vulkanContext.queueFamilies->computeQueueFamily,
+				particlesStorageBufferCopy->buffer, 0, particlesStorageBufferCopy->size);
+			cb.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader, vk::PipelineStageFlagBits::eComputeShader, {}, {}, barrier, {});
+		}
+
 		moveParticlesProgram->Run(cb, imageIndex, fluidUniform.particlesCount, true);
 	}
 
@@ -348,6 +362,7 @@ public:
 		determineGridCellsProgram->Dispose();
 		countGridCellsOffsetProgram->Dispose();
 		distributeByCellsProgram->Dispose();
+		accumulateVelocitiesProgram->Dispose();
 		moveParticlesProgram->Dispose();
 
 		Object::Dispose();
@@ -372,5 +387,6 @@ public:
 	std::unique_ptr<ComputeProgram> determineGridCellsProgram;
 	std::unique_ptr<ComputeProgram> countGridCellsOffsetProgram;
 	std::unique_ptr<ComputeProgram> distributeByCellsProgram;
+	std::unique_ptr<ComputeProgram> accumulateVelocitiesProgram;
 	std::unique_ptr<ComputeProgram> moveParticlesProgram;
 };

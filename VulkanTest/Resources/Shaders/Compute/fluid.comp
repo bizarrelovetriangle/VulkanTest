@@ -13,6 +13,7 @@ struct GridCell
 {
 	int count;
 	int offset;
+	int offsetBucket;
 };
 
 layout(binding = 0) buffer FluidUniform
@@ -109,6 +110,7 @@ void countGridCellsOffset()
 			{
 				int gridIndex = particleGridIndex(ivec3(x, y, z));
 				Grid.cells[gridIndex].offset = currentOffset;
+				Grid.cells[gridIndex].offsetBucket = currentOffset;
 				currentOffset += Grid.cells[gridIndex].count;
 			}
 		}
@@ -130,7 +132,7 @@ void distributeByCells()
 	if (gridPosValidation(partGridPos))
 	{
 		int partGridIndex = particleGridIndex(partGridPos);
-		int newParticleIndex = atomicAdd(Grid.cells[partGridIndex].offset, 1);
+		int newParticleIndex = atomicAdd(Grid.cells[partGridIndex].offsetBucket, 1);
 		ParticlesCopy.particles[newParticleIndex] = Particles.particles[index];
 		ParticlesCopy.particles[index].gridCellIndex = partGridIndex;
 	}
@@ -140,12 +142,41 @@ void distributeByCells()
 	}
 }
 
+void accumulateVelocities()
+{
+	uint index = gl_GlobalInvocationID.x;
+	ivec3 partGridPos = particleGridPos(ParticlesCopy.particles[index].pos);
+	ivec3 rangeFrom = clamp(partGridPos - ivec3(1, 1, 1), ivec3(0, 0, 0), Fluid.gridDimentions);
+	ivec3 rangeTo = clamp(partGridPos + ivec3(2, 2, 2), ivec3(0, 0, 0), Fluid.gridDimentions);
+
+	for (int z = rangeFrom.z; z < rangeTo.z; ++z)
+	{
+		for (int y = rangeFrom.y; y < rangeTo.y; ++y)
+		{
+			for (int x = rangeFrom.x; x < rangeTo.x; ++x)
+			{
+				int gridCellIndex = particleGridIndex(ivec3(x, y, z));
+				GridCell gridCell = Grid.cells[gridCellIndex];
+
+				for (int i = gridCell.offset; i < gridCell.offset + gridCell.count; ++i)
+				{
+					float dist = (ParticlesCopy.particles[i].pos - ParticlesCopy.particles[index].pos).length();
+
+					if (dist > 1)
+					{
+						vec3 vector = (ParticlesCopy.particles[i].pos - ParticlesCopy.particles[index].pos) / dist;
+						float pressure = 1 - dist / 0.5;
+						ParticlesCopy.particles[index].velocity -= vector * pressure / 2000000;
+					}
+				}
+			}
+		}
+	}
+}
+
 void moveParticles()
 {
 	uint index = gl_GlobalInvocationID.x;
 
-	ivec3 partGridPos = particleGridPos(ParticlesCopy.particles[index].pos);
-
-
-	ParticlesCopy.particles[index].pos.z += 0.002;
+	ParticlesCopy.particles[index].pos += ParticlesCopy.particles[index].velocity;
 }
