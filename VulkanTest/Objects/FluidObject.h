@@ -134,7 +134,8 @@ public:
 	FluidObject(VulkanContext& vulkanContext) : vulkanContext(vulkanContext)
 	{
 		float breadth = 2.;
-		int dimention = 2;
+		int dimention = 3;
+
 		for (int i = 0; i < dimention; ++i)
 		{
 			for (int j = 0; j < dimention; ++j)
@@ -149,9 +150,34 @@ public:
 		}
 
 		fluidUniform.particlesCount = particles.size();
-		fluidUniform.gridCellSize = 0.5;
-		fluidUniform.gridDimention = { 10, 10, 10 };
+		fluidUniform.gridCellSize = 1;
+		fluidUniform.gridDimention = { 5, 5, 5 };
 		fluidUniform.gridSize = fluidUniform.gridDimention * fluidUniform.gridCellSize;
+
+		{
+			auto bb = BoundingBox();
+			bb.aa = -Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
+			bb.bb = Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
+			auto bbObject = std::make_unique<BoundingBoxObject>(vulkanContext, bb);
+			bbObjects.push_back(std::move(bbObject));
+
+			for (int z = 0; z < fluidUniform.gridDimention.z; ++z)
+			{
+				for (int y = 0; y < fluidUniform.gridDimention.y; ++y)
+				{
+					for (int x = 0; x < fluidUniform.gridDimention.z; ++x)
+					{
+						auto gridCellPos = Vector3f(x, y, z);
+						auto centerShift = -Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
+						auto bb = BoundingBox();
+						bb.aa = gridCellPos * fluidUniform.gridCellSize + centerShift;
+						bb.bb = (gridCellPos + Vector3f(1, 1, 1)) * fluidUniform.gridCellSize + centerShift;
+						auto bbObject = std::make_unique<BoundingBoxObject>(vulkanContext, bb);
+						bbObjects.push_back(std::move(bbObject));
+					}
+				}
+			}
+		}
 
 		auto grid = std::vector<GridCell>(fluidUniform.gridDimention.x * fluidUniform.gridDimention.y * fluidUniform.gridDimention.z);
 
@@ -178,11 +204,6 @@ public:
 			vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eTransferDst);
 
 		renderer = std::move(fluidRenderer);
-
-		auto bb = BoundingBox();
-		bb.aa = -Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
-		bb.bb = Vector3f(fluidUniform.gridDimention) * fluidUniform.gridCellSize / 2;
-		bbObject = std::make_unique<BoundingBoxObject>(vulkanContext, bb);
 
 		clearGridProgram = std::make_unique<ComputeProgram>(vulkanContext,
 			"E:/Projects/VulkanTest/VulkanTest/Resources/Shaders/Compute/fluid.comp", "clearGrid",
@@ -282,7 +303,9 @@ public:
 
 	virtual void Render(RenderVisitor& renderVisitor) override
 	{
-		bbObject->Render(renderVisitor);
+		for (auto& bbObject : bbObjects) {
+			bbObject->Render(renderVisitor);
+		}
 
 		auto fluidRenderer = (FluidRenderer*)renderer.get();
 
@@ -312,7 +335,9 @@ public:
 		particlesStorageBufferCopy->Dispose();
 		gridStorageBuffer->Dispose();
 
-		bbObject->Dispose();
+		for (auto& bbObject : bbObjects) {
+			bbObject->Dispose();
+		}
 
 		clearGridProgram->Dispose();
 		determineGridCellsProgram->Dispose();
@@ -329,7 +354,7 @@ public:
 	FluidUniform fluidUniform;
 	IndirectDispatch indirectDispatch;
 
-	std::unique_ptr<BoundingBoxObject> bbObject;
+	std::vector<std::unique_ptr<BoundingBoxObject>> bbObjects;
 
 	std::unique_ptr<BufferData> indirectDispatchBuffer;
 
