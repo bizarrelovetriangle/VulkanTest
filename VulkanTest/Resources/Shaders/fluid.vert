@@ -19,8 +19,10 @@ layout(binding = 1) uniform TransformUniform
 
 struct Particle
 {
+	int index;
 	vec3 pos;
-	bool valid;
+	vec3 velocity;
+	int state;
 	int gridCellIndex;
 };
 

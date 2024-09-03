@@ -2,8 +2,10 @@
 
 struct Particle
 {
+	int index;
 	vec3 pos;
-	bool valid;
+	vec3 velocity;
+	int state;
 	int gridCellIndex;
 };
 
@@ -73,16 +75,16 @@ bool gridPosValidation(ivec3 particleGridPos)
 
 void clearGrid()
 {
-    uint index = gl_GlobalInvocationID.x;
+	uint index = gl_GlobalInvocationID.x;
 	Grid.cells[index].count = 0;
 	Grid.cells[index].offset = 0;
 }
 
 void determineGridCells()
 {
-    uint index = gl_GlobalInvocationID.x;
+	uint index = gl_GlobalInvocationID.x;
 
-	if (!Particles.particles[index].valid)
+	if (Particles.particles[index].state == 0)
 	{
 		return;
 	}
@@ -116,9 +118,15 @@ void countGridCellsOffset()
 void distributeByCells()
 {
 	uint index = gl_GlobalInvocationID.x;
-	
+
+	if (Particles.particles[index].state == 0)
+	{
+		atomicAdd(Fluid.particlesCount, -1);
+		return;
+	}
+
 	ivec3 partGridPos = particleGridPos(Particles.particles[index].pos);
-	
+
 	if (gridPosValidation(partGridPos))
 	{
 		int partGridIndex = particleGridIndex(partGridPos);
@@ -134,14 +142,10 @@ void distributeByCells()
 
 void moveParticles()
 {
-    uint index = gl_GlobalInvocationID.x;
-	
+	uint index = gl_GlobalInvocationID.x;
+
 	ivec3 partGridPos = particleGridPos(ParticlesCopy.particles[index].pos);
 
-	if (!ParticlesCopy.particles[index].valid)
-	{
-		return;
-	}
 
 	ParticlesCopy.particles[index].pos.z += 0.002;
 }

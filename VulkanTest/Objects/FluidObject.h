@@ -23,8 +23,10 @@ struct FluidUniform
 
 struct Particle
 {
+	alignas(4) int index = 0;
 	alignas(16) Vector3f pos;
-	alignas(4) bool valid = false;
+	alignas(16) Vector3f velocity;
+	alignas(4) int state = 0;
 	alignas(4) int gridCellIndex = 0;
 };
 
@@ -143,7 +145,10 @@ public:
 				for (int k = 0; k < dimention; ++k)
 				{
 					auto getPos = [&](int v) { return (breadth * float(v) / (dimention - 1)) - breadth / 2; };
-					Particle particle(Vector3f(getPos(i), getPos(j), getPos(k)), false);
+					Particle particle;
+					particle.index = particles.size();
+					particle.pos = Vector3f(getPos(i), getPos(j), getPos(k));
+					particle.state = 1;
 					particles.push_back(particle);
 				}
 			}
