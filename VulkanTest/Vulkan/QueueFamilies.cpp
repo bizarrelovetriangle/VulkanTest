@@ -34,7 +34,7 @@ QueueFamilies::QueueFamilies(vk::PhysicalDevice& physicalDevice, vk::SurfaceKHR&
 
 	if (computeQueueFamily_ == std::end(queueFamilies))
 	{
-		auto computeQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
+		computeQueueFamily_ = std::find_if(std::begin(queueFamilies), std::end(queueFamilies),
 			[](auto& family) { return family.flags.contains(vk::QueueFlagBits::eCompute); });
 	}
 
