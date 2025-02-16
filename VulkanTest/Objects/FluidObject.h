@@ -137,7 +137,7 @@ public:
 	FluidObject(VulkanContext& vulkanContext) : vulkanContext(vulkanContext)
 	{
 		float breadth = 2.;
-		int dimention = 3;
+		int dimention = 10;
 
 		for (int i = 0; i < dimention; ++i)
 		{
