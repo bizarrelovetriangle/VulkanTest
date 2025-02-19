@@ -15,8 +15,6 @@ layout(binding = 0) uniform CommonUniform
 layout(binding = 1) uniform TransformUniform
 {
 	mat4x4 modelToWorld;
-	mat4x4 worldToView;
-	mat4x4 viewToProj;
 } Transform;
 
 void main()

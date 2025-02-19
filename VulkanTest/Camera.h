@@ -33,10 +33,7 @@ public:
 
 		if (mouseMiddleDown)
 		{
-			auto center4f = worldToView * Vector4f(0., 0., 0., 1.);
-			auto center = Vector3f(center4f.x, center4f.y, center4f.z);
-			const auto rotateShift = rotatePoint + center;
-
+			auto rotateShift = Vector3f(worldToView * Vector4f(rotatePoint, 1.));
 			auto offset = mousePosition - prevMousePosition;
 			worldToView = Matrix4::Translate(-rotateShift) * worldToView;
 			worldToView = Matrix4::RotateX(offset.y) * worldToView;

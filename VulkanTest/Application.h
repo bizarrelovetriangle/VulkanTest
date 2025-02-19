@@ -54,7 +54,6 @@ public:
 			auto contactInfos = boundingBoxTree->ComposePairs();
 
 			picker.Update(*boundingBoxTree);
-			//camera.rotatePoint = picker.pickedPos;
 			vulkanContext.commandBufferDispatcher->PullFences();
 			vulkanContext.DrawFrame(objects, camera);
 		}
@@ -103,14 +102,22 @@ public:
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 			app->camera.MouseRightDown(down);
 		if (button == GLFW_MOUSE_BUTTON_MIDDLE)
+		{
 			app->camera.MouseMiddleDown(down);
+			app->picker.UpdateRotatePos();
+		}
 		if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
 			if (app->scrollMode)
+			{
 				app->camera.MouseMiddleDown(down);
+				app->picker.UpdateRotatePos();
+			}
 			else
+			{
 				if (down) app->picker.Pick();
 				else app->picker.UnPick();
+			}
 		}
 	}
 

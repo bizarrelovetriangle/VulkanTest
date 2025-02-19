@@ -9,7 +9,7 @@
 class Picker
 {
 public:
-	void Init(VulkanContext& vulkanContext, const Camera& camera)
+	void Init(VulkanContext& vulkanContext, Camera& camera)
 	{
 		this->camera = &camera;
 		auto pointerRenderer = std::make_unique<SimpleVertexedRenderer>(vulkanContext);
@@ -110,6 +110,8 @@ public:
 		auto projToView = camera->viewToProj.Inverse();
 		auto vec4 = projToView * Vector4f(mousePos.x, mousePos.y, 1, 1);
 		mouseDirection = Vector3f(vec4).Normalized();
+
+		// make the cursor always visible
 		//pointer->position = camera->worldToView.Inverse() * Vector4f(mouseDirection * 5, 1);
 	}
 
@@ -121,6 +123,14 @@ public:
 		Vector3f newPos = viewToWorld * Vector4f(mouseDirection * pickedCameraDist, 1.);
 		pickedObj->position += newPos - *pickedPos;
 		*pickedPos = newPos;
+	}
+
+	void UpdateRotatePos()
+	{
+		if (focusedPos)
+			camera->rotatePoint = *focusedPos;
+		else
+			camera->rotatePoint = Vector3f(0., 0., 0.);
 	}
 
 	Vector2f mousePos;
@@ -136,5 +146,5 @@ public:
 	float pickedCameraDist = 0.;
 
 private:
-	const Camera* camera;
+	Camera* camera;
 };
