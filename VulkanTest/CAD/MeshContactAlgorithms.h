@@ -314,11 +314,19 @@ public:
 			renderer->Render(renderVisitor);
 	}
 
+	void DisposePrev()
+	{
+		for (auto& renderer : renderersTemp)
+			renderer->Dispose();
+		renderersTemp.clear();
+
+		std::swap(renderers, renderersTemp);
+	}
+
 	void Dispose()
 	{
-		for (auto& renderer : renderers)
-			renderer->Dispose();
-		renderers.clear();
+		DisposePrev();
+		DisposePrev();
 	}
 
 private:
@@ -382,4 +390,5 @@ private:
 private:
 	VulkanContext& vulkanContext;
 	std::unordered_set<std::shared_ptr<MeshObject>> renderers;
+	std::unordered_set<std::shared_ptr<MeshObject>> renderersTemp;
 };
