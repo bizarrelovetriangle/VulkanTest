@@ -24,7 +24,6 @@ public:
 		planeRenderer->evenPlaneObjectUniform.gridScale = plane->scale;
 		planeRenderer->evenPlaneObjectUniform.gridded = true;
 		planeRenderer->UpdatePlaneUniformBuffer();
-		objects.push_back(plane);
 
 		auto center = std::make_unique<MeshObject>(
 			GeometryCreator::CreateIcosphere(0.02, 1), std::make_unique<SimpleVertexedRenderer>(vulkanContext));
@@ -32,9 +31,9 @@ public:
 		objects.push_back(std::move(center));
 
 		Deserializer deserializer(vulkanContext);
-		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\witch\\witch.gltf");
+		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\witch\\witch.gltf");
 		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\Zombie_Schoolgirl_01.gltf");
-		//GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\untitled.gltf");
+		GLTFReader glTFReader("C:\\Users\\PC\\Desktop\\untitled\\untitled.gltf");
 
 		for (auto& serializedObject : glTFReader.serializedObjects)
 		{
@@ -42,5 +41,7 @@ public:
 			object->convexSegments = Desegmentator::ConvexSegments(*object->mesh);
 			objects.push_back(std::move(object));
 		}
+
+		objects.push_back(plane);
 	}
 };
