@@ -287,5 +287,7 @@
     <None Include="Resources\Shaders\fluid.vert" />
     <None Include="Resources\Shaders\fluid.frag" />
     <None Include="Resources\Shaders\Compute\fluid.comp" />
+    <None Include="Resources\Shaders\Morph\sphere.frag" />
+    <None Include="Resources\Shaders\Morph\sphere.vert" />
   </ItemGroup>
 </Project>

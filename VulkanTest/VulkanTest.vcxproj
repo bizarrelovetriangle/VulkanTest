@@ -250,6 +250,8 @@
     <None Include="Resources\Shaders\fluid.vert" />
     <None Include="Resources\Shaders\lined.frag" />
     <None Include="Resources\Shaders\lined.vert" />
+    <None Include="Resources\Shaders\Morph\sphere.frag" />
+    <None Include="Resources\Shaders\Morph\sphere.vert" />
     <None Include="Resources\Shaders\Primitives\EvenPlane.frag" />
     <None Include="Resources\Shaders\Primitives\EvenPlane.vert" />
     <None Include="Resources\Shaders\textured.frag" />
